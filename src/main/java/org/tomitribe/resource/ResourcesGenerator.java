@@ -111,7 +111,7 @@ public class ResourcesGenerator {
 
     private static void generateResource(final String resourceName, final CompilationUnit modelClassUnit) throws IOException {
         String resourceClassPackage = modelClassUnit.getPackageDeclaration().get().getNameAsString();
-        resourceClassPackage = resourceClassPackage.replace(Configuration.API_PACKAGE, Configuration.RESOURCE_PACKAGE);
+        resourceClassPackage = resourceClassPackage.replace(Configuration.MODEL_PACKAGE, Configuration.RESOURCE_PACKAGE);
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(resourceClassPackage);
         newClassCompilationUnit.addClass(resourceName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(resourceName).get();

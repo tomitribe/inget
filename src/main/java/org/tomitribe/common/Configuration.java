@@ -17,6 +17,6 @@ public class Configuration {
     public static String SOURCES;
     public static String GENERATED_SOURCES;
     public static String MAIN_CLASS = "org.tomitribe.model.ModelGenerator";
-    public static String API_PACKAGE = "com.tomitribe.tribestream.gateway.model";
-    public static String RESOURCE_PACKAGE = "com.tomitribe.tribestream.gateway.resources";
+    public static String MODEL_PACKAGE;
+    public static String RESOURCE_PACKAGE ;
 }

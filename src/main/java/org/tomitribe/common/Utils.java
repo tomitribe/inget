@@ -573,7 +573,7 @@ public class Utils {
     }
 
     public static List<File> getModel() {
-        final File apiSourcesDir = new File(Configuration.SOURCES + "/" + Configuration.API_PACKAGE.replaceAll("\\.", "/"));
+        final File apiSourcesDir = new File(Configuration.SOURCES + "/" + Configuration.MODEL_PACKAGE.replaceAll("\\.", "/"));
         return Files.collect(apiSourcesDir, "(.*)Model\\.java");
     }
 

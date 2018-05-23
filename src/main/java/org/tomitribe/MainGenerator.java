@@ -21,20 +21,25 @@ import org.tomitribe.resource.ResourcesGenerator;
 @Mojo(name = "generate")
 public class MainGenerator extends AbstractMojo {
 
-    @Parameter(property = "generate.generated_sources")
+    @Parameter(property = "generate.generated_sources", required = true)
     private String generatedSources;
 
-    @Parameter(property = "generate.sources")
+    @Parameter(property = "generate.sources", required = true)
     private String sources;
+
+    @Parameter(property = "generate.model_package", required = true)
+    private String modelPackage;
+
+    @Parameter(property = "generate.resource_package")
+    private String resourcePackage;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
-        getLog().info("SOURCES: " + sources);
-        getLog().info("GENERATED_SOURCES: " + generatedSources);
-
         Configuration.SOURCES = sources;
         Configuration.GENERATED_SOURCES = generatedSources;
+        Configuration.MODEL_PACKAGE = modelPackage;
+        Configuration.RESOURCE_PACKAGE = resourcePackage;
 
         try {
             getLog().info("Started model code generation.");
