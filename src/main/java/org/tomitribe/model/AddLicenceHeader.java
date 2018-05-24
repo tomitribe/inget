@@ -11,6 +11,7 @@
  */
 package org.tomitribe.model;
 
+// TODO: Remove
 public class AddLicenceHeader {
 
     private static final String TOMITRIBE_LICENCE = "/*\n" +

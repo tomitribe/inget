@@ -27,9 +27,6 @@ import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -91,14 +88,6 @@ public class ResourcesGenerator {
         if (classToBeSaved == null) {
             return;
         }
-        String source = Configuration.GENERATED_SOURCES;
-        String resourceFolder = packageLocation.replaceAll("\\.", "/");
-        source += "/" + resourceFolder;
-        Path path = Paths.get(source);
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
-        File newFile = new File(source, className + ".java");
 
         String modified = Stream.of(classToBeSaved.toString())
                 .map(RemoveDuplicateImports::apply)
@@ -106,7 +95,7 @@ public class ResourcesGenerator {
                 .map(AddLicenceHeader::apply)
                 .findFirst().get();
 
-        IO.copy(IO.read(modified), newFile);
+        Utils.save(className + ".java", packageLocation, modified);
     }
 
     private static void generateResource(final String resourceName, final CompilationUnit modelClassUnit) throws IOException {

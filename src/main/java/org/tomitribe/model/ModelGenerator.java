@@ -16,7 +16,6 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
-import org.tomitribe.common.Configuration;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.Utils;
@@ -24,9 +23,6 @@ import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -42,6 +38,8 @@ public class ModelGenerator {
 
     public static void execute() throws IOException {
         List<File> modelFiles = getModel();
+
+        ModelClassGenerator.createBaseClasses();
 
         for (File rootClassFile : modelFiles) {
             final String rootClassSource = IO.slurp(rootClassFile);
@@ -96,15 +94,6 @@ public class ModelGenerator {
         if (classToBeSaved == null) {
             return;
         }
-        String sourceFolder = Configuration.GENERATED_SOURCES;
-        String modelFolder = rootClassUnit.getPackageDeclaration().get().getName().toString().replaceAll("\\.", "/");
-        sourceFolder += "/" + modelFolder;
-        Path path = Paths.get(sourceFolder);
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
-        File newFile = new File(sourceFolder, className + ".java");
-
         String modified = Stream.of(classToBeSaved.toString())
                 .map(RemoveDuplicateImports::apply)
                 .map(Reformat::apply)
@@ -112,6 +101,6 @@ public class ModelGenerator {
                 .map(RemoveUnusedImports::removeUnusedImports)
                 .findFirst().get();
 
-        IO.copy(IO.read(modified), newFile);
+        Utils.save(className + ".java", rootClassUnit.getPackageDeclaration().get().getName().toString(), modified);
     }
 }

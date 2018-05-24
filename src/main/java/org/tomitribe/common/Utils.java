@@ -32,6 +32,8 @@ import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -52,10 +54,7 @@ public class Utils {
     private static HashMap<String, String> importMap = new HashMap<>();
 
     static {
-        importMap.put("JsDateConverter", "com.tomitribe.tribestream.gateway.model.base.JsDateConverter");
-        importMap.put("JohnzonConverter", "org.apache.johnzon.mapper.JohnzonConverter");
         importMap.put("Date", "java.util.Date");
-        importMap.put("DefaultFilter", "com.tomitribe.tribestream.gateway.model.base.DefaultFilter");
         importMap.put("Builder", "lombok.Builder");
         importMap.put("Collection", "java.util.Collection");
         importMap.put("Operation", "io.swagger.v3.oas.annotations.Operation");
@@ -70,8 +69,6 @@ public class Utils {
         importMap.put("AllArgsConstructor", "lombok.AllArgsConstructor");
         importMap.put("Value", "lombok.Value");
         importMap.put("Schema", "io.swagger.v3.oas.annotations.media.Schema");
-        importMap.put("Page", "com.tomitribe.tribestream.gateway.model.base.Page");
-        importMap.put("Failure", "com.tomitribe.tribestream.gateway.model.base.bulk.Failure");
         importMap.put("List", "java.util.List");
         importMap.put("Data", "lombok.Data");
         importMap.put("Produces", "javax.ws.rs.Produces");
@@ -677,6 +674,20 @@ public class Utils {
         oldClassUnit.getImports().stream().forEach(i -> {
             newClassUnit.addImport(i);
         });
+    }
+
+    public static void save(String fileName, String pkg, String content) throws IOException {
+        Path path = Paths.get(Configuration.GENERATED_SOURCES + "/" + transformPackageToPath(pkg));
+
+        if (!java.nio.file.Files.exists(path)) {
+            java.nio.file.Files.createDirectories(path);
+        }
+        File newFile = new File(path.toAbsolutePath().toString(), fileName);
+        IO.copy(IO.read(content.toString()), newFile);
+    }
+
+    public static String transformPackageToPath(String pkg) {
+        return pkg.replaceAll("\\.", "/");
     }
 
     public static void main(String[] args) {

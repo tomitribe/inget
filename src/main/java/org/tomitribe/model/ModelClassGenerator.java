@@ -28,7 +28,9 @@ import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
+import org.tomitribe.common.Configuration;
 import org.tomitribe.common.Utils;
+import org.tomitribe.model.base.Templates;
 import org.tomitribe.util.Join;
 
 import java.io.IOException;
@@ -71,7 +73,7 @@ public class ModelClassGenerator {
             handleField(operation, rootClassUnit, newClass, f, classPrefix);
         });
 
-        Utils.addImports(rootClassUnit,  newClassCompilationUnit);
+        Utils.addImports(rootClassUnit, newClassCompilationUnit);
 
         return newClassCompilationUnit;
     }
@@ -158,22 +160,17 @@ public class ModelClassGenerator {
         schema.addPair("description", "\"The list of " + listClassName.toLowerCase() + " available for a given search request with associated metadata.\"");
         newClass.addAnnotation(schema);
         newClassCompilationUnit.addImport(Utils.getImport("Schema"));
-        newClassCompilationUnit.addImport(Utils.getImport("Page"));
+        newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.Page");
 
-        rootClass.getFields().stream().filter(f -> Utils.isOperationPresent(f, Operation.LIST)).forEach(f -> {
-            if (f.getAnnotationByName("JohnzonConverter") != null) {
-                newClassCompilationUnit.addImport(Utils.getImport("JohnzonConverter"));
-                newClassCompilationUnit.addImport(Utils.getImport("JsDateConverter"));
-            }
-            String type = f.getVariables().stream().findFirst().get().getTypeAsString();
-            String importType = Utils.getImport(type);
-            if (importType != null) {
-                newClassCompilationUnit.addImport(importType);
-            }
-            FieldDeclaration newField = f.clone();
-            newField.remove(newField.getAnnotationByName("Model").get());
-            newClass.addMember(newField);
-        });
+        rootClass.getFields().stream()
+                .filter(f -> Utils.isOperationPresent(f, Operation.LIST))
+                .forEach(f -> {
+                    FieldDeclaration newField = f.clone();
+                    newField.remove(newField.getAnnotationByName("Model").get());
+                    newClass.addMember(newField);
+                });
+
+        Utils.addImports(rootClassUnit, newClassCompilationUnit);
 
         String summaryClassValue = rootClassName;
         if (summaryClassUnit != null) {
@@ -183,12 +180,12 @@ public class ModelClassGenerator {
         String filterName = "";
         if (filterClassUnit == null) {
             filterName = "DefaultFilter";
-            newClassCompilationUnit.addImport(Utils.getImport(filterName));
+            newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
         } else {
             filterName = Utils.getClazz(filterClassUnit).getNameAsString();
         }
 
-        newClass.addExtendedType("Page<" + summaryClassValue + "," + filterName + ">");
+        newClass.addExtendedType("Page<" + summaryClassValue + ">");
 
         final StringBuilder constructor = new StringBuilder();
         constructor.append("@Builder public %classname(");
@@ -243,7 +240,7 @@ public class ModelClassGenerator {
         filterClassCompilationUnit.addClass(filterClassName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration filterClass = filterClassCompilationUnit.getClassByName(filterClassName).get();
         filterClass.addExtendedType("DefaultFilter");
-        filterClassCompilationUnit.addImport(Utils.getImport("DefaultFilter"));
+        filterClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
         filterClass.addMarkerAnnotation("Value");
         filterClassCompilationUnit.addImport(Utils.getImport("Value"));
 
@@ -286,10 +283,8 @@ public class ModelClassGenerator {
 
         StringBuilder constructorBuilder = new StringBuilder();
         constructorBuilder.append("public " + filterClassName + "(");
-        constructorBuilder.append("final Collection<String> labels, ");
         constructorBuilder.append(Join.join(",", constructorArgs));
         constructorBuilder.append(") {");
-        constructorBuilder.append("super(labels);");
         constructorThis.stream().forEach(v -> {
             constructorBuilder.append(v);
         });
@@ -324,7 +319,7 @@ public class ModelClassGenerator {
         fieldSchema.addPair("description", "\"The " + paramName + " that failed in the bulk operation.\"");
         FieldDeclaration fieldDeclaration = newClass.addField(new TypeParameter("List<Failure>"), paramName, Modifier.PRIVATE);
         fieldDeclaration.addAnnotation(fieldSchema);
-        newClassCompilationUnit.addImport(Utils.getImport("Failure"));
+        newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.bulk.Failure");
         newClassCompilationUnit.addImport(Utils.getImport("List"));
 
         return newClassCompilationUnit;
@@ -378,5 +373,36 @@ public class ModelClassGenerator {
         });
 
         return summaryUnit;
+    }
+
+    public static void createBaseClasses() throws IOException {
+        String outputBasePackage = Configuration.MODEL_PACKAGE + ".base";
+        createPageClass(outputBasePackage);
+        createFailureClass(outputBasePackage);
+        createDefaultFilterClass(outputBasePackage);
+    }
+
+    private static void createFailureClass(String outputBasePackage) throws IOException {
+        String pkg = outputBasePackage + ".bulk";
+        CompilationUnit content = JavaParser.parse(Templates.FAILURE);
+        content.setPackageDeclaration(pkg);
+        Utils.save("Failure.java", pkg, content.toString());
+    }
+
+    private static void createDefaultFilterClass(String outputBasePackage) throws IOException {
+        String pkg = outputBasePackage + ".filter";
+        CompilationUnit content = JavaParser.parse(Templates.DEFAULT_FILTER);
+        content.setPackageDeclaration(pkg);
+        Utils.save("DefaultFilter.java", pkg, content.toString());
+    }
+
+    private static void createPageClass(String outputBasePackage) throws IOException {
+        CompilationUnit content = JavaParser.parse(Templates.PAGE);
+        content.setPackageDeclaration(outputBasePackage);
+        Utils.save("Page.java", outputBasePackage, content.toString());
+    }
+
+    public static void main(String[] args) throws IOException {
+        createBaseClasses();
     }
 }
