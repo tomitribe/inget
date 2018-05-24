@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -573,8 +574,13 @@ public class Utils {
     }
 
     public static List<File> getModel() {
-        final File apiSourcesDir = new File(Configuration.SOURCES + "/" + Configuration.MODEL_PACKAGE.replaceAll("\\.", "/"));
-        return Files.collect(apiSourcesDir, "(.*)Model\\.java");
+        if (Configuration.MODEL_PACKAGE != null) {
+            final File apiSourcesDir =
+                    new File(Configuration.SOURCES + "/" + Configuration.MODEL_PACKAGE.replaceAll("\\.", "/"));
+            return Files.collect(apiSourcesDir, "(.*)Model\\.java");
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     public static String getId(ClassOrInterfaceDeclaration rootClass) {
