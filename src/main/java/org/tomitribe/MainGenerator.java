@@ -28,7 +28,7 @@ public class MainGenerator extends AbstractMojo {
     @Parameter(property = "generate.sources", required = true)
     private String sources;
 
-    @Parameter(property = "generate.model_package", required = true)
+    @Parameter(property = "generate.model_package")
     private String modelPackage;
 
     @Parameter(property = "generate.resource_package")
@@ -46,12 +46,21 @@ public class MainGenerator extends AbstractMojo {
         Configuration.RESOURCE_PACKAGE = resourcePackage;
 
         try {
-            getLog().info("Started model code generation.");
-            ModelGenerator.execute();
-            getLog().info("Finished model code generation.");
-            getLog().info("Started resource code generation.");
-            ResourcesGenerator.execute();
-            getLog().info("Finished resource code generation.");
+            if (modelPackage != null) {
+                getLog().info("Started Model Code Generation.");
+                ModelGenerator.execute();
+                getLog().info("Finished Model Code Generation.");
+            } else {
+                getLog().info("Skiping Model Code Generation");
+            }
+
+            if (resourcePackage != null) {
+                getLog().info("Started Resource Code Generation.");
+                ResourcesGenerator.execute();
+                getLog().info("Finished Resource Code Generation.");
+            } else {
+                getLog().info("Skiping Resources Code Generation");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
