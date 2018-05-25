@@ -48,7 +48,7 @@ public class MainGenerator extends AbstractMojo {
                 ModelGenerator.execute();
                 getLog().info("Finished Model Code Generation.");
             } else {
-                getLog().info("Skiping Model Code Generation");
+                getLog().info("Skipping Model Code Generation");
             }
 
             if (resourcePackage != null) {
@@ -56,7 +56,7 @@ public class MainGenerator extends AbstractMojo {
                 ResourcesGenerator.execute();
                 getLog().info("Finished Resource Code Generation.");
             } else {
-                getLog().info("Skiping Resources Code Generation");
+                getLog().info("Skipping Resources Code Generation");
             }
         } catch (Exception e) {
             e.printStackTrace();
