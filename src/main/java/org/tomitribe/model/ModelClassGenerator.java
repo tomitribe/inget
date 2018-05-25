@@ -29,6 +29,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
 import org.tomitribe.common.Configuration;
+import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Utils;
 import org.tomitribe.model.base.Templates;
 import org.tomitribe.util.Join;
@@ -50,7 +51,7 @@ public class ModelClassGenerator {
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(className).get();
 
         newClass.addMarkerAnnotation("Value");
-        newClassCompilationUnit.addImport(Utils.getImport("Value"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Value"));
 
         final String builderClassName = (classPrefix.length() != 0) ? classPrefix : "Read";
         final NormalAnnotationExpr builderAnnotation = new NormalAnnotationExpr();
@@ -58,7 +59,7 @@ public class ModelClassGenerator {
         builderAnnotation.addPair("builderClassName", "\"" + builderClassName + "\"");
         builderAnnotation.addPair("toBuilder", "true");
         newClass.addAnnotation(builderAnnotation);
-        newClassCompilationUnit.addImport(Utils.getImport("Builder"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
 
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
@@ -146,11 +147,11 @@ public class ModelClassGenerator {
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(listClassName).get();
 
         newClass.addMarkerAnnotation("Value");
-        newClassCompilationUnit.addImport(Utils.getImport("Value"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Value"));
         NormalAnnotationExpr equalsAndHashCode = new NormalAnnotationExpr();
         equalsAndHashCode.setName("EqualsAndHashCode");
         equalsAndHashCode.addPair("callSuper", "true");
-        newClassCompilationUnit.addImport(Utils.getImport("EqualsAndHashCode"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
         newClass.addAnnotation(equalsAndHashCode);
 
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
@@ -159,7 +160,7 @@ public class ModelClassGenerator {
         schema.setName("Schema");
         schema.addPair("description", "\"The list of " + listClassName.toLowerCase() + " available for a given search request with associated metadata.\"");
         newClass.addAnnotation(schema);
-        newClassCompilationUnit.addImport(Utils.getImport("Schema"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Schema"));
         newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.Page");
 
         rootClass.getFields().stream()
@@ -210,8 +211,8 @@ public class ModelClassGenerator {
 
         ConstructorDeclaration constructorDeclaration = JavaParser.parseBodyDeclaration(result).asConstructorDeclaration();
         newClass.addMember(constructorDeclaration);
-        newClassCompilationUnit.addImport(Utils.getImport("Builder"));
-        newClassCompilationUnit.addImport(Utils.getImport("Collection"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Collection"));
 
         return newClassCompilationUnit;
     }
@@ -242,7 +243,7 @@ public class ModelClassGenerator {
         filterClass.addExtendedType("DefaultFilter");
         filterClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
         filterClass.addMarkerAnnotation("Value");
-        filterClassCompilationUnit.addImport(Utils.getImport("Value"));
+        filterClassCompilationUnit.addImport(ImportManager.getImport("Value"));
 
         final List<String> constructorArgs = new ArrayList<String>();
         final List<String> constructorThis = new ArrayList<String>();
@@ -263,7 +264,7 @@ public class ModelClassGenerator {
                 multiple = multipleValuePair.getValue().asBooleanLiteralExpr().getValue();
                 if (multiple) {
                     type = new TypeParameter("Collection<String>");
-                    filterClassCompilationUnit.addImport(Utils.getImport("Collection"));
+                    filterClassCompilationUnit.addImport(ImportManager.getImport("Collection"));
                 }
             }
 
@@ -276,7 +277,7 @@ public class ModelClassGenerator {
                 schema.addPair("description", "\"The " + name + " in all returned items.\"");
             }
             newField.addAnnotation(schema);
-            filterClassCompilationUnit.addImport(Utils.getImport("Schema"));
+            filterClassCompilationUnit.addImport(ImportManager.getImport("Schema"));
             constructorArgs.add("final " + type + " " + name);
             constructorThis.add("this." + name + " = " + name + ";");
         });
@@ -301,9 +302,9 @@ public class ModelClassGenerator {
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(bulkClassName).get();
 
         newClass.addMarkerAnnotation("Value");
-        newClassCompilationUnit.addImport(Utils.getImport("Value"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Value"));
         newClass.addMarkerAnnotation("EqualsAndHashCode");
-        newClassCompilationUnit.addImport(Utils.getImport("EqualsAndHashCode"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
 
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
@@ -311,7 +312,7 @@ public class ModelClassGenerator {
         schema.setName("Schema");
         schema.addPair("description", "\"The result of the bulk operation.\"");
         newClass.addAnnotation(schema);
-        newClassCompilationUnit.addImport(Utils.getImport("Schema"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Schema"));
 
         String paramName = Utils.toPlural(rootClassName.toLowerCase());
         NormalAnnotationExpr fieldSchema = new NormalAnnotationExpr();
@@ -320,7 +321,7 @@ public class ModelClassGenerator {
         FieldDeclaration fieldDeclaration = newClass.addField(new TypeParameter("List<Failure>"), paramName, Modifier.PRIVATE);
         fieldDeclaration.addAnnotation(fieldSchema);
         newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.bulk.Failure");
-        newClassCompilationUnit.addImport(Utils.getImport("List"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("List"));
 
         return newClassCompilationUnit;
     }
@@ -349,11 +350,11 @@ public class ModelClassGenerator {
         summaryUnit.addClass(summaryClassName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration summaryClass = summaryUnit.getClassByName(summaryClassName).get();
         summaryClass.addMarkerAnnotation("Data");
-        summaryUnit.addImport(Utils.getImport("Data"));
+        summaryUnit.addImport(ImportManager.getImport("Data"));
         summaryClass.addMarkerAnnotation("EqualsAndHashCode");
-        summaryUnit.addImport(Utils.getImport("EqualsAndHashCode"));
+        summaryUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
         summaryClass.addMarkerAnnotation("AllArgsConstructor");
-        summaryUnit.addImport(Utils.getImport("AllArgsConstructor"));
+        summaryUnit.addImport(ImportManager.getImport("AllArgsConstructor"));
 
         String rootClassName = Utils.getRootName(Utils.getClazz(rootClassUnit));
         String schemaDescription = "Summary of the search for " + Utils.toPlural(rootClassName);
@@ -368,7 +369,7 @@ public class ModelClassGenerator {
             Optional<AnnotationExpr> fieldSchema = f.getAnnotationByName("Schema");
             if (fieldSchema.isPresent()) {
                 newField.addAnnotation(fieldSchema.get());
-                summaryUnit.addImport(Utils.getImport("Schema"));
+                summaryUnit.addImport(ImportManager.getImport("Schema"));
             }
         });
 
@@ -400,9 +401,5 @@ public class ModelClassGenerator {
         CompilationUnit content = JavaParser.parse(Templates.PAGE);
         content.setPackageDeclaration(outputBasePackage);
         Utils.save("Page.java", outputBasePackage, content.toString());
-    }
-
-    public static void main(String[] args) throws IOException {
-        createBaseClasses();
     }
 }

@@ -19,14 +19,10 @@ import org.tomitribe.common.Configuration;
 import org.tomitribe.model.ModelGenerator;
 import org.tomitribe.resource.ResourcesGenerator;
 
+import java.io.File;
+
 @Mojo(name = "generate")
 public class MainGenerator extends AbstractMojo {
-
-    @Parameter(property = "generate.generated_sources", required = true)
-    private String generatedSources;
-
-    @Parameter(property = "generate.sources", required = true)
-    private String sources;
 
     @Parameter(property = "generate.model_package")
     private String modelPackage;
@@ -39,8 +35,9 @@ public class MainGenerator extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        final String generatedSources = project.getBuild().getOutputDirectory() + File.separator + "generated-sources";
         project.addCompileSourceRoot(generatedSources);
-        Configuration.SOURCES = sources;
+        Configuration.SOURCES = project.getBuild().getSourceDirectory();
         Configuration.GENERATED_SOURCES = generatedSources;
         Configuration.MODEL_PACKAGE = modelPackage;
         Configuration.RESOURCE_PACKAGE = resourcePackage;

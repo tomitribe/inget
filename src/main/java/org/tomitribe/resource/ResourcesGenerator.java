@@ -19,6 +19,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.tomitribe.common.Configuration;
+import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.Utils;
@@ -107,13 +108,13 @@ public class ResourcesGenerator {
         newClass.setInterface(true);
         String path = Utils.formatCamelCaseTo(resourceName.replace("Resource", ""), "/");
         newClass.addSingleMemberAnnotation("Path", "\"" + path + "\"");
-        newClassCompilationUnit.addImport(Utils.getImport("Path"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Path"));
 
         newClass.addSingleMemberAnnotation("Consumes", "MediaType.APPLICATION_JSON");
         newClass.addSingleMemberAnnotation("Produces", "MediaType.APPLICATION_JSON");
-        newClassCompilationUnit.addImport(Utils.getImport("Consumes"));
-        newClassCompilationUnit.addImport(Utils.getImport("Produces"));
-        newClassCompilationUnit.addImport(Utils.getImport("MediaType"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Consumes"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("Produces"));
+        newClassCompilationUnit.addImport(ImportManager.getImport("MediaType"));
 
         save(resourceClassPackage, resourceName, newClassCompilationUnit);
     }

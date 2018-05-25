@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.tomitribe.common.Utils.getImport;
+import static org.tomitribe.common.ImportManager.getImport;
 import static org.tomitribe.common.Utils.isRootResource;
 
 public class MethodGenerator {
@@ -129,12 +129,12 @@ public class MethodGenerator {
 
         if (!emptyReturn) {
             method.setType("Response");
-            unit.addImport(Utils.getImport("Response"));
+            unit.addImport(getImport("Response"));
         }
 
         method.addMarkerAnnotation(verb);
         if (path) {
-            unit.addImport(Utils.getImport("Path"));
+            unit.addImport(getImport("Path"));
             NormalAnnotationExpr pathAnnotation = new NormalAnnotationExpr();
             pathAnnotation.setName("Path");
             pathAnnotation.addPair("value", "\"{" + ID_PARAM + "}\"");
@@ -145,7 +145,7 @@ public class MethodGenerator {
 
         if (operation != null) {
             method.addAnnotation(operation);
-            unit.addImport(Utils.getImport("Operation"));
+            unit.addImport(getImport("Operation"));
         }
 
         return method;
