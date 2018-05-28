@@ -405,11 +405,11 @@ public class Utils {
         Optional<ImportDeclaration> classImport = classUnit.getImports().stream().filter(i -> i.getNameAsString().endsWith("." + extendedClassName)).findFirst();
         String extendedClassPath;
         if (classImport.isPresent()) {
-            extendedClassPath = Configuration.SOURCES + "/" + classImport.get().getNameAsString().replaceAll("\\.", "/");
+            extendedClassPath = Configuration.MODEL_SOURCES + "/" + classImport.get().getNameAsString().replaceAll("\\.", "/");
             extendedClassPath += ".java";
 
         } else {
-            extendedClassPath = Configuration.SOURCES + "/" + classUnit.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", "/");
+            extendedClassPath = Configuration.MODEL_SOURCES + "/" + classUnit.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", "/");
             extendedClassPath += "/" + extendedClassName + ".java";
         }
         return getClazz(extendedClassPath);
@@ -508,7 +508,7 @@ public class Utils {
     }
 
     public static List<File> getResources(final String modelClassName) {
-        final File apiSourcesDir = new File(Configuration.SOURCES);
+        final File apiSourcesDir = new File(Configuration.RESOURCE_SOURCES);
         final File sourceRootDir = new File(Configuration.GENERATED_SOURCES);
         List<File> src = Files.collect(apiSourcesDir, "(.*)Resource\\.java")
                 .stream()
@@ -530,7 +530,7 @@ public class Utils {
     public static List<File> getModel() {
         if (Configuration.MODEL_PACKAGE != null) {
             final File apiSourcesDir =
-                    new File(Configuration.SOURCES + "/" + Configuration.MODEL_PACKAGE.replaceAll("\\.", "/"));
+                    new File(Configuration.getModelPath());
             return Files.collect(apiSourcesDir, "(.*)Model\\.java");
         } else {
             return Collections.emptyList();
@@ -640,7 +640,7 @@ public class Utils {
     }
 
     public static void save(String fileName, String pkg, String content) throws IOException {
-        Path path = Paths.get(Configuration.GENERATED_SOURCES + "/" + transformPackageToPath(pkg));
+        Path path = Paths.get(Configuration.GENERATED_SOURCES + File.separator + transformPackageToPath(pkg));
 
         if (!java.nio.file.Files.exists(path)) {
             java.nio.file.Files.createDirectories(path);
@@ -650,7 +650,7 @@ public class Utils {
     }
 
     public static String transformPackageToPath(String pkg) {
-        return pkg.replaceAll("\\.", "/");
+        return pkg.replaceAll("\\.", File.separator);
     }
 
     public static void main(String[] args) {

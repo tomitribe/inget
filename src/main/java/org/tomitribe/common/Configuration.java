@@ -12,11 +12,22 @@
 
 package org.tomitribe.common;
 
+import java.io.File;
+
 public class Configuration {
 
-    public static String SOURCES;
+    public static String RESOURCE_SOURCES;
+    public static String MODEL_SOURCES;
     public static String GENERATED_SOURCES;
     public static String MAIN_CLASS = "org.tomitribe.model.ModelGenerator";
     public static String MODEL_PACKAGE;
     public static String RESOURCE_PACKAGE ;
+
+    public static String getModelPath(){
+        return MODEL_SOURCES + File.separator + Utils.transformPackageToPath(MODEL_PACKAGE);
+    }
+
+    public static String getResourcePath(){
+        return RESOURCE_SOURCES + File.separator + Utils.transformPackageToPath(RESOURCE_PACKAGE);
+    }
 }

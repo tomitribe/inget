@@ -23,7 +23,6 @@ import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.Utils;
-import org.tomitribe.model.AddLicenceHeader;
 import org.tomitribe.util.IO;
 
 import java.io.File;
@@ -93,7 +92,7 @@ public class ResourcesGenerator {
         String modified = Stream.of(classToBeSaved.toString())
                 .map(RemoveDuplicateImports::apply)
                 .map(Reformat::apply)
-                .map(AddLicenceHeader::apply)
+//                .map(AddLicenceHeader::apply)
                 .findFirst().get();
 
         Utils.save(className + ".java", packageLocation, modified);
