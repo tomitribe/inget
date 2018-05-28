@@ -19,6 +19,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
@@ -651,6 +652,13 @@ public class Utils {
 
     public static String transformPackageToPath(String pkg) {
         return pkg.replaceAll("\\.", File.separator);
+    }
+
+    public static void addLicense(CompilationUnit rootUnit, CompilationUnit newClassUnit){
+        Optional<Comment> license = rootUnit.getComment();
+        if(license.isPresent()){
+            newClassUnit.setComment(license.get());
+        }
     }
 
     public static void main(String[] args) {
