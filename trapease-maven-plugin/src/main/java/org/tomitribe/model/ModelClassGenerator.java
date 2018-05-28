@@ -61,6 +61,7 @@ public class ModelClassGenerator {
         newClass.addAnnotation(builderAnnotation);
         newClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
 
+        Utils.addLicense(rootClassUnit, newClassCompilationUnit);
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
         final Optional<AnnotationExpr> schema = rootClass.getAnnotationByName("Schema");
@@ -154,6 +155,7 @@ public class ModelClassGenerator {
         newClassCompilationUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
         newClass.addAnnotation(equalsAndHashCode);
 
+        Utils.addLicense(rootClassUnit, newClassCompilationUnit);
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
         NormalAnnotationExpr schema = new NormalAnnotationExpr();
@@ -244,6 +246,8 @@ public class ModelClassGenerator {
         filterClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
         filterClass.addMarkerAnnotation("Value");
         filterClassCompilationUnit.addImport(ImportManager.getImport("Value"));
+        Utils.addLicense(rootClassUnit, filterClassCompilationUnit);
+
 
         final List<String> constructorArgs = new ArrayList<String>();
         final List<String> constructorThis = new ArrayList<String>();
@@ -306,6 +310,7 @@ public class ModelClassGenerator {
         newClass.addMarkerAnnotation("EqualsAndHashCode");
         newClassCompilationUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
 
+        Utils.addLicense(rootClassUnit, newClassCompilationUnit);
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
         NormalAnnotationExpr schema = new NormalAnnotationExpr();
@@ -355,6 +360,7 @@ public class ModelClassGenerator {
         summaryUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
         summaryClass.addMarkerAnnotation("AllArgsConstructor");
         summaryUnit.addImport(ImportManager.getImport("AllArgsConstructor"));
+        Utils.addLicense(rootClassUnit, summaryUnit);
 
         String rootClassName = Utils.getRootName(Utils.getClazz(rootClassUnit));
         String schemaDescription = "Summary of the search for " + Utils.toPlural(rootClassName);
