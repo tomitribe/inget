@@ -31,7 +31,7 @@ import com.github.javaparser.ast.type.TypeParameter;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Utils;
-import org.tomitribe.model.base.Templates;
+import org.tomitribe.model.base.ModelTemplates;
 import org.tomitribe.util.Join;
 
 import java.io.IOException;
@@ -391,21 +391,24 @@ public class ModelClassGenerator {
 
     private static void createFailureClass(String outputBasePackage) throws IOException {
         String pkg = outputBasePackage + ".bulk";
-        CompilationUnit content = JavaParser.parse(Templates.FAILURE);
+        CompilationUnit content = JavaParser.parse(ModelTemplates.FAILURE);
         content.setPackageDeclaration(pkg);
+        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
         Utils.save("Failure.java", pkg, content.toString());
     }
 
     private static void createDefaultFilterClass(String outputBasePackage) throws IOException {
         String pkg = outputBasePackage + ".filter";
-        CompilationUnit content = JavaParser.parse(Templates.DEFAULT_FILTER);
+        CompilationUnit content = JavaParser.parse(ModelTemplates.DEFAULT_FILTER);
         content.setPackageDeclaration(pkg);
+        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
         Utils.save("DefaultFilter.java", pkg, content.toString());
     }
 
     private static void createPageClass(String outputBasePackage) throws IOException {
-        CompilationUnit content = JavaParser.parse(Templates.PAGE);
+        CompilationUnit content = JavaParser.parse(ModelTemplates.PAGE);
         content.setPackageDeclaration(outputBasePackage);
+        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
         Utils.save("Page.java", outputBasePackage, content.toString());
     }
 }

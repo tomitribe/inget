@@ -22,6 +22,7 @@ public class Configuration {
     public static String MAIN_CLASS = "org.tomitribe.model.ModelGenerator";
     public static String MODEL_PACKAGE;
     public static String RESOURCE_PACKAGE ;
+    public static String RESOURCE_SUFFIX = "Resource";
 
     public static String getModelPath(){
         return MODEL_SOURCES + File.separator + Utils.transformPackageToPath(MODEL_PACKAGE);

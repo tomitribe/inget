@@ -17,6 +17,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.tomitribe.client.ClientGenerator;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.Utils;
 import org.tomitribe.model.ModelGenerator;
@@ -40,6 +41,9 @@ public class MainGenerator extends AbstractMojo {
 
     @Parameter(property = "generate.resource_package")
     private String resourcePackage;
+
+    @Parameter(property = "generate.generate_client", defaultValue = "false")
+    private Boolean generateClient;
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     protected MavenProject project;
@@ -80,6 +84,9 @@ public class MainGenerator extends AbstractMojo {
             if (resourcePackage != null) {
                 getLog().info("Started Resource Code Generation.");
                 ResourcesGenerator.execute();
+                if(generateClient){
+                    ClientGenerator.execute();
+                }
                 getLog().info("Finished Resource Code Generation.");
             } else {
                 getLog().info("Skipping Resources Code Generation, " +

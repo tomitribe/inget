@@ -12,6 +12,7 @@ public class ImportManager {
         importMap.put("Operation", "io.swagger.v3.oas.annotations.Operation");
         importMap.put("Generated", "javax.annotation.Generated");
         importMap.put("Path", "javax.ws.rs.Path");
+        importMap.put("PathParam", "javax.ws.rs.PathParam");
         importMap.put("Response", "javax.ws.rs.core.Response");
         importMap.put("POST", "javax.ws.rs.POST");
         importMap.put("GET", "javax.ws.rs.GET");
@@ -26,6 +27,8 @@ public class ImportManager {
         importMap.put("Produces", "javax.ws.rs.Produces");
         importMap.put("Consumes", "javax.ws.rs.Consumes");
         importMap.put("MediaType", "javax.ws.rs.core.MediaType");
+        importMap.put("JohnzonProvider", "org.apache.johnzon.jaxrs.JohnzonProvider");
+        importMap.put("RestClientBuilder", "org.eclipse.microprofile.rest.client.RestClientBuilder");
     }
 
     public static String getImport(String className) {

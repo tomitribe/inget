@@ -64,7 +64,7 @@ public class ResourcesGenerator {
             return relatedResources;
         }
 
-        final String rootResourceName = modelClassName + "Resource";
+        final String rootResourceName = modelClassName + Configuration.RESOURCE_SUFFIX;
         Optional<File> rootResource = relatedResources.stream()
                 .filter(f -> f.getName().contains(modelClassName))
                 .findFirst();
@@ -72,7 +72,7 @@ public class ResourcesGenerator {
             generateResource(rootResourceName, modelClassUnit);
         }
 
-        final String listResourceName = Utils.toPlural(modelClassName) + "Resource";
+        final String listResourceName = Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX;
         Optional<File> listResource = relatedResources.stream()
                 .filter(f -> f.getName().contains(listResourceName))
                 .findFirst();
@@ -92,7 +92,7 @@ public class ResourcesGenerator {
         String modified = Stream.of(classToBeSaved.toString())
                 .map(RemoveDuplicateImports::apply)
                 .map(Reformat::apply)
-//                .map(AddLicenceHeader::apply)
+                .map(RemoveUnusedImports::removeUnusedImports)
                 .findFirst().get();
 
         Utils.save(className + ".java", packageLocation, modified);
@@ -114,6 +114,7 @@ public class ResourcesGenerator {
         newClassCompilationUnit.addImport(ImportManager.getImport("Consumes"));
         newClassCompilationUnit.addImport(ImportManager.getImport("Produces"));
         newClassCompilationUnit.addImport(ImportManager.getImport("MediaType"));
+        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
         Utils.addLicense(modelClassUnit, newClassCompilationUnit);
         save(resourceClassPackage, resourceName, newClassCompilationUnit);
     }

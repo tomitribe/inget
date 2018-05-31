@@ -28,6 +28,7 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 
@@ -511,18 +512,19 @@ public class Utils {
     public static List<File> getResources(final String modelClassName) {
         final File apiSourcesDir = new File(Configuration.RESOURCE_SOURCES);
         final File sourceRootDir = new File(Configuration.GENERATED_SOURCES);
-        List<File> src = Files.collect(apiSourcesDir, "(.*)Resource\\.java")
+        List<File> src = Files.collect(apiSourcesDir, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java")
                 .stream()
-                .filter(f -> f.getName().contains(modelClassName + "Resource") ||
-                        f.getName().contains(Utils.toPlural(modelClassName) + "Resource"))
+                .filter(f -> f.getName().equals(modelClassName + Configuration.RESOURCE_SUFFIX + ".java") ||
+                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
                 .collect(Collectors.toList());
-        List<File> generatedSources = Files.collect(sourceRootDir, "(.*)Resource\\.java")
+        List<File> generatedSources = Files.collect(sourceRootDir, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java")
                 .stream()
-                .filter(f -> f.getName().contains(modelClassName + "Resource") ||
-                        f.getName().contains(Utils.toPlural(modelClassName) + "Resource"))
+                .filter(f -> f.getName().equals(modelClassName + Configuration.RESOURCE_SUFFIX + ".java") ||
+                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
                 .collect(Collectors.toList());
 
         List<File> resources = Stream.concat(src.stream(), generatedSources.stream())
+                .distinct()
                 .collect(Collectors.toList());
 
         return resources;
@@ -647,6 +649,7 @@ public class Utils {
             java.nio.file.Files.createDirectories(path);
         }
         File newFile = new File(path.toAbsolutePath().toString(), fileName);
+
         IO.copy(IO.read(content.toString()), newFile);
     }
 
@@ -654,11 +657,38 @@ public class Utils {
         return pkg.replaceAll("\\.", File.separator);
     }
 
-    public static void addLicense(CompilationUnit rootUnit, CompilationUnit newClassUnit){
+    public static void addLicense(CompilationUnit rootUnit, CompilationUnit newClassUnit) {
         Optional<Comment> license = rootUnit.getComment();
-        if(license.isPresent()){
+        if (license.isPresent()) {
             newClassUnit.setComment(license.get());
         }
+    }
+
+    public static boolean isJaxRSAnnotation(AnnotationExpr a) {
+        String importValue = ImportManager.getImport(a.getNameAsString());
+        if (importValue != null && importValue.contains("javax.ws.rs.")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static String getResponseImplementation(MethodDeclaration m) {
+        final NormalAnnotationExpr apiResponses = Utils.getAnnotation(m, "ApiResponses");
+        final MemberValuePair value = pairs(apiResponses).get("value");
+        final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
+        Optional<NormalAnnotationExpr> responseOptional = annotations.stream().filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\"")).findFirst();
+        if (responseOptional.isPresent()) {
+            NormalAnnotationExpr response = responseOptional.get();
+            Map<String, MemberValuePair> responsePairs = pairs(response);
+            Expression content = responsePairs.get("content").getValue();
+            Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
+            NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
+            Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
+            Expression implementation = schemaPairs.get("implementation").getValue();
+            return implementation.asClassExpr().getTypeAsString();
+        }
+
+        return null;
     }
 
     public static void main(String[] args) {
@@ -675,5 +705,6 @@ public class Utils {
         System.out.println(toPlural("baby"));
         System.out.println(toPlural("sky"));
     }
+
 
 }
