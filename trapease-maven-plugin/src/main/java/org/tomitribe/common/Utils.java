@@ -467,22 +467,24 @@ public class Utils {
         List<String> classOperations = null;
         Optional<AnnotationExpr> classModel = rootClass.getAnnotationByName("Model");
         if (classModel.isPresent()) {
-            NormalAnnotationExpr modelAnnotation = classModel.get().asNormalAnnotationExpr();
-            NodeList<MemberValuePair> pairs = modelAnnotation.getPairs();
-            Optional<MemberValuePair> pair = pairs.stream().filter(p -> p.getNameAsString().equals("operation")).findFirst();
-            if (pair.isPresent()) {
-                Expression value = pair.get().getValue();
-                if (value.isArrayInitializerExpr()) {
-                    ArrayInitializerExpr values = value.asArrayInitializerExpr();
-                    classOperations = values.getValues().stream()
-                            .map(a -> a.toString())
-                            .collect(Collectors.toList());
-                } else {
-                    FieldAccessExpr field = value.asFieldAccessExpr();
-                    classOperations = Arrays.asList(field.toString());
+            AnnotationExpr modelAnnotation = classModel.get();
+            if(modelAnnotation.isNormalAnnotationExpr()){
+                NodeList<MemberValuePair> pairs = modelAnnotation.asNormalAnnotationExpr().getPairs();
+                Optional<MemberValuePair> pair = pairs.stream().filter(p -> p.getNameAsString().equals("operation")).findFirst();
+                if (pair.isPresent()) {
+                    Expression value = pair.get().getValue();
+                    if (value.isArrayInitializerExpr()) {
+                        ArrayInitializerExpr values = value.asArrayInitializerExpr();
+                        classOperations = values.getValues().stream()
+                                .map(a -> a.toString())
+                                .collect(Collectors.toList());
+                    } else {
+                        FieldAccessExpr field = value.asFieldAccessExpr();
+                        classOperations = Arrays.asList(field.toString());
+                    }
                 }
-
             }
+
         }
         return classOperations;
     }

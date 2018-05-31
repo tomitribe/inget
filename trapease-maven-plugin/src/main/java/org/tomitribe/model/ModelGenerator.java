@@ -97,8 +97,6 @@ public class ModelGenerator {
         String modified = Stream.of(classToBeSaved.toString())
                 .map(RemoveDuplicateImports::apply)
                 .map(Reformat::apply)
-                // get header from model
-//                .map(AddLicenceHeader::apply)
                 .map(RemoveUnusedImports::removeUnusedImports)
                 .findFirst().get();
 
