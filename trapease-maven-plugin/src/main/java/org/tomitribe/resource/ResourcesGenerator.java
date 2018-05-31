@@ -119,21 +119,21 @@ public class ResourcesGenerator {
         save(resourceClassPackage, resourceName, newClassCompilationUnit);
     }
 
-    static void applyGenerationInResource(CompilationUnit rootClassUnit, File resource) throws IOException {
+    static void applyGenerationInResource(CompilationUnit modelClassUnit, File resource) throws IOException {
         String resourceSource = IO.slurp(resource);
         final CompilationUnit resourceUnit = JavaParser.parse(resourceSource);
         // Perform transformations
         final String modified = Stream.of(resourceSource)
-                .map(s -> MethodGenerator.apply(resourceUnit, rootClassUnit))
+                .map(s -> MethodGenerator.apply(resourceUnit, modelClassUnit))
                 .map(ImportAnnotations::apply)
                 .map(ExpandAnnotations::apply)
 
 //                   REST API requirements
-                .map(s -> TagRequired.apply(s, rootClassUnit))
-                .map(s -> OperationRequired.apply(s, rootClassUnit))
+                .map(s -> TagRequired.apply(s, modelClassUnit))
+                .map(s -> OperationRequired.apply(s, modelClassUnit))
                 .map(Add200Responses::apply)
-                .map(s -> Add201CreateResponses.apply(s, rootClassUnit))
-                .map(s -> CheckContentInResponses.apply(s, rootClassUnit))
+                .map(s -> Add201CreateResponses.apply(s, modelClassUnit))
+                .map(s -> CheckContentInResponses.apply(s, modelClassUnit, resourceUnit))
                 .map(Response409onCreateConflict::apply)
                 .map(Response404onIdReferences::apply)
                 .map(ParametersMustBeFinal::apply)

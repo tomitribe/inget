@@ -74,6 +74,10 @@ public class MethodGenerator {
         if (classOperations == null || classOperations.contains(Operation.DELETE)) {
             bulkDelete(rootClassName, rootClass, resourceClass, resourceUnit);
         }
+
+        if (classOperations == null || classOperations.contains(Operation.READ)) {
+            readAll(rootClassName, rootClass, resourceClass, resourceUnit);
+        }
     }
 
     private static void createRootResourceMethods(CompilationUnit resourceUnit, ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass, String rootClassName, String rootClassPackage, List<String> classOperations) {
@@ -322,5 +326,20 @@ public class MethodGenerator {
         final String rootClassImport = rootClassPackage + "." + paramName;
         final List<String> imports = Arrays.asList("java.util.List", rootClassImport);
         createParameter("List<" + paramName + ">", Strings.lcfirst(rootClassName + "s"), false, imports, description, null, baseMethod, unit);
+    }
+
+
+    private static void readAll(String rootClassName, ClassOrInterfaceDeclaration rootClass, ClassOrInterfaceDeclaration clazz, CompilationUnit unit) {
+        boolean isMethodPresent = clazz.getMethods().stream()
+                .filter(m -> Utils.isMethodReadAll(m))
+                .findFirst()
+                .isPresent();
+        if (isMethodPresent) {
+            return;
+        }
+
+        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Read all " + Utils.toPlural(rootClassName) + ".\")");
+        final MethodDeclaration baseMethod = createBaseMethod(false, "readAll", "GET", false, clazz, unit, operation);
+        rootClass.addMember(baseMethod);
     }
 }

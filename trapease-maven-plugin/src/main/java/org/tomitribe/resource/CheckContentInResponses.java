@@ -30,7 +30,7 @@ import static org.tomitribe.common.Utils.pairs;
  */
 public class CheckContentInResponses {
 
-    public static String apply(final String source, final CompilationUnit rootClassUnit) {
+    public static String apply(final String source, final CompilationUnit modelClassUnit, CompilationUnit resourceClassUnit) {
         final CompilationUnit unit = JavaParser.parse(source);
         final ClassOrInterfaceDeclaration clazz = getClazz(unit);
 
@@ -46,7 +46,7 @@ public class CheckContentInResponses {
                 final MemberValuePair value = pairs(apiResponses).get("value");
                 final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
 
-                annotations.stream().forEach(applyContent(m, unit, rootClassUnit));
+                annotations.stream().forEach(applyContent(m, unit, modelClassUnit, resourceClassUnit));
 
             }
         });
@@ -55,16 +55,18 @@ public class CheckContentInResponses {
     }
 
     private static Consumer<NormalAnnotationExpr> applyContent(final MethodDeclaration m, final CompilationUnit unit,
-                                                               final CompilationUnit rootClassUnit) {
+                                                               final CompilationUnit modelClassUnit,
+                                                               final CompilationUnit resourceClassUnit) {
         return new Consumer<NormalAnnotationExpr>() {
             @Override
             public void accept(NormalAnnotationExpr responseAnnotation) {
                 if (Utils.has(responseAnnotation, "responseCode", "\"200\"")
                         || Utils.has(responseAnnotation, "responseCode", "\"201\"")) {
 
-                    ClassOrInterfaceDeclaration rootClass = Utils.getClazz(rootClassUnit);
-                    final String rootClassName = Utils.getRootName(rootClass);;
-                    final String rootClassPackage = rootClassUnit.getPackageDeclaration().get().getName().toString();
+                    ClassOrInterfaceDeclaration modelClass = Utils.getClazz(modelClassUnit);
+                    final String modelClassName = Utils.getRootName(modelClass);
+                    ;
+                    final String modelClassPackage = modelClassUnit.getPackageDeclaration().get().getName().toString();
 
                     final Map<String, MemberValuePair> pairs = Utils.pairs(responseAnnotation);
                     final MemberValuePair code = pairs.get("content");
@@ -73,12 +75,18 @@ public class CheckContentInResponses {
                         unit.addImport("io.swagger.v3.oas.annotations.media.Schema");
 
                         if (Utils.isBulkMethod(m)) {
-                            final String bulkClassName = "Bulk" + rootClassName + "Result";
-                            unit.addImport(rootClassPackage + "." + bulkClassName);
+                            final String bulkClassName = "Bulk" + modelClassName + "Result";
+                            unit.addImport(modelClassPackage + "." + bulkClassName);
                             responseAnnotation.addPair("content", "@Content(schema = @Schema(implementation = " + bulkClassName + ".class))");
                         } else {
-                            unit.addImport(rootClassPackage + "." + rootClassName);
-                            responseAnnotation.addPair("content", "@Content(schema = @Schema(implementation = " + rootClassName + ".class))");
+                            String className = modelClassName;
+                            ClassOrInterfaceDeclaration resourceClass = Utils.getClazz(resourceClassUnit);
+
+                            if (!Utils.isRootResource(modelClassName, resourceClass.getNameAsString())) {
+                                className = Utils.toPlural(modelClassName);
+                            }
+                            unit.addImport(modelClassPackage + "." + className);
+                            responseAnnotation.addPair("content", "@Content(schema = @Schema(implementation = " + className + ".class))");
                         }
 
                     }

@@ -144,10 +144,6 @@ public class Utils {
         return (NormalAnnotationExpr) annotationByName.orElse(null);
     }
 
-    public static Function<MethodDeclaration, NormalAnnotationExpr> getAnnotation(final String annotationName) {
-        return method -> getAnnotation(method, annotationName);
-    }
-
     // TODO move to a Nodes static class
     public static <N extends Node> void sortNodes(final Supplier<NodeList<N>> listSupplier, final Function<N, String> classifier, final String... patterns) {
         sortNodes(listSupplier.get(), classifier, patterns);
@@ -207,13 +203,6 @@ public class Utils {
         }
     }
 
-    private static CompilationUnit getCompilationUnit(final Node node) {
-        if (node instanceof CompilationUnit) {
-            return (CompilationUnit) node;
-        }
-        return getCompilationUnit(node.findRootNode());
-    }
-
     public static ArrayInitializerExpr asArray(NodeList<? extends Expression> annotations) {
         final NodeList<Expression> expressions = new NodeList<>();
         for (final Expression annotation : annotations) {
@@ -246,13 +235,6 @@ public class Utils {
             throw new IllegalStateException("Unsupported Expression " + expression.getClass().getName());
         }
         return annotations;
-    }
-
-    public static Predicate<? super MethodDeclaration> hasOperation(final String code, final String value) {
-        return methodDeclaration -> {
-            final NormalAnnotationExpr operation = getAnnotation(methodDeclaration, "Operation");
-            return has(operation, code, value);
-        };
     }
 
     public static void removeApiResponse(final MethodDeclaration method, final int code) {
@@ -296,15 +278,11 @@ public class Utils {
         return value != null && value.toString().matches(".*\\{[^}]+\\}.*");
     }
 
-    public static boolean hasAnnotation(final FieldDeclaration field, final String annotation) {
-        return field.isAnnotationPresent(annotation);
-    }
-
-    public static boolean isMethodFindAll(final MethodDeclaration method) {
+    public static boolean isMethodReadAll(final MethodDeclaration method) {
         AnnotationExpr pathAnnotation = Utils.getAnnotation(method, "Path");
         boolean hasPathAnnotation = pathAnnotation != null;
-        boolean isMethodFindAll = Utils.isGET(method) && !hasPathAnnotation;
-        if (isMethodFindAll) {
+        boolean isMethodReadAll = Utils.isGET(method) && !hasPathAnnotation;
+        if (isMethodReadAll) {
             return true;
         }
         return false;

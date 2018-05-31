@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.tomitribe.common.Utils.getClazz;
-import static org.tomitribe.common.Utils.isMethodFindAll;
+import static org.tomitribe.common.Utils.isMethodReadAll;
 import static org.tomitribe.common.Utils.toPlural;
 
 /**
@@ -34,7 +34,7 @@ public class OperationRequired {
 
 
     static {
-        methods.put("findAll", "@Operation(summary = \"Find accounts.\")");
+        methods.put("readAll", "@Operation(summary = \"Read all accounts.\")");
     }
 
     public static String apply(String source, CompilationUnit rootClassUnit) {
@@ -67,7 +67,7 @@ public class OperationRequired {
     }
 
     private static String getOperation(MethodDeclaration method) {
-        if (isMethodFindAll(method)) {
+        if (isMethodReadAll(method)) {
             return methods.get("findAll");
         }
 
