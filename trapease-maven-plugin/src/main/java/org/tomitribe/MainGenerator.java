@@ -99,28 +99,27 @@ public class MainGenerator extends AbstractMojo {
                     ResourcesGenerator.execute();
                     getLog().info("Finished Resource Code Generation.");
                 } else {
-                    if(generateClient){
-                        List<Artifact> resourceDependencies = artifacts.stream()
-                                .filter(a -> hasResources(a.getFile())).collect(Collectors.toList());
+                    List<Artifact> resourceDependencies = artifacts.stream()
+                            .filter(a -> hasResources(a.getFile())).collect(Collectors.toList());
 
-                        if(resourceDependencies.size() == 0){
-                            throw new MojoExecutionException(
-                                    "Resources were not found. Add the correct 'resourcePackage' for " +
-                                            "this project or add a jar with the .java files for the resources.");
-                        }
-
-                        resourceDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
-                        Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
-
-                        getLog().info("Started Client Code Generation.");
-                        ClientGenerator.execute();
-                        getLog().info("Finished Client Code Generation.");
+                    if(resourceDependencies.size() == 0){
+                        throw new MojoExecutionException(
+                                "Resources were not found. Add the correct 'resourcePackage' for " +
+                                        "this project or add a jar with the .java files for the resources.");
                     }
-                }
 
+                    resourceDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
+                    Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
+                }
             } else {
                 getLog().info("Skipping Resources Code Generation, " +
                         "resource package not found. Add a valid 'resourcePackage'.");
+            }
+
+            if(generateClient){
+                getLog().info("Started Client Code Generation.");
+                ClientGenerator.execute();
+                getLog().info("Finished Client Code Generation.");
             }
         } catch (Exception e) {
             e.printStackTrace();

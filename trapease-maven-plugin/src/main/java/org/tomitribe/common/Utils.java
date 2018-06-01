@@ -28,6 +28,7 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 
@@ -467,7 +468,7 @@ public class Utils {
         Optional<AnnotationExpr> classModel = rootClass.getAnnotationByName("Model");
         if (classModel.isPresent()) {
             AnnotationExpr modelAnnotation = classModel.get();
-            if(modelAnnotation.isNormalAnnotationExpr()){
+            if (modelAnnotation.isNormalAnnotationExpr()) {
                 NodeList<MemberValuePair> pairs = modelAnnotation.asNormalAnnotationExpr().getPairs();
                 Optional<MemberValuePair> pair = pairs.stream().filter(p -> p.getNameAsString().equals("operation")).findFirst();
                 if (pair.isPresent()) {
@@ -526,7 +527,7 @@ public class Utils {
         if (Configuration.MODEL_PACKAGE != null) {
             final File apiSourcesDir =
                     new File(Configuration.getModelPath());
-            return Files.collect(apiSourcesDir, "(.*)"+Configuration.MODEL_SUFFIX+"\\.java");
+            return Files.collect(apiSourcesDir, "(.*)" + Configuration.MODEL_SUFFIX + "\\.java");
         } else {
             return Collections.emptyList();
         }
@@ -666,24 +667,22 @@ public class Utils {
 
     public static String getResponseImplementation(MethodDeclaration m) {
         final NormalAnnotationExpr apiResponses = Utils.getAnnotation(m, "ApiResponses");
-        final MemberValuePair value = pairs(apiResponses).get("value");
-        final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
-        Optional<NormalAnnotationExpr> responseOptional = annotations.stream().filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\"")).findFirst();
-        if (responseOptional.isPresent()) {
-            NormalAnnotationExpr response = responseOptional.get();
-            Map<String, MemberValuePair> responsePairs = pairs(response);
-            try {
+        try {
+            final MemberValuePair value = pairs(apiResponses).get("value");
+            final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
+            Optional<NormalAnnotationExpr> responseOptional = annotations.stream().filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\"")).findFirst();
+            if (responseOptional.isPresent()) {
+                NormalAnnotationExpr response = responseOptional.get();
+                Map<String, MemberValuePair> responsePairs = pairs(response);
                 Expression content = responsePairs.get("content").getValue();
                 Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
                 NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
                 Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
                 Expression implementation = schemaPairs.get("implementation").getValue();
                 return implementation.asClassExpr().getTypeAsString();
-            } catch (Exception e) {
-                return null;
             }
+        } catch (Exception e) {
         }
-
         return null;
     }
 
