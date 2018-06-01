@@ -104,12 +104,11 @@ public class ClientGenerator {
         newClass.setAnnotations(new NodeList<>(classAnnotations));
 
         resourceClientClass.getMethods().stream().forEach(m -> {
-            if(!m.getModifiers().contains(Modifier.PUBLIC)){
+            if (m.getModifiers().contains(Modifier.PRIVATE)) {
                 return;
             }
 
             MethodDeclaration newMethod = m.clone();
-
             newMethod.removeBody();
 
             final String type = Utils.getResponseImplementation(newMethod);
