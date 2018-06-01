@@ -28,7 +28,6 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
-import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 
@@ -452,7 +451,7 @@ public class Utils {
     }
 
     public static String getRootName(ClassOrInterfaceDeclaration rootClass) {
-        return rootClass.getName().toString().replace("Model", "");
+        return rootClass.getName().toString().replace(Configuration.MODEL_SUFFIX, "");
     }
 
     public static boolean isRootResource(final String rootClassName, final String resourceName) {
@@ -510,11 +509,24 @@ public class Utils {
         return resources;
     }
 
+    public static List<File> getResources() {
+        final File srcFolder = new File(Configuration.RESOURCE_SOURCES);
+        final File generatedFolder = new File(Configuration.GENERATED_SOURCES);
+        List<File> src = Files.collect(srcFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java");
+        List<File> generatedSources = Files.collect(generatedFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java");
+
+        List<File> resources = Stream.concat(src.stream(), generatedSources.stream())
+                .distinct()
+                .collect(Collectors.toList());
+
+        return resources;
+    }
+
     public static List<File> getModel() {
         if (Configuration.MODEL_PACKAGE != null) {
             final File apiSourcesDir =
                     new File(Configuration.getModelPath());
-            return Files.collect(apiSourcesDir, "(.*)Model\\.java");
+            return Files.collect(apiSourcesDir, "(.*)"+Configuration.MODEL_SUFFIX+"\\.java");
         } else {
             return Collections.emptyList();
         }
@@ -660,12 +672,16 @@ public class Utils {
         if (responseOptional.isPresent()) {
             NormalAnnotationExpr response = responseOptional.get();
             Map<String, MemberValuePair> responsePairs = pairs(response);
-            Expression content = responsePairs.get("content").getValue();
-            Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
-            NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
-            Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
-            Expression implementation = schemaPairs.get("implementation").getValue();
-            return implementation.asClassExpr().getTypeAsString();
+            try {
+                Expression content = responsePairs.get("content").getValue();
+                Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
+                NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
+                Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
+                Expression implementation = schemaPairs.get("implementation").getValue();
+                return implementation.asClassExpr().getTypeAsString();
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         return null;

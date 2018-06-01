@@ -37,38 +37,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientGenerator {
     public static void execute() throws IOException {
-        final List<File> files = Utils.getModel();
-
         createBaseClientClasses();
         CompilationUnit genericClientUnit = createResourceClient();
         genericClientUnit.addImport(ImportManager.getImport("RestClientBuilder"));
         genericClientUnit.addImport(ImportManager.getImport("JohnzonProvider"));
 
-        for (final File file : files) {
-            final String modelClassSource = IO.slurp(file);
-            final CompilationUnit modelClassUnit = JavaParser.parse(modelClassSource);
-            final ClassOrInterfaceDeclaration modelClass = Utils.getClazz(modelClassUnit);
+        List<File> relatedResources = Utils.getResources();
 
-            if (modelClass != null) {
-                Optional<AnnotationExpr> resourceAnnotation = modelClass.getAnnotationByName("Resource");
-                if (!resourceAnnotation.isPresent()) {
-                    continue;
-                }
-
-                final String modelClassName = Utils.getRootName(modelClass);
-
-                List<File> relatedResources = Utils.getResources(modelClassName);
-
-                for (File resource : relatedResources) {
-                    generateClient(resource, Utils.getClazz(genericClientUnit));
-                }
-            }
+        for (File resource : relatedResources) {
+            generateClient(resource, Utils.getClazz(genericClientUnit));
         }
         save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.RESOURCE_SUFFIX + "Client", genericClientUnit);
     }

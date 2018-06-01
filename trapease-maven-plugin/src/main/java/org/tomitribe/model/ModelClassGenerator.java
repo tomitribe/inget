@@ -113,17 +113,17 @@ public class ModelClassGenerator {
 
     private static void handleExpandableField(FieldDeclaration field, String prefix, CompilationUnit unit) {
         VariableDeclarator variable = field.getVariables().stream().findFirst().get();
-        boolean isExpandable = variable.getTypeAsString().contains("Model");
+        boolean isExpandable = variable.getTypeAsString().contains(Configuration.MODEL_SUFFIX);
         if (isExpandable) {
             String end = variable.getTypeAsString();
             String entityBefore = variable.getTypeAsString();
             String entityAfter;
             if (variable.getTypeAsString().contains("<")) {
                 entityBefore = end.substring(end.indexOf("<") + 1, end.indexOf(">"));
-                entityAfter = prefix + entityBefore.replace("Model", "");
+                entityAfter = prefix + entityBefore.replace(Configuration.MODEL_SUFFIX, "");
                 end = end.replace(entityBefore, entityAfter);
             } else {
-                end = prefix + end.replace("Model", "");
+                end = prefix + end.replace(Configuration.MODEL_SUFFIX, "");
                 entityAfter = end;
             }
             variable.setType(end);

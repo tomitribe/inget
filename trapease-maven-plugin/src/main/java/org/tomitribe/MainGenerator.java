@@ -36,7 +36,7 @@ import java.util.zip.ZipEntry;
 @Mojo(name = "generate")
 public class MainGenerator extends AbstractMojo {
 
-    @Parameter(property = "generate.model_package", required = true)
+    @Parameter(property = "generate.model_package")
     private String modelPackage;
 
     @Parameter(property = "generate.resource_package")
@@ -44,6 +44,13 @@ public class MainGenerator extends AbstractMojo {
 
     @Parameter(property = "generate.generate_client", defaultValue = "false")
     private Boolean generateClient;
+
+    @Parameter(property = "generate.resource_suffix", defaultValue = "Resource")
+    private String resourceSuffix;
+
+    @Parameter(property = "generate.model_suffix", defaultValue = "Model")
+    private String modelSuffix;
+
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     protected MavenProject project;
@@ -59,6 +66,10 @@ public class MainGenerator extends AbstractMojo {
         Configuration.GENERATED_SOURCES = generatedSources;
         Configuration.MODEL_PACKAGE = modelPackage;
         Configuration.RESOURCE_PACKAGE = resourcePackage;
+        Configuration.RESOURCE_SUFFIX = resourceSuffix;
+        Configuration.MODEL_SUFFIX = modelSuffix;
+        Configuration.TEMP_SOURCE = project.getBuild().getDirectory() + File.separator + "temp-source";
+
         try {
             if (modelPackage != null) {
                 boolean existsInCurrentProject = new File(Configuration.getModelPath()).exists();
@@ -76,18 +87,37 @@ public class MainGenerator extends AbstractMojo {
                                 "this project or add a jar with the .java files for the model.");
                     }
 
-                    modelDependencies.stream().forEach(m -> extractModel(m.getFile()));
-                    Configuration.MODEL_SOURCES = Configuration.GENERATED_SOURCES;
+                    modelDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
+                    Configuration.MODEL_SOURCES = Configuration.TEMP_SOURCE;
                 }
             }
 
             if (resourcePackage != null) {
-                getLog().info("Started Resource Code Generation.");
-                ResourcesGenerator.execute();
-                if(generateClient){
-                    ClientGenerator.execute();
+                boolean resourcesExistsInCurrentProject = new File(Configuration.getResourcePath()).exists();
+                if (resourcesExistsInCurrentProject) {
+                    getLog().info("Started Resource Code Generation.");
+                    ResourcesGenerator.execute();
+                    getLog().info("Finished Resource Code Generation.");
+                } else {
+                    if(generateClient){
+                        List<Artifact> resourceDependencies = artifacts.stream()
+                                .filter(a -> hasResources(a.getFile())).collect(Collectors.toList());
+
+                        if(resourceDependencies.size() == 0){
+                            throw new MojoExecutionException(
+                                    "Resources were not found. Add the correct 'resourcePackage' for " +
+                                            "this project or add a jar with the .java files for the resources.");
+                        }
+
+                        resourceDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
+                        Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
+
+                        getLog().info("Started Client Code Generation.");
+                        ClientGenerator.execute();
+                        getLog().info("Finished Client Code Generation.");
+                    }
                 }
-                getLog().info("Finished Resource Code Generation.");
+
             } else {
                 getLog().info("Skipping Resources Code Generation, " +
                         "resource package not found. Add a valid 'resourcePackage'.");
@@ -114,7 +144,24 @@ public class MainGenerator extends AbstractMojo {
         return false;
     }
 
-    public void extractModel(File jarFile) {
+    private boolean hasResources(File jarFile) {
+        try {
+            JarFile jar = new JarFile(jarFile);
+            Enumeration<? extends JarEntry> enumeration = jar.entries();
+            while (enumeration.hasMoreElements()) {
+                ZipEntry zipEntry = enumeration.nextElement();
+                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE) + File.separator)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public void extractJavaFiles(File jarFile) {
         try {
             JarFile jar = new JarFile(jarFile);
             Enumeration<? extends JarEntry> enumeration = jar.entries();
@@ -122,7 +169,7 @@ public class MainGenerator extends AbstractMojo {
                 ZipEntry zipEntry = enumeration.nextElement();
                 if (zipEntry.getName().endsWith(".java")) {
                     InputStream is = jar.getInputStream(zipEntry);
-                    File generatedSources = new File(Configuration.GENERATED_SOURCES);
+                    File generatedSources = new File(Configuration.TEMP_SOURCE);
                     java.io.File output = new java.io.File(generatedSources, java.io.File.separator + zipEntry.getName());
                     if (!output.getParentFile().exists()) {
                         output.getParentFile().mkdirs();
