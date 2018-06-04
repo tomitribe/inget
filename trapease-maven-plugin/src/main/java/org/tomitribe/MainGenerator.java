@@ -45,15 +45,17 @@ public class MainGenerator extends AbstractMojo {
     @Parameter(property = "generate.generate_client", defaultValue = "false")
     private Boolean generateClient;
 
+    @Parameter(property = "generate.client_name", defaultValue = "ResourceClient")
+    private String clientName;
+
     @Parameter(property = "generate.resource_suffix", defaultValue = "Resource")
     private String resourceSuffix;
 
     @Parameter(property = "generate.model_suffix", defaultValue = "Model")
     private String modelSuffix;
 
-
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
-    protected MavenProject project;
+    private MavenProject project;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -66,6 +68,7 @@ public class MainGenerator extends AbstractMojo {
         Configuration.GENERATED_SOURCES = generatedSources;
         Configuration.MODEL_PACKAGE = modelPackage;
         Configuration.RESOURCE_PACKAGE = resourcePackage;
+        Configuration.CLIENT_NAME = clientName;
         Configuration.RESOURCE_SUFFIX = resourceSuffix;
         Configuration.MODEL_SUFFIX = modelSuffix;
         Configuration.TEMP_SOURCE = project.getBuild().getDirectory() + File.separator + "temp-source";

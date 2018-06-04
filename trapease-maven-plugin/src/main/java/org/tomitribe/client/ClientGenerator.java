@@ -52,7 +52,7 @@ public class ClientGenerator {
         for (File resource : relatedResources) {
             generateClient(resource, Utils.getClazz(genericClientUnit));
         }
-        save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.RESOURCE_SUFFIX + "Client", genericClientUnit);
+        save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
     }
 
     private static void createBaseClientClasses() throws IOException {
@@ -62,10 +62,9 @@ public class ClientGenerator {
 
     private static CompilationUnit createResourceClient() throws IOException {
         final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client";
-        final String resourceClientName = Configuration.RESOURCE_SUFFIX + "Client";
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(outputBasePackage);
-        newClassCompilationUnit.addClass(resourceClientName, Modifier.PUBLIC);
-        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(resourceClientName).get();
+        newClassCompilationUnit.addClass(Configuration.CLIENT_NAME, Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(Configuration.CLIENT_NAME).get();
 
         ConstructorDeclaration constructor = newClass.addConstructor(Modifier.PUBLIC);
         constructor.addParameter("ClientConfiguration", "config");
