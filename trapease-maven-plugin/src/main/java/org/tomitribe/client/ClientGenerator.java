@@ -58,6 +58,7 @@ public class ClientGenerator {
     private static void createBaseClientClasses() throws IOException {
         final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client.base";
         createClientConfiguration(outputBasePackage);
+        createClientExceptions(outputBasePackage);
     }
 
     private static CompilationUnit createResourceClient() throws IOException {
@@ -74,7 +75,25 @@ public class ClientGenerator {
         return newClassCompilationUnit;
     }
 
-    private static void createClientConfiguration(String outputBasePackage) throws IOException {
+    private static void createClientExceptions(final String outputBasePackage) throws IOException {
+        final CompilationUnit clientException = new CompilationUnit(outputBasePackage);
+        clientException.addClass(Configuration.CLIENT_NAME + "Exception", Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration clientExceptionClass =
+                clientException.getClassByName(Configuration.CLIENT_NAME + "Exception").get();
+        clientExceptionClass.addExtendedType(RuntimeException.class);
+        Utils.addGeneratedAnnotation(clientException, Utils.getClazz(clientException), null);
+        save(outputBasePackage, Configuration.CLIENT_NAME + "Exception", clientException);
+
+        final CompilationUnit entityNotFoundException = new CompilationUnit(outputBasePackage);
+        entityNotFoundException.addClass("EntityNotFoundException", Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration entityNotFoundExceptionClass =
+                entityNotFoundException.getClassByName("EntityNotFoundException").get();
+        entityNotFoundExceptionClass.addExtendedType(clientExceptionClass.getNameAsString());
+        Utils.addGeneratedAnnotation(entityNotFoundException, Utils.getClazz(entityNotFoundException), null);
+        save(outputBasePackage, "EntityNotFoundException", entityNotFoundException);
+    }
+
+    private static void createClientConfiguration(final String outputBasePackage) throws IOException {
         final CompilationUnit content = JavaParser.parse(ClientTemplates.CLIENT_CONFIGURATION);
         content.setPackageDeclaration(outputBasePackage);
         Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
