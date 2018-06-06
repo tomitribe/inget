@@ -44,7 +44,7 @@ public class MethodGenerator {
         ClassOrInterfaceDeclaration rootClass = Utils.getClazz(rootClassUnit);
         final String rootClassName = Utils.getRootName(rootClass);
         final String rootClassPackage = rootClassUnit.getPackageDeclaration().get().getName().toString();
-        ID_PARAM = Utils.getId(rootClass);
+        ID_PARAM = Utils.getIdName(rootClass);
 
         removeGeneratedMethods(resourceClass);
 //        removeCrudAndBulkMethods(resourceClass);

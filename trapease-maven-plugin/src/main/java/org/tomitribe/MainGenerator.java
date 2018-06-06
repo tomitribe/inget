@@ -18,7 +18,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.tomitribe.client.ClientGenerator;
+import org.tomitribe.cmd.CmdGenerator;
 import org.tomitribe.common.Configuration;
+import org.tomitribe.common.TrapeaseTypeSolver;
 import org.tomitribe.common.Utils;
 import org.tomitribe.model.ModelGenerator;
 import org.tomitribe.resource.ResourcesGenerator;
@@ -44,6 +46,9 @@ public class MainGenerator extends AbstractMojo {
 
     @Parameter(property = "generate.generate_client", defaultValue = "false")
     private Boolean generateClient;
+
+    @Parameter(property = "generate.generate_cmd", defaultValue = "false")
+    private Boolean generateCmd;
 
     @Parameter(property = "generate.resource_suffix", defaultValue = "Resource")
     private String resourceSuffix;
@@ -116,10 +121,19 @@ public class MainGenerator extends AbstractMojo {
                         "resource package not found. Add a valid 'resourcePackage'.");
             }
 
+            // Only after resolving the model and resource paths
+            TrapeaseTypeSolver.init();
+
             if(generateClient){
                 getLog().info("Started Client Code Generation.");
                 ClientGenerator.execute();
                 getLog().info("Finished Client Code Generation.");
+            }
+
+            if(generateCmd){
+                getLog().info("Started Command Code Generation.");
+                CmdGenerator.execute();
+                getLog().info("Finished Command Code Generation.");
             }
         } catch (Exception e) {
             e.printStackTrace();

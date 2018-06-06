@@ -533,7 +533,18 @@ public class Utils {
         }
     }
 
-    public static String getId(ClassOrInterfaceDeclaration rootClass) {
+    public static String getIdName(ClassOrInterfaceDeclaration rootClass) {
+        Optional<FieldDeclaration> idField = getId(rootClass);
+
+        if (idField.isPresent()) {
+            return idField.get().getVariables().stream().findFirst().get().getName().asString();
+        }
+
+        return "id";
+    }
+
+
+    public static Optional<FieldDeclaration> getId(ClassOrInterfaceDeclaration rootClass) {
         Optional<FieldDeclaration> idField = rootClass.getFields().stream().filter(f -> {
             Optional<AnnotationExpr> modelOptional = f.getAnnotationByName("Model");
             if (modelOptional.isPresent()) {
@@ -548,11 +559,7 @@ public class Utils {
             return false;
         }).findFirst();
 
-        if (idField.isPresent()) {
-            return idField.get().getVariables().get(0).getName().asString();
-        }
-
-        return "id";
+        return idField;
     }
 
     public static boolean isOperationPresent(final FieldDeclaration f, final String operation) {
@@ -684,6 +691,12 @@ public class Utils {
         } catch (Exception e) {
         }
         return null;
+    }
+
+    public static String getFullQualifiedName(CompilationUnit unit) {
+        ClassOrInterfaceDeclaration clazz = Utils.getClazz(unit);
+        return unit.getPackageDeclaration().get().getNameAsString() + "." + clazz.getNameAsString();
+
     }
 
     public static void main(String[] args) {

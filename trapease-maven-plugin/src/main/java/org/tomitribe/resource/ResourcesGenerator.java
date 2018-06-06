@@ -66,7 +66,7 @@ public class ResourcesGenerator {
 
         final String rootResourceName = modelClassName + Configuration.RESOURCE_SUFFIX;
         Optional<File> rootResource = relatedResources.stream()
-                .filter(f -> f.getName().contains(modelClassName))
+                .filter(f -> f.getName().equals(rootResourceName + ".java"))
                 .findFirst();
         if (!rootResource.isPresent()) {
             generateResource(rootResourceName, modelClassUnit);
@@ -74,8 +74,8 @@ public class ResourcesGenerator {
 
         final String listResourceName = Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX;
         Optional<File> listResource = relatedResources.stream()
-                .filter(f -> f.getName().contains(listResourceName))
-                .findFirst();
+                .filter(f -> f.getName().equals(listResourceName + ".java"))
+        .findFirst();
 
         if (!listResource.isPresent()) {
             generateResource(listResourceName, modelClassUnit);
