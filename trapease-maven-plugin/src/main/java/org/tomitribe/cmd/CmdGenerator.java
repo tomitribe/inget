@@ -21,6 +21,8 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -361,7 +363,7 @@ public class CmdGenerator {
         newClass.addMember(newField);
         newField.setAnnotations(new NodeList<>());
         newField.setFinal(false);
-        addCommand(newField, rootClassUnit, true, true);
+        addCommand(f, newField, rootClassUnit, true);
     }
 
     private static void writeField(String operation, CompilationUnit rootClassUnit,
@@ -380,8 +382,7 @@ public class CmdGenerator {
                 newField.addSingleMemberAnnotation("TypeInfo", "\"" + importPath + "\"");
                 newClassCompilationUnit.addImport("org.tomitribe.api.TypeInfo");
             }
-            // TODO: Where should we pick the required flag? From Model or Schema?
-            addCommand(newField, rootClassUnit, false, false);
+            addCommand(f, newField, rootClassUnit, false);
             if (importPath != null) {
                 newClassCompilationUnit.addImport(importPath);
             }
@@ -396,10 +397,10 @@ public class CmdGenerator {
         }
     }
 
-    private static void addCommand(FieldDeclaration field, CompilationUnit unit, boolean required, boolean id) {
+    private static void addCommand(FieldDeclaration oldField, FieldDeclaration field, CompilationUnit unit, boolean id) {
         String fieldName = field.getVariables().stream().findFirst().get().getNameAsString();
         StringBuilder annotation = new StringBuilder();
-
+        boolean required = getRequired(oldField);
         if (id) {
             field.addAnnotation(JavaParser.parseAnnotation("@Arguments(required = " + id + ")"));
             unit.addImport(ImportManager.getImport("Arguments"));
@@ -412,6 +413,18 @@ public class CmdGenerator {
             field.addAnnotation(JavaParser.parseAnnotation(annotation.toString()));
             unit.addImport(ImportManager.getImport("Option"));
         }
+    }
+
+    private static boolean getRequired(FieldDeclaration field) {
+        Optional<AnnotationExpr> schema = field.getAnnotationByName("Schema");
+        if (schema.isPresent()) {
+            Map<String, MemberValuePair> pairs = Utils.pairs(schema.get().asNormalAnnotationExpr());
+            MemberValuePair valuePair = pairs.get("required");
+            if(valuePair != null){
+                return valuePair.getValue().asBooleanLiteralExpr().getValue();
+            }
+        }
+        return false;
     }
 
     public static void save(String className, CompilationUnit rootClassUnit, CompilationUnit classToBeSaved) throws IOException {
