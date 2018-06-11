@@ -14,6 +14,7 @@ package org.tomitribe.cmd;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -45,7 +46,8 @@ import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +93,7 @@ public class CmdGenerator {
                 }
 
                 final String rootClassName = getRootName(getClazz(rootClassUnit));
-                if (!rootClassName.equalsIgnoreCase("Account")) {
+                if (!rootClassName.equalsIgnoreCase("ApiConnection")) {
                     continue;
                 }
                 StringBuilder cli = new StringBuilder();
@@ -181,7 +183,7 @@ public class CmdGenerator {
             }
         } else if (operation == Operation.CREATE || operation == Operation.UPDATE) {
             rootClass.getFields().stream().forEach(f -> {
-                writeFieldOrHandleReference(rootClassUnit, operation, classPrefix, newClass, f, null, null);
+                writeFieldOrHandleReference(rootClassUnit, operation, classPrefix, newClass, f, null, null, null);
             });
 
         }
@@ -211,40 +213,30 @@ public class CmdGenerator {
 
         if (operation == Operation.CREATE || operation == Operation.UPDATE) {
             builder.append("final " + className + " " + modelName + " = " + className + ".builder()");
-            newClass.getFields().stream().filter(f -> !f.getAnnotationByName("TypeInfo").isPresent()).forEach(f -> {
-                String varName = f.getVariables().stream().findFirst().get().getNameAsString();
+            extractBuilderNonExpandableFields(rootClassUnit, newClass, operation, builder);
 
-                FieldDeclaration fieldId = Utils.getId(Utils.getClazz(rootClassUnit)).get();
-                String idRootClass = fieldId.getVariables().stream().findFirst().get().getNameAsString();
-                String newFieldId = f.getVariables().stream().findFirst().get().getNameAsString();
-                boolean skipBuilder = operation == Operation.UPDATE && idRootClass.equals(newFieldId);
-                if (!skipBuilder) {
-                    builder.append("." + varName + "(this." + varName + ")");
+            Map<String, List<FieldDeclaration>> fieldByClass = groupExpandableFieldsByClass(newClass);
+
+            HashMap<String, String> builderMap = new HashMap<>();
+            List<String> sortedKeys = fieldByClass.keySet().stream().sorted().collect(Collectors.toList());
+            sortedKeys.stream().forEach(key -> {
+                String builderClazzName = key.substring(key.lastIndexOf("-") + 1, key.length());
+                String builderClazzPkg = key.substring(0, key.lastIndexOf("-"));
+
+                if (!builderClazzName.contains(".")) {
+                    builderMap.put(builderClazzName, createBuilderForClass(builderClazzName, builderClazzPkg, newClassCompilationUnit));
+                } else {
+                    List<String> classes = Arrays.asList(builderClazzName.split("\\."));
+                    classes.forEach(clazz -> {
+                        String builderValue = builderMap.get(clazz);
+                        if (builderValue == null) {
+                            builderMap.put(clazz, createBuilderForClass(clazz, builderClazzPkg, newClassCompilationUnit));
+                        }
+                    });
                 }
+                appendToExistingBuilder(builderClazzPkg, builderClazzName, newClassCompilationUnit, builderMap, fieldByClass);
             });
-
-            Map<String, List<FieldDeclaration>> fieldByClass = newClass.getFields().stream()
-                    .filter(f -> f.getAnnotationByName("TypeInfo").isPresent())
-                    .collect(groupingBy(f -> f.getAnnotationByName("TypeInfo").get()
-                            .asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString()));
-
-            Iterator<String> it = fieldByClass.keySet().iterator();
-            while (it.hasNext()) {
-                String fullPath = it.next();
-                String clazz = fullPath.substring(fullPath.lastIndexOf(".") + 1, fullPath.length());
-                newClassCompilationUnit.addImport(fullPath);
-                List<FieldDeclaration> clazzFields = fieldByClass.get(fullPath);
-                List<String> builderLines =
-                        clazzFields.stream().map(f -> {
-                            String currentFieldName = f.getVariables().stream().findFirst().get().getNameAsString();
-                            String originalFieldName = currentFieldName.replace(clazz.toLowerCase(), "");
-                            String line = WordUtils.uncapitalize(originalFieldName) + "(" + currentFieldName + ")";
-                            return line;
-                        }).collect(Collectors.toList());
-                String params = String.join(".", builderLines);
-                builder.append("." + clazz.toLowerCase() + "(" + fullPath + ".builder()." + params + ".build())");
-            }
-
+            organizeBuilds(sortedKeys, builderMap, builder);
             builder.append(".build();");
             Statement builderStatement = JavaParser.parseStatement(builder.toString());
             method.getBody().get().asBlockStmt().addStatement(builderStatement);
@@ -265,9 +257,97 @@ public class CmdGenerator {
         newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.ResourceClient");
     }
 
-    private static void writeFieldOrHandleReference(CompilationUnit rootClassUnit, String operation, String classPrefix, ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName, String importPath) {
+    private static void organizeBuilds(List<String> sortedKeys, HashMap<String, String> builderMap, StringBuilder builder) {
+        sortedKeys.forEach(k -> {
+            String[] line = k.split("-");
+            String clazz = line[1];
+            List<String> classes = Arrays.asList(clazz.split("\\."));
+            if (classes.size() > 1) {
+                String previous = null;
+                for (String c : classes) {
+                    String builderValue = builderMap.get(c);
+                    if (builderValue.equals("added")) {
+                        previous = c;
+                        continue;
+                    }
+
+                    if (previous == null) {
+                        previous = c;
+                        builder.insert(builder.length(), builderValue);
+                    } else {
+                        String startingPrevious = previous + ".builder()";
+                        builder.insert(builder.indexOf(startingPrevious) + startingPrevious.length(), builderValue);
+                    }
+                    builderMap.put(c, "added");
+                }
+            }
+        });
+    }
+
+    private static void appendToExistingBuilder(String builderClazzPkg, String builderClazzName, CompilationUnit newClassCompilationUnit, HashMap<String, String> builderMap, Map<String, List<FieldDeclaration>> fieldByClass) {
+        String lastClass = builderClazzName;
+        if (builderClazzName.contains(".")) {
+            String[] classes = builderClazzName.split("\\.");
+            lastClass = classes[classes.length - 1];
+        }
+        List<FieldDeclaration> clazzFields = fieldByClass.get(builderClazzPkg + "-" + builderClazzName);
+        List<String> builderParams = extractBuilderParams(lastClass, clazzFields);
+        String params = "." + String.join(".", builderParams);
+        String builderValue = builderMap.get(lastClass);
+        StringBuilder builder = new StringBuilder(builderValue);
+        builder.insert(builderValue.indexOf("builder()") + "builder()".length(), params);
+        builderMap.put(lastClass, builder.toString());
+    }
+
+    private static String createBuilderForClass(String builderClazzName, String builderPkg, CompilationUnit unit) {
+        Optional<ImportDeclaration> builderClassImport = unit.getImports().stream().filter(i -> i.toString().contains(builderClazzName + ";")).findFirst();
+        if (!builderClassImport.isPresent()) {
+            unit.addImport(builderPkg + "." + builderClazzName);
+            System.out.println("332-"+ builderPkg + "." + builderClazzName);
+        }
+        StringBuilder builder = new StringBuilder();
+        return builder.append("." + WordUtils.uncapitalize(builderClazzName) + "(" + builderClazzName + ".builder().build())").toString();
+    }
+
+    private static Map<String, List<FieldDeclaration>> groupExpandableFieldsByClass(ClassOrInterfaceDeclaration newClass) {
+        return newClass.getFields().stream()
+                .filter(f -> f.getAnnotationByName("TypeInfo").isPresent())
+                .filter(f -> Utils.pairs(f.getAnnotationByName("TypeInfo").get().asNormalAnnotationExpr()).get("isEnum") == null)
+                .collect(
+                        groupingBy(f -> Utils.pairs(f.getAnnotationByName("TypeInfo").get()
+                                .asNormalAnnotationExpr()).get("value").getValue().toString().replace("\"", "")));
+    }
+
+    private static void extractBuilderNonExpandableFields(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration newClass, String operation, StringBuilder builder) {
+        newClass.getFields().stream()
+                .filter(f -> !f.getAnnotationByName("TypeInfo").isPresent())
+                .forEach(f -> {
+                    String varName = f.getVariables().stream().findFirst().get().getNameAsString();
+
+                    FieldDeclaration fieldId = Utils.getId(Utils.getClazz(rootClassUnit)).get();
+                    String idRootClass = fieldId.getVariables().stream().findFirst().get().getNameAsString();
+                    String newFieldId = f.getVariables().stream().findFirst().get().getNameAsString();
+                    boolean skipBuilder = operation == Operation.UPDATE && idRootClass.equals(newFieldId);
+                    if (!skipBuilder) {
+                        builder.append("." + varName + "(this." + varName + ")");
+                    }
+                });
+    }
+
+    private static List<String> extractBuilderParams(String clazz, List<FieldDeclaration> clazzFields) {
+        return clazzFields.stream().map(f -> {
+            String currentFieldName = f.getVariables().stream().findFirst().get().getNameAsString();
+            String originalFieldName = currentFieldName.replace(WordUtils.uncapitalize(clazz), "");
+            String line = WordUtils.uncapitalize(originalFieldName) + "(" + currentFieldName + ")";
+            return line;
+        }).collect(Collectors.toList());
+    }
+
+    private static void writeFieldOrHandleReference(CompilationUnit rootClassUnit, String operation, String classPrefix,
+                                                    ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName,
+                                                    String pkg, String clazzName) {
         if (isWrapperOrPrimitiveOrDate(f)) {
-            writeField(operation, rootClassUnit, newClass, f, objectName, importPath);
+            writeField(operation, rootClassUnit, newClass, f, objectName, pkg, clazzName, false);
         } else {
             handleReferenceFields(rootClassUnit, operation, classPrefix, newClass, f, objectName);
         }
@@ -316,15 +396,14 @@ public class CmdGenerator {
             return;  // TODO: Arrays with types - skip for now
         }
 
-        String importPath = solvedType.getPackageName() + "." + solvedType.getClassName();
         if (solvedType.isEnum()) {
-            writeField(operation, rootClassUnit, newClass, f, objectName, importPath);
+            writeField(operation, rootClassUnit, newClass, f, objectName, solvedType.getPackageName(), solvedType.getClassName(), true);
         } else {
-            expandClassFields(rootClassUnit, operation, classPrefix, newClass, type, solvedType, importPath);
+            expandClassFields(rootClassUnit, operation, classPrefix, newClass, type, solvedType, solvedType.getPackageName(), solvedType.getClassName());
         }
     }
 
-    private static void expandClassFields(CompilationUnit rootClassUnit, String operation, String classPrefix, ClassOrInterfaceDeclaration newClass, VariableDeclarator type, ResolvedReferenceTypeDeclaration solvedType, String importPath) {
+    private static void expandClassFields(CompilationUnit rootClassUnit, String operation, String classPrefix, ClassOrInterfaceDeclaration newClass, VariableDeclarator type, ResolvedReferenceTypeDeclaration solvedType, String pkg, String clazzName) {
         List<ResolvedFieldDeclaration> allFields = solvedType.getAllFields();
 
         List<FieldDeclaration> fieldsToBeExpanded = allFields.stream()
@@ -337,7 +416,7 @@ public class CmdGenerator {
             if (!expandedTobeExpanded.getAnnotationByName("Model").isPresent()
                     || !Utils.hasOperations(expandedTobeExpanded) ||
                     Utils.isOperationPresent(expandedTobeExpanded, operation)) {
-                writeFieldOrHandleReference(rootClassUnit, operation, classPrefix, newClass, expandedTobeExpanded, type.getNameAsString(), importPath);
+                writeFieldOrHandleReference(rootClassUnit, operation, classPrefix, newClass, expandedTobeExpanded, type.getNameAsString(), pkg, clazzName);
             }
         }
     }
@@ -350,7 +429,7 @@ public class CmdGenerator {
                         Utils.getExtendedClass(rootClassUnit, et.getNameAsString());
 
                 extendedClass.getFields().forEach(f -> {
-                    writeField(operation, rootClassUnit, newClass, f, null, null);
+                    writeField(operation, rootClassUnit, newClass, f, null, null, null, false);
                 });
                 Utils.addImports(extendedClass.findCompilationUnit().get(), newClass.findCompilationUnit().get());
                 extendedTypes = extendedClass.getExtendedTypes();
@@ -367,7 +446,8 @@ public class CmdGenerator {
     }
 
     private static void writeField(String operation, CompilationUnit rootClassUnit,
-                                   ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectCommandName, String importPath) {
+                                   ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectCommandName,
+                                   String pkg, String clazzName, boolean isEnum) {
         FieldDeclaration newField = f.clone();
         if (!newField.getAnnotationByName("Model").isPresent()
                 || !Utils.hasOperations(newField) ||
@@ -379,12 +459,19 @@ public class CmdGenerator {
             if (objectCommandName != null) {
                 VariableDeclarator var = newField.getVariables().stream().findFirst().get();
                 var.setName(WordUtils.uncapitalize(objectCommandName) + WordUtils.capitalize(var.getNameAsString()));
-                newField.addSingleMemberAnnotation("TypeInfo", "\"" + importPath + "\"");
+                NormalAnnotationExpr typeInfo = new NormalAnnotationExpr();
+                typeInfo.setName("TypeInfo");
+                typeInfo.addPair("value", "\"" + pkg + "-" + clazzName + "\"");
+                if (isEnum) {
+                    typeInfo.addPair("isEnum", "true");
+                }
                 newClassCompilationUnit.addImport("org.tomitribe.api.TypeInfo");
+                newField.addAnnotation(typeInfo);
             }
             addCommand(f, newField, rootClassUnit, false);
-            if (importPath != null) {
-                newClassCompilationUnit.addImport(importPath);
+            if (pkg != null && clazzName != null) {
+                newClassCompilationUnit.addImport(pkg + "." + clazzName);
+                System.out.println("489-" + pkg + "." + clazzName);
             }
         } else {
             //TODO: Refactor this
@@ -420,7 +507,7 @@ public class CmdGenerator {
         if (schema.isPresent()) {
             Map<String, MemberValuePair> pairs = Utils.pairs(schema.get().asNormalAnnotationExpr());
             MemberValuePair valuePair = pairs.get("required");
-            if(valuePair != null){
+            if (valuePair != null) {
                 return valuePair.getValue().asBooleanLiteralExpr().getValue();
             }
         }
