@@ -12,6 +12,14 @@
   <description>Translate Rest APIs with Ease</description>
   <packaging>pom</packaging>
 
+  <repositories>
+    <repository>
+      <id>tomitribe-all</id>
+      <name>Tomitribe Repository</name>
+      <url>http://repository.tomitribe.com/content/groups/tomitribe/</url>
+    </repository>
+  </repositories>
+
   <distributionManagement>
     <repository>
       <id>tomitribe.releases.https</id>

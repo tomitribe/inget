@@ -20,8 +20,19 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.NullLiteralExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.stmt.SwitchEntryStmt;
+import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
@@ -52,30 +63,85 @@ public class ClientGenerator {
         for (File resource : relatedResources) {
             generateClient(resource, Utils.getClazz(genericClientUnit));
         }
-        save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.RESOURCE_SUFFIX + "Client", genericClientUnit);
+        save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
     }
 
     private static void createBaseClientClasses() throws IOException {
         final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client.base";
         createClientConfiguration(outputBasePackage);
+        createClientExceptions(outputBasePackage);
     }
 
     private static CompilationUnit createResourceClient() throws IOException {
         final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client";
-        final String resourceClientName = Configuration.RESOURCE_SUFFIX + "Client";
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(outputBasePackage);
-        newClassCompilationUnit.addClass(resourceClientName, Modifier.PUBLIC);
-        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(resourceClientName).get();
+        newClassCompilationUnit.addClass(Configuration.CLIENT_NAME, Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(Configuration.CLIENT_NAME).get();
 
         ConstructorDeclaration constructor = newClass.addConstructor(Modifier.PUBLIC);
         constructor.addParameter("ClientConfiguration", "config");
         newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
+        newClassCompilationUnit.addImport(
+                Configuration.RESOURCE_PACKAGE + ".client.base." + Configuration.CLIENT_NAME + "ExceptionMapper");
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
         return newClassCompilationUnit;
     }
 
-    private static void createClientConfiguration(String outputBasePackage) throws IOException {
+    private static void createClientExceptions(final String outputBasePackage) throws IOException {
+        final CompilationUnit clientException = new CompilationUnit(outputBasePackage);
+        clientException.addClass(Configuration.CLIENT_NAME + "Exception", Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration clientExceptionClass =
+                clientException.getClassByName(Configuration.CLIENT_NAME + "Exception").get();
+        clientExceptionClass.addExtendedType(RuntimeException.class);
+        Utils.addGeneratedAnnotation(clientException, Utils.getClazz(clientException), null);
+        save(outputBasePackage, Configuration.CLIENT_NAME + "Exception", clientException);
+
+        final CompilationUnit entityNotFoundException = new CompilationUnit(outputBasePackage);
+        entityNotFoundException.addClass("EntityNotFoundException", Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration entityNotFoundExceptionClass =
+                entityNotFoundException.getClassByName("EntityNotFoundException").get();
+        entityNotFoundExceptionClass.addExtendedType(clientExceptionClass.getNameAsString());
+        Utils.addGeneratedAnnotation(entityNotFoundException, Utils.getClazz(entityNotFoundException), null);
+        save(outputBasePackage, "EntityNotFoundException", entityNotFoundException);
+
+        final CompilationUnit exceptionMapper = new CompilationUnit(outputBasePackage);
+        exceptionMapper.addClass(Configuration.CLIENT_NAME + "ExceptionMapper", Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration exceptionMapperClass =
+                exceptionMapper.getClassByName(Configuration.CLIENT_NAME + "ExceptionMapper").get();
+        exceptionMapperClass.addImplementedType("ResponseExceptionMapper");
+        exceptionMapperClass.getImplementedTypes()
+                            .get(0)
+                            .setTypeArguments(new TypeParameter(clientExceptionClass.getNameAsString()));
+        exceptionMapper.addImport("org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper");
+
+        exceptionMapperClass.addAnnotation("Provider");
+        exceptionMapper.addImport("javax.ws.rs.ext.Provider");
+
+        exceptionMapper.addImport("javax.ws.rs.core.Response");
+        final MethodDeclaration toThrowable = exceptionMapperClass.addMethod("toThrowable", Modifier.PUBLIC);
+        toThrowable.addAnnotation(Override.class);
+        toThrowable.setType(clientExceptionClass.getNameAsString());
+        toThrowable.addParameter(
+                new Parameter(EnumSet.of(Modifier.FINAL), new TypeParameter("Response"), new SimpleName("response")));
+        final BlockStmt toThrowableBody = new BlockStmt();
+        final SwitchStmt switchStmt = new SwitchStmt();
+        switchStmt.setSelector(new MethodCallExpr(new NameExpr("response"), "getStatus"));
+        switchStmt.getEntries()
+                  .add(new SwitchEntryStmt(new IntegerLiteralExpr(404),
+                                           new NodeList<>(new ReturnStmt(
+                                                   new ObjectCreationExpr(null, JavaParser.parseClassOrInterfaceType(
+                                                           entityNotFoundExceptionClass.getNameAsString()),
+                                                                          new NodeList<>())))));
+        toThrowableBody.addStatement(switchStmt);
+        toThrowableBody.addStatement(new ReturnStmt(new NullLiteralExpr()));
+        toThrowable.setBody(toThrowableBody);
+
+        Utils.addGeneratedAnnotation(exceptionMapper, Utils.getClazz(exceptionMapper), null);
+        save(outputBasePackage, Configuration.CLIENT_NAME + "ExceptionMapper", exceptionMapper);
+    }
+
+    private static void createClientConfiguration(final String outputBasePackage) throws IOException {
         final CompilationUnit content = JavaParser.parse(ClientTemplates.CLIENT_CONFIGURATION);
         content.setPackageDeclaration(outputBasePackage);
         Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
@@ -159,6 +225,7 @@ public class ClientGenerator {
         cBuilder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = RestClientBuilder.newBuilder()");
         cBuilder.append(".baseUrl(config.getUrl())");
         cBuilder.append(".register(JohnzonProvider.class)");
+        cBuilder.append(".register(TribestreamApiGatewayExceptionMapper.class)");
         cBuilder.append(".build(" + resourceClientClass.getNameAsString() + ".class);");
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(cBuilder.toString()));
 

@@ -26,6 +26,7 @@ public class Configuration {
     public static String RESOURCE_PACKAGE ;
     public static String RESOURCE_SUFFIX;
     public static String CMD_PACKAGE;
+    public static String CLIENT_NAME;
 
     public static String getModelPath(){
         return MODEL_SOURCES + File.separator + Utils.transformPackageToPath(MODEL_PACKAGE);
