@@ -13,7 +13,7 @@ public class ClientTemplates {
             "@Getter\n" +
             "@Builder\n" +
             "public class ClientConfiguration {\n" +
-            "    private URL tagUrl;\n" +
+            "    private URL url;\n" +
             "    private boolean verbose;\n" +
             "}\n";
 }

@@ -223,7 +223,7 @@ public class ClientGenerator {
 
         StringBuilder cBuilder = new StringBuilder();
         cBuilder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = RestClientBuilder.newBuilder()");
-        cBuilder.append(".baseUrl(config.getTagUrl())");
+        cBuilder.append(".baseUrl(config.getUrl())");
         cBuilder.append(".register(JohnzonProvider.class)");
         cBuilder.append(".register(TribestreamApiGatewayExceptionMapper.class)");
         cBuilder.append(".build(" + resourceClientClass.getNameAsString() + ".class);");

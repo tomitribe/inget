@@ -97,15 +97,15 @@ public class ModelClassGenerator {
     }
 
     private static void handleField(String operation, CompilationUnit unit, ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String prefix) {
-        if (!f.getAnnotationByName("Model").isPresent()) {
-            FieldDeclaration newField = f.clone();
+        FieldDeclaration newField = f.clone();
+        if (!newField.getAnnotationByName("Model").isPresent() ||
+                !Utils.hasOperations(newField) || Utils.isOperationPresent(newField, operation)) {
             handleExpandableField(newField, prefix, unit);
             newClass.addMember(newField);
-        } else if (!Utils.hasOperations(f) || Utils.isOperationPresent(f, operation)) {
-            FieldDeclaration newField = f.clone();
-            handleExpandableField(newField, prefix, unit);
+        }
+
+        if (newField.getAnnotationByName("Model").isPresent()) {
             AnnotationExpr modelAnnotation = newField.getAnnotationByName("Model").get();
-            newClass.addMember(newField);
             newField.remove(modelAnnotation);
         }
     }

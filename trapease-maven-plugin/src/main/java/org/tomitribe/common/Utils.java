@@ -19,6 +19,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
@@ -533,7 +534,18 @@ public class Utils {
         }
     }
 
-    public static String getId(ClassOrInterfaceDeclaration rootClass) {
+    public static String getIdName(ClassOrInterfaceDeclaration rootClass) {
+        Optional<FieldDeclaration> idField = getId(rootClass);
+
+        if (idField.isPresent()) {
+            return idField.get().getVariables().stream().findFirst().get().getName().asString();
+        }
+
+        return "id";
+    }
+
+
+    public static Optional<FieldDeclaration> getId(ClassOrInterfaceDeclaration rootClass) {
         Optional<FieldDeclaration> idField = rootClass.getFields().stream().filter(f -> {
             Optional<AnnotationExpr> modelOptional = f.getAnnotationByName("Model");
             if (modelOptional.isPresent()) {
@@ -548,11 +560,7 @@ public class Utils {
             return false;
         }).findFirst();
 
-        if (idField.isPresent()) {
-            return idField.get().getVariables().get(0).getName().asString();
-        }
-
-        return "id";
+        return idField;
     }
 
     public static boolean isOperationPresent(final FieldDeclaration f, final String operation) {
@@ -685,6 +693,42 @@ public class Utils {
         }
         return null;
     }
+
+    public static String getFullQualifiedName(CompilationUnit unit) {
+        ClassOrInterfaceDeclaration clazz = Utils.getClazz(unit);
+        return unit.getPackageDeclaration().get().getNameAsString() + "." + clazz.getNameAsString();
+
+    }
+
+    public static boolean isWrapperOrPrimitiveOrDate(FieldDeclaration f) {
+        VariableDeclarator var = f.getVariables().stream().findFirst().get();
+
+        boolean isWrapper = false;
+
+        String type = var.getTypeAsString();
+        if (type.contains("<")) {
+            type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
+        }
+
+        try {
+            TrapeaseTypeSolver.get().solveType("java.lang." + type);
+            isWrapper = true;
+        } catch (RuntimeException e) {
+        }
+
+        boolean isDate = false;
+        try {
+            TrapeaseTypeSolver.get().solveType("java.util." + type);
+            isDate = true;
+        } catch (RuntimeException e) {
+        }
+
+        if (f.getCommonType().isPrimitiveType() || isWrapper || isDate) {
+            return true;
+        }
+        return false;
+    }
+
 
     public static void main(String[] args) {
         System.out.println(formatCamelCaseTo("LdapAccountSource", "/"));
