@@ -131,6 +131,7 @@ public class MainGenerator extends AbstractMojo {
             }
 
             if(generateCmd){
+                Configuration.CMD_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd";
                 getLog().info("Started Command Code Generation.");
                 CmdGenerator.execute();
                 getLog().info("Finished Command Code Generation.");

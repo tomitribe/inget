@@ -67,19 +67,14 @@ public class CmdGenerator {
     static final String READ_PREFIX = "Read";
     static final String DELETE_PREFIX = "Delete";
     static final String CMD_SUFFIX = "Cmd";
+    static final String BASE_OUTPUT_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd.base";
 
     public static void execute() throws IOException {
-        final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".cmd.base";
-        createBaseTrapeaseCmd(outputBasePackage);
-        CompilationUnit trapeaseCliUnit = createBaseTrapeaseCli(outputBasePackage);
+        createBaseTrapeaseCmd();
+        CompilationUnit trapeaseCliUnit = createBaseTrapeaseCli();
         ClassOrInterfaceDeclaration trapeaseCliClass = Utils.getClazz(trapeaseCliUnit);
-        MethodDeclaration commands = new MethodDeclaration();
-        commands.setName("commands");
-        commands.setPublic(true);
-        commands.setStatic(true);
-        commands.addParameter(new Parameter(new TypeParameter("Cli.CliBuilder<Runnable>"), "trapease"));
-        commands.setType("void");
-        trapeaseCliClass.addMember(commands);
+
+        MethodDeclaration commands = getCommandMethod(trapeaseCliClass);
 
         List<File> modelFiles = getModel();
         for (File rootClassFile : modelFiles) {
@@ -140,34 +135,43 @@ public class CmdGenerator {
 
             }
         }
-        Utils.save("TrapeaseCli.java", outputBasePackage, trapeaseCliUnit.toString());
+        Utils.save("TrapeaseCli.java", BASE_OUTPUT_PACKAGE, trapeaseCliUnit.toString());
     }
 
-    private static CompilationUnit createBaseTrapeaseCli(String outputBasePackage) throws IOException {
+    private static MethodDeclaration getCommandMethod(ClassOrInterfaceDeclaration trapeaseCliClass) {
+        MethodDeclaration commands = new MethodDeclaration();
+        commands.setName("commands");
+        commands.setPublic(true);
+        commands.setStatic(true);
+        commands.addParameter(new Parameter(new TypeParameter("Cli.CliBuilder<Runnable>"), "trapease"));
+        commands.setType("void");
+        trapeaseCliClass.addMember(commands);
+        return commands;
+    }
+
+    private static CompilationUnit createBaseTrapeaseCli() throws IOException {
         final CompilationUnit content = JavaParser.parse(TrapeaseTemplates.TRAPEASE_CLI);
-        content.setPackageDeclaration(outputBasePackage);
+        content.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
         Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
         return content;
     }
 
-    private static void createBaseTrapeaseCmd(String outputBasePackage) throws IOException {
+    private static void createBaseTrapeaseCmd() throws IOException {
         final CompilationUnit content = JavaParser.parse(TrapeaseTemplates.TRAPEASE_COMMAND);
-        content.setPackageDeclaration(outputBasePackage);
+        content.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
         Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
-        Utils.save("TrapeaseCommand.java", outputBasePackage, content.toString());
+        Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, content.toString());
     }
 
     static CompilationUnit createClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
                                        String rootClassName, String operation, String classPrefix) throws IOException {
-        final CompilationUnit newClassCompilationUnit = new CompilationUnit(Configuration.RESOURCE_PACKAGE + ".cmd");
+
+        final CompilationUnit newClassCompilationUnit = new CompilationUnit(Configuration.CMD_PACKAGE);
         final String className = classPrefix + rootClassName + CMD_SUFFIX;
         newClassCompilationUnit.addClass(className, Modifier.PUBLIC);
+
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(className).get();
-        NormalAnnotationExpr command = new NormalAnnotationExpr();
-        command.setName("Command");
-        command.addPair("name", "\"" + classPrefix.toLowerCase() + "\"");
-        newClass.addAnnotation(command);
-        newClassCompilationUnit.addImport(ImportManager.getImport("Command"));
+        addClassCommandAnnotation(classPrefix, newClassCompilationUnit, newClass);
 
         newClass.addExtendedType("TrapeaseCommand");
         newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".cmd.base.TrapeaseCommand");
@@ -177,15 +181,19 @@ public class CmdGenerator {
 
         handleExtendedClasses(rootClassUnit, rootClass, operation, newClass, classPrefix);
         Optional<FieldDeclaration> id = Utils.getId(rootClass);
-        if (operation == Operation.DELETE || operation == Operation.READ) {
-            if (id.isPresent()) {
-                handleId(id.get(), rootClassUnit, newClass);
-            }
-        } else if (operation == Operation.CREATE || operation == Operation.UPDATE) {
-            rootClass.getFields().stream().forEach(f -> {
-                writeFieldOrHandleReference(rootClassUnit, operation, classPrefix, newClass, f, null, null, null);
-            });
 
+        if (!id.isPresent()) {
+            throw new RuntimeException(rootClass.getNameAsString() + " must have one field annotated with '@Model(id = true).'");
+        }
+
+        // For DELETE and  UPDATE only ID is needed
+        if (operation == Operation.DELETE || operation == Operation.READ) {
+            handleId(id.get(), rootClassUnit, newClass);
+        } else if (operation == Operation.CREATE || operation == Operation.UPDATE) {
+            // Other fields must be written or flattened
+            rootClass.getFields().stream().forEach(f -> {
+                writeFieldOrFlattenClass(rootClassUnit, operation, classPrefix, newClass, f, null, null, null);
+            });
         }
         createRunMethod(rootClassUnit, newClassCompilationUnit, newClass, classPrefix, operation, id.get());
         Utils.addImports(rootClassUnit, newClassCompilationUnit);
@@ -213,7 +221,7 @@ public class CmdGenerator {
 
         if (operation == Operation.CREATE || operation == Operation.UPDATE) {
             builder.append("final " + className + " " + modelName + " = " + className + ".builder()");
-            extractBuilderNonExpandableFields(rootClassUnit, newClass, operation, builder);
+            extractBuilderNonFlattenedFields(newClass, builder);
 
             Map<String, List<FieldDeclaration>> fieldByClass = groupExpandableFieldsByClass(newClass);
 
@@ -262,6 +270,7 @@ public class CmdGenerator {
             String[] line = k.split("-");
             String clazz = line[1];
             List<String> classes = Arrays.asList(clazz.split("\\."));
+
             if (classes.size() > 1) {
                 String previous = null;
                 for (String c : classes) {
@@ -303,7 +312,6 @@ public class CmdGenerator {
         Optional<ImportDeclaration> builderClassImport = unit.getImports().stream().filter(i -> i.toString().contains(builderClazzName + ";")).findFirst();
         if (!builderClassImport.isPresent()) {
             unit.addImport(builderPkg + "." + builderClazzName);
-            System.out.println("332-"+ builderPkg + "." + builderClazzName);
         }
         StringBuilder builder = new StringBuilder();
         return builder.append("." + WordUtils.uncapitalize(builderClazzName) + "(" + builderClazzName + ".builder().build())").toString();
@@ -318,17 +326,12 @@ public class CmdGenerator {
                                 .asNormalAnnotationExpr()).get("value").getValue().toString().replace("\"", "")));
     }
 
-    private static void extractBuilderNonExpandableFields(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration newClass, String operation, StringBuilder builder) {
+    private static void extractBuilderNonFlattenedFields(ClassOrInterfaceDeclaration newClass, StringBuilder builder) {
         newClass.getFields().stream()
                 .filter(f -> !f.getAnnotationByName("TypeInfo").isPresent())
                 .forEach(f -> {
                     String varName = f.getVariables().stream().findFirst().get().getNameAsString();
-
-                    FieldDeclaration fieldId = Utils.getId(Utils.getClazz(rootClassUnit)).get();
-                    String idRootClass = fieldId.getVariables().stream().findFirst().get().getNameAsString();
-                    String newFieldId = f.getVariables().stream().findFirst().get().getNameAsString();
-                    boolean skipBuilder = operation == Operation.UPDATE && idRootClass.equals(newFieldId);
-                    if (!skipBuilder) {
+                    if (f.getAnnotationByName("Option").isPresent()) {
                         builder.append("." + varName + "(this." + varName + ")");
                     }
                 });
@@ -343,47 +346,18 @@ public class CmdGenerator {
         }).collect(Collectors.toList());
     }
 
-    private static void writeFieldOrHandleReference(CompilationUnit rootClassUnit, String operation, String classPrefix,
-                                                    ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName,
-                                                    String pkg, String clazzName) {
-        if (isWrapperOrPrimitiveOrDate(f)) {
+    private static void writeFieldOrFlattenClass(CompilationUnit rootClassUnit, String operation, String classPrefix,
+                                                 ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName,
+                                                 String pkg, String clazzName) {
+        if (Utils.isWrapperOrPrimitiveOrDate(f)) {
             writeField(operation, rootClassUnit, newClass, f, objectName, pkg, clazzName, false);
         } else {
-            handleReferenceFields(rootClassUnit, operation, classPrefix, newClass, f, objectName);
+            resolveFieldClass(rootClassUnit, operation, classPrefix, newClass, f, objectName);
         }
     }
 
-    private static boolean isWrapperOrPrimitiveOrDate(FieldDeclaration f) {
-        VariableDeclarator var = f.getVariables().stream().findFirst().get();
-
-        boolean isWrapper = false;
-
-        String type = var.getTypeAsString();
-        if (type.contains("<")) {
-            type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
-        }
-
-        try {
-            TrapeaseTypeSolver.get().solveType("java.lang." + type);
-            isWrapper = true;
-        } catch (RuntimeException e) {
-        }
-
-        boolean isDate = false;
-        try {
-            TrapeaseTypeSolver.get().solveType("java.util." + type);
-            isDate = true;
-        } catch (RuntimeException e) {
-        }
-
-        if (f.getCommonType().isPrimitiveType() || isWrapper || isDate) {
-            return true;
-        }
-        return false;
-    }
-
-    private static void handleReferenceFields(CompilationUnit rootClassUnit, String operation, String classPrefix,
-                                              ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName) {
+    private static void resolveFieldClass(CompilationUnit rootClassUnit, String operation, String classPrefix,
+                                          ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName) {
         VariableDeclarator type = f.getVariables().stream().findFirst().get();
         ResolvedReferenceTypeDeclaration solvedType = null;
         try {
@@ -399,11 +373,13 @@ public class CmdGenerator {
         if (solvedType.isEnum()) {
             writeField(operation, rootClassUnit, newClass, f, objectName, solvedType.getPackageName(), solvedType.getClassName(), true);
         } else {
-            expandClassFields(rootClassUnit, operation, classPrefix, newClass, type, solvedType, solvedType.getPackageName(), solvedType.getClassName());
+            flattenClassFields(rootClassUnit, operation, classPrefix, newClass, type, solvedType, solvedType.getPackageName(), solvedType.getClassName());
         }
     }
 
-    private static void expandClassFields(CompilationUnit rootClassUnit, String operation, String classPrefix, ClassOrInterfaceDeclaration newClass, VariableDeclarator type, ResolvedReferenceTypeDeclaration solvedType, String pkg, String clazzName) {
+    private static void flattenClassFields(CompilationUnit rootClassUnit, String operation, String classPrefix,
+                                           ClassOrInterfaceDeclaration newClass, VariableDeclarator type,
+                                           ResolvedReferenceTypeDeclaration solvedType, String pkg, String clazzName) {
         List<ResolvedFieldDeclaration> allFields = solvedType.getAllFields();
 
         List<FieldDeclaration> fieldsToBeExpanded = allFields.stream()
@@ -412,13 +388,13 @@ public class CmdGenerator {
                 .map(field -> ((JavaParserFieldDeclaration) field).getWrappedNode())
                 .collect(Collectors.toList());
 
-        for (FieldDeclaration expandedTobeExpanded : fieldsToBeExpanded) {
-            if (!expandedTobeExpanded.getAnnotationByName("Model").isPresent()
-                    || !Utils.hasOperations(expandedTobeExpanded) ||
-                    Utils.isOperationPresent(expandedTobeExpanded, operation)) {
-                writeFieldOrHandleReference(rootClassUnit, operation, classPrefix, newClass, expandedTobeExpanded, type.getNameAsString(), pkg, clazzName);
+        fieldsToBeExpanded.forEach(field -> {
+            if (!field.getAnnotationByName("Model").isPresent()
+                    || !Utils.hasOperations(field) ||
+                    Utils.isOperationPresent(field, operation)) {
+                writeFieldOrFlattenClass(rootClassUnit, operation, classPrefix, newClass, field, type.getNameAsString(), pkg, clazzName);
             }
-        }
+        });
     }
 
     private static void handleExtendedClasses(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass, String operation, ClassOrInterfaceDeclaration newClass, String prefix) throws IOException {
@@ -456,32 +432,32 @@ public class CmdGenerator {
             newClass.addMember(newField);
             newField.setAnnotations(new NodeList<>());
             newField.setFinal(false);
+
             if (objectCommandName != null) {
-                VariableDeclarator var = newField.getVariables().stream().findFirst().get();
-                var.setName(WordUtils.uncapitalize(objectCommandName) + WordUtils.capitalize(var.getNameAsString()));
-                NormalAnnotationExpr typeInfo = new NormalAnnotationExpr();
-                typeInfo.setName("TypeInfo");
-                typeInfo.addPair("value", "\"" + pkg + "-" + clazzName + "\"");
-                if (isEnum) {
-                    typeInfo.addPair("isEnum", "true");
-                }
-                newClassCompilationUnit.addImport("org.tomitribe.api.TypeInfo");
-                newField.addAnnotation(typeInfo);
+                VariableDeclarator varNewField = newField.getVariables().stream().findFirst().get();
+                // Change name to have the object before the field name
+                varNewField.setName(WordUtils.uncapitalize(objectCommandName) + WordUtils.capitalize(varNewField.getNameAsString()));
+                addTypeInfoAnnotation(pkg, clazzName, isEnum, newField, newClassCompilationUnit);
             }
+
             addCommand(f, newField, rootClassUnit, false);
             if (pkg != null && clazzName != null) {
                 newClassCompilationUnit.addImport(pkg + "." + clazzName);
-                System.out.println("489-" + pkg + "." + clazzName);
             }
-        } else {
-            //TODO: Refactor this
-            FieldDeclaration fieldId = Utils.getId(Utils.getClazz(rootClassUnit)).get();
-            String id = fieldId.getVariables().stream().findFirst().get().getNameAsString();
-            String newFieldId = newField.getVariables().stream().findFirst().get().getNameAsString();
-            if (id.equals(newFieldId)) {
-                handleId(newField, rootClassUnit, newClass);
-            }
+        } else if (Utils.isId(newField) && operation == Operation.UPDATE) {
+            handleId(newField, rootClassUnit, newClass);
         }
+    }
+
+    private static void addTypeInfoAnnotation(String pkg, String clazzName, boolean isEnum, FieldDeclaration newField, CompilationUnit newClassCompilationUnit) {
+        NormalAnnotationExpr typeInfo = new NormalAnnotationExpr();
+        typeInfo.setName("TypeInfo");
+        typeInfo.addPair("value", "\"" + pkg + "-" + clazzName + "\"");
+        if (isEnum) {
+            typeInfo.addPair("isEnum", "true");
+        }
+        newClassCompilationUnit.addImport("org.tomitribe.api.TypeInfo");
+        newField.addAnnotation(typeInfo);
     }
 
     private static void addCommand(FieldDeclaration oldField, FieldDeclaration field, CompilationUnit unit, boolean id) {
@@ -502,18 +478,6 @@ public class CmdGenerator {
         }
     }
 
-    private static boolean getRequired(FieldDeclaration field) {
-        Optional<AnnotationExpr> schema = field.getAnnotationByName("Schema");
-        if (schema.isPresent()) {
-            Map<String, MemberValuePair> pairs = Utils.pairs(schema.get().asNormalAnnotationExpr());
-            MemberValuePair valuePair = pairs.get("required");
-            if (valuePair != null) {
-                return valuePair.getValue().asBooleanLiteralExpr().getValue();
-            }
-        }
-        return false;
-    }
-
     public static void save(String className, CompilationUnit rootClassUnit, CompilationUnit classToBeSaved) throws IOException {
         if (classToBeSaved == null) {
             return;
@@ -526,4 +490,25 @@ public class CmdGenerator {
 
         Utils.save(className + ".java", Configuration.RESOURCE_PACKAGE + ".cmd", modified);
     }
+
+    private static boolean getRequired(FieldDeclaration field) {
+        Optional<AnnotationExpr> schema = field.getAnnotationByName("Schema");
+        if (schema.isPresent()) {
+            Map<String, MemberValuePair> pairs = Utils.pairs(schema.get().asNormalAnnotationExpr());
+            MemberValuePair valuePair = pairs.get("required");
+            if (valuePair != null) {
+                return valuePair.getValue().asBooleanLiteralExpr().getValue();
+            }
+        }
+        return false;
+    }
+
+    private static void addClassCommandAnnotation(String classPrefix, CompilationUnit newClassCompilationUnit, ClassOrInterfaceDeclaration newClass) {
+        NormalAnnotationExpr command = new NormalAnnotationExpr();
+        command.setName("Command");
+        command.addPair("name", "\"" + classPrefix.toLowerCase() + "\"");
+        newClass.addAnnotation(command);
+        newClassCompilationUnit.addImport(ImportManager.getImport("Command"));
+    }
+
 }

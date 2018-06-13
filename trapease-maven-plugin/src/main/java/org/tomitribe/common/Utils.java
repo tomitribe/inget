@@ -19,6 +19,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
@@ -698,6 +699,36 @@ public class Utils {
         return unit.getPackageDeclaration().get().getNameAsString() + "." + clazz.getNameAsString();
 
     }
+
+    public static boolean isWrapperOrPrimitiveOrDate(FieldDeclaration f) {
+        VariableDeclarator var = f.getVariables().stream().findFirst().get();
+
+        boolean isWrapper = false;
+
+        String type = var.getTypeAsString();
+        if (type.contains("<")) {
+            type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
+        }
+
+        try {
+            TrapeaseTypeSolver.get().solveType("java.lang." + type);
+            isWrapper = true;
+        } catch (RuntimeException e) {
+        }
+
+        boolean isDate = false;
+        try {
+            TrapeaseTypeSolver.get().solveType("java.util." + type);
+            isDate = true;
+        } catch (RuntimeException e) {
+        }
+
+        if (f.getCommonType().isPrimitiveType() || isWrapper || isDate) {
+            return true;
+        }
+        return false;
+    }
+
 
     public static void main(String[] args) {
         System.out.println(formatCamelCaseTo("LdapAccountSource", "/"));
