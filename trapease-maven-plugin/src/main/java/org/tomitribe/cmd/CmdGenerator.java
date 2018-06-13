@@ -88,9 +88,7 @@ public class CmdGenerator {
                 }
 
                 final String rootClassName = getRootName(getClazz(rootClassUnit));
-                if (!rootClassName.equalsIgnoreCase("ApiConnection")) {
-                    continue;
-                }
+
                 StringBuilder cli = new StringBuilder();
                 cli.append("trapease.withGroup(\"" + rootClassName.toLowerCase() + "\")");
                 cli.append(".withDescription(\"Manages " + rootClassName + ".\")");
@@ -494,10 +492,13 @@ public class CmdGenerator {
     private static boolean getRequired(FieldDeclaration field) {
         Optional<AnnotationExpr> schema = field.getAnnotationByName("Schema");
         if (schema.isPresent()) {
-            Map<String, MemberValuePair> pairs = Utils.pairs(schema.get().asNormalAnnotationExpr());
-            MemberValuePair valuePair = pairs.get("required");
-            if (valuePair != null) {
-                return valuePair.getValue().asBooleanLiteralExpr().getValue();
+            AnnotationExpr ann = schema.get();
+            if(ann.isNormalAnnotationExpr()){
+                Map<String, MemberValuePair> pairs = Utils.pairs(schema.get().asNormalAnnotationExpr());
+                MemberValuePair valuePair = pairs.get("required");
+                if (valuePair != null) {
+                    return valuePair.getValue().asBooleanLiteralExpr().getValue();
+                }
             }
         }
         return false;
