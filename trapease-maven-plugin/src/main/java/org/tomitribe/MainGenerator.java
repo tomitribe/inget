@@ -17,6 +17,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.tomitribe.client.ClientGenerator;
 import org.tomitribe.cmd.CmdGenerator;
 import org.tomitribe.common.Configuration;
@@ -124,6 +125,7 @@ public class MainGenerator extends AbstractMojo {
                         "resource package not found. Add a valid 'resourcePackage'.");
             }
 
+            FileUtils.mkdir(generatedSources);
             // Only after resolving the model and resource paths
             TrapeaseTypeSolver.init();
 
