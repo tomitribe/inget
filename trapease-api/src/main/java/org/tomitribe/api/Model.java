@@ -24,8 +24,6 @@ public @interface Model {
             LIST
     };
 
-    String[] commands() default {};
-
     enum Operation {
         READ, CREATE, UPDATE, DELETE, LIST
     }
