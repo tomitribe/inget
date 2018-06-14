@@ -21,7 +21,7 @@ Maven depedency
 </dependency>
 ```
 
-##Trapease Maven Plugin
+## Trapease Maven Plugin
 The Trapease Maven Plugin is used to generate all the code looking into your configured model. See below how each part of the generation work:
 
 ### Model
@@ -65,7 +65,7 @@ class AccountModel {
 }
 ``` 
 
-The Model suffix in AccountModel tells Trapease that it should look into this Java source and generate a Model from it. By default the following classes are generated:
+The ```Model``` suffix in AccountModel tells Trapease that it should look into this Java source and generate a Model from it. By default the following classes are generated:
 
 * Account - This is used for reading an Account.
 * CreateAccount - This is used for creating an Account.
