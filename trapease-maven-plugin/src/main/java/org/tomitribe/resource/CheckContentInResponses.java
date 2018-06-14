@@ -63,9 +63,14 @@ public class CheckContentInResponses {
                 if (Utils.has(responseAnnotation, "responseCode", "\"200\"")
                         || Utils.has(responseAnnotation, "responseCode", "\"201\"")) {
 
+
                     ClassOrInterfaceDeclaration modelClass = Utils.getClazz(modelClassUnit);
                     final String modelClassName = Utils.getRootName(modelClass);
-                    ;
+
+                    if (Utils.isMethodDelete(m, Utils.getIdName(modelClass))) {
+                        return;
+                    }
+
                     final String modelClassPackage = modelClassUnit.getPackageDeclaration().get().getName().toString();
 
                     final Map<String, MemberValuePair> pairs = Utils.pairs(responseAnnotation);

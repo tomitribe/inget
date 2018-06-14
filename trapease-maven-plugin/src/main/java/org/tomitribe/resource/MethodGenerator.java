@@ -124,17 +124,15 @@ public class MethodGenerator {
         });
     }
 
-    private static MethodDeclaration createBaseMethod(final boolean emptyReturn, final String methodName, final String verb, final boolean path,
+    private static MethodDeclaration createBaseMethod(final String methodName, final String verb, final boolean path,
                                                       ClassOrInterfaceDeclaration clazz, CompilationUnit unit, AnnotationExpr operation) {
         unit.addImport(getImport(verb));
 
         MethodDeclaration method = clazz.addMethod(methodName);
         method.removeBody();
 
-        if (!emptyReturn) {
-            method.setType("Response");
-            unit.addImport(getImport("Response"));
-        }
+        method.setType("Response");
+        unit.addImport(getImport("Response"));
 
         method.addMarkerAnnotation(verb);
         if (path) {
@@ -223,7 +221,7 @@ public class MethodGenerator {
         final String paramType = CREATE + rootClassName;
         final String description = "The new " + rootClassName;
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Create a new " + rootClassName + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, CREATE.toLowerCase(), "POST", false, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod(CREATE.toLowerCase(), "POST", false, clazz, unit, operation);
         createRequestBody(paramType, rootClassName.toLowerCase(), rootClassPackage, description, null, baseMethod, unit);
     }
 
@@ -241,7 +239,7 @@ public class MethodGenerator {
         final String idDescription = "The " + rootClassName + " " + ID_PARAM;
         final String idExample = Utils.getExample(getId(rootClass));
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Update " + rootClassName + " by " + ID_PARAM + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, UPDATE.toLowerCase(), "PUT", true, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod(UPDATE.toLowerCase(), "PUT", true, clazz, unit, operation);
         createParameter("String", ID_PARAM, true, null, idDescription, idExample, baseMethod, unit);
         final String requestBodyDescription = "The updated data for the existing " + rootClassName;
         createRequestBody(paramType, rootClassName.toLowerCase(), rootClassPackage, requestBodyDescription, null, baseMethod, unit);
@@ -267,7 +265,7 @@ public class MethodGenerator {
         final String description = "The " + rootClassName + " " + ID_PARAM;
         final String example = Utils.getExample(getId(rootClass));
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Read " + rootClassName + " by " + ID_PARAM + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, "read", "GET", true, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod("read", "GET", true, clazz, unit, operation);
         createParameter("String", ID_PARAM, true, null, description, example, baseMethod, unit);
 
     }
@@ -284,7 +282,7 @@ public class MethodGenerator {
         final String idDescription = "The " + rootClassName + " " + ID_PARAM;
         final String example = Utils.getExample(getId(rootClass));
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Delete by " + ID_PARAM + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(true, "delete", "DELETE", true, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod("delete", "DELETE", true, clazz, unit, operation);
         createParameter("String", ID_PARAM, true, null, idDescription, example, baseMethod, unit);
     }
 
@@ -297,7 +295,7 @@ public class MethodGenerator {
         final String idsDescription = "Set of " + rootClassName + " " + paramName + " to delete";
         final String idExample = Utils.getExample(rootClass.getFieldByName(ID_PARAM).get());
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Bulk delete " + Utils.toPlural(rootClassName).toLowerCase() + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, "bulkDelete", "DELETE", false, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod("bulkDelete", "DELETE", false, clazz, unit, operation);
         createParameter("List<String>", paramName, false, Arrays.asList("java.util.List"), idsDescription, idExample, baseMethod, unit);
     }
 
@@ -309,7 +307,7 @@ public class MethodGenerator {
         final String paramName = CREATE + rootClassName;
         final String description = "Set of " + paramName + " to create";
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Bulk create " + Utils.toPlural(rootClassName).toLowerCase() + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, "bulkCreate", "POST", false, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod("bulkCreate", "POST", false, clazz, unit, operation);
         final String rootClassImport = rootClassPackage + "." + paramName;
         final List<String> imports = Arrays.asList("java.util.List", rootClassImport);
         createParameter("List<" + paramName + ">", Strings.lcfirst(rootClassName + "s"), false, imports, description, null, baseMethod, unit);
@@ -322,7 +320,7 @@ public class MethodGenerator {
         final String paramName = UPDATE + rootClassName;
         final String description = "Set of " + paramName + " to update";
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Bulk update " + Utils.toPlural(rootClassName).toLowerCase() + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, "bulkUpdate", "PUT", false, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod("bulkUpdate", "PUT", false, clazz, unit, operation);
         final String rootClassImport = rootClassPackage + "." + paramName;
         final List<String> imports = Arrays.asList("java.util.List", rootClassImport);
         createParameter("List<" + paramName + ">", Strings.lcfirst(rootClassName + "s"), false, imports, description, null, baseMethod, unit);
@@ -339,7 +337,7 @@ public class MethodGenerator {
         }
 
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Read all " + Utils.toPlural(rootClassName) + ".\")");
-        final MethodDeclaration baseMethod = createBaseMethod(false, "readAll", "GET", false, clazz, unit, operation);
+        final MethodDeclaration baseMethod = createBaseMethod("readAll", "GET", false, clazz, unit, operation);
         rootClass.addMember(baseMethod);
     }
 }
