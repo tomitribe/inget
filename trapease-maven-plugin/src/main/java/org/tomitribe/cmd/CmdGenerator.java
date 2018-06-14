@@ -208,7 +208,10 @@ public class CmdGenerator {
         method.addParameter(new TypeParameter("ClientConfiguration"), "config");
         newClass.addMember(method);
 
-        Statement statement = JavaParser.parseStatement("final ResourceClient resourceClient = new ResourceClient(config);");
+        newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client." + Configuration.CLIENT_NAME);
+        Statement statement = JavaParser.parseStatement("final " +
+                                                        Configuration.CLIENT_NAME + " resourceClient = new " +
+                                                        Configuration.CLIENT_NAME + "(config);");
         method.getBody().get().asBlockStmt().addStatement(statement);
 
         String className = newClass.getNameAsString();

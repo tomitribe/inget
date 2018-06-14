@@ -1,10 +1,13 @@
 package org.tomitribe.cmd.base;
 
+import org.tomitribe.common.Configuration;
+
 public class TrapeaseTemplates {
 
-    public static String TRAPEASE_COMMAND = "import io.airlift.airline.Option;\n" +
+    public static String TRAPEASE_COMMAND =
+            "import io.airlift.airline.Option;\n" +
             "import io.airlift.airline.OptionType;\n" +
-            "import resources.client.base.ClientConfiguration;\n" +
+            "import " + Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration;\n" +
             "import java.net.URL;\n" +
             "\n" +
             "public abstract class TrapeaseCommand implements Runnable {\n" +
