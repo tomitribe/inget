@@ -131,7 +131,7 @@ This is not ready.
 
 ### Setup
 
-To setup Trapease, you just need to apply the Maven plugin to perform the code generation:
+To setup Trapease, you just need to add the trapease maven plugin as following :
 
 ```xml
 <plugin>
