@@ -106,9 +106,10 @@ The AccountsResource will only be created if operation ```LIST``` is enabled in 
 
 ### Client
 To generate the client you need to add the following in the plugin ```<configuration>```.
-resourcePackage - Make sure to add the package to your resources.
-generateClient - Add ```true``` to generate the client.
-clientName - Add a new name if you don't want the default to be ```ResourceClient```.
+
+* resourcePackage - Make sure to add the package to your resources.
+* generateClient - Add ```true``` to generate the client.
+* clientName - Add a new name if you don't want the default to be ```ResourceClient```.
 
 After the generation you will be able to call the resources directly using the generated client. See the following example:
 
