@@ -9,7 +9,6 @@
  *  U.S. Copyright Office.
  *
  */
-
 package org.tomitribe.cmd;
 
 import com.github.javaparser.JavaParser;
@@ -50,6 +49,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,12 +62,12 @@ import static org.tomitribe.common.Utils.getRootName;
 
 public class CmdGenerator {
 
-    static final String CREATE_PREFIX = "Create";
-    static final String UPDATE_PREFIX = "Update";
-    static final String READ_PREFIX = "Read";
-    static final String DELETE_PREFIX = "Delete";
-    static final String CMD_SUFFIX = "Cmd";
-    static final String BASE_OUTPUT_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd.base";
+    private static final String CREATE_PREFIX = "Create";
+    private static final String UPDATE_PREFIX = "Update";
+    private static final String READ_PREFIX = "Read";
+    private static final String DELETE_PREFIX = "Delete";
+    private static final String CMD_SUFFIX = "Cmd";
+    private static final String BASE_OUTPUT_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd.base";
 
     public static void execute() throws IOException {
         createBaseTrapeaseCmd();
@@ -90,41 +90,53 @@ public class CmdGenerator {
                 final String rootClassName = getRootName(getClazz(rootClassUnit));
 
                 StringBuilder cli = new StringBuilder();
-                cli.append("trapease.withGroup(\"" + rootClassName.toLowerCase() + "\")");
-                cli.append(".withDescription(\"Manages " + rootClassName + ".\")");
+                cli.append("trapease.withGroup(\"").append(rootClassName.toLowerCase()).append("\")");
+                cli.append(".withDescription(\"Manages ").append(rootClassName).append(".\")");
                 cli.append(".withDefaultCommand(Help.class)");
 
                 List<String> classOperations = getClassOperations(rootClass);
 
-                CompilationUnit createUnit = null;
-                CompilationUnit updateUnit = null;
+                CompilationUnit createUnit;
+                CompilationUnit updateUnit;
 
                 if (classOperations == null || classOperations.contains(Operation.CREATE)) {
                     createUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.CREATE, CREATE_PREFIX);
-                    cli.append(".withCommand(" + CREATE_PREFIX + rootClassName + CMD_SUFFIX + ".class)");
+                    cli.append(".withCommand(" + CREATE_PREFIX)
+                       .append(rootClassName)
+                       .append(CMD_SUFFIX)
+                       .append(".class)");
                     trapeaseCliUnit.addImport(Utils.getFullQualifiedName(createUnit));
-                    save(CREATE_PREFIX + rootClassName + CMD_SUFFIX, rootClassUnit, createUnit);
+                    save(CREATE_PREFIX + rootClassName + CMD_SUFFIX, createUnit);
                 }
 
                 if (classOperations == null || classOperations.contains(Operation.UPDATE)) {
                     updateUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.UPDATE, UPDATE_PREFIX);
-                    cli.append(".withCommand(" + UPDATE_PREFIX + rootClassName + CMD_SUFFIX + ".class)");
+                    cli.append(".withCommand(" + UPDATE_PREFIX)
+                       .append(rootClassName)
+                       .append(CMD_SUFFIX)
+                       .append(".class)");
                     trapeaseCliUnit.addImport(Utils.getFullQualifiedName(updateUnit));
-                    save(UPDATE_PREFIX + rootClassName + CMD_SUFFIX, rootClassUnit, updateUnit);
+                    save(UPDATE_PREFIX + rootClassName + CMD_SUFFIX, updateUnit);
                 }
 
                 if (classOperations == null || classOperations.contains(Operation.READ)) {
                     CompilationUnit readUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.READ, READ_PREFIX);
-                    cli.append(".withCommand(" + READ_PREFIX + rootClassName + CMD_SUFFIX + ".class)");
+                    cli.append(".withCommand(" + READ_PREFIX)
+                       .append(rootClassName)
+                       .append(CMD_SUFFIX)
+                       .append(".class)");
                     trapeaseCliUnit.addImport(Utils.getFullQualifiedName(readUnit));
-                    save(READ_PREFIX + rootClassName + CMD_SUFFIX, rootClassUnit, readUnit);
+                    save(READ_PREFIX + rootClassName + CMD_SUFFIX, readUnit);
                 }
 
                 if (classOperations == null || classOperations.contains(Operation.DELETE)) {
                     CompilationUnit deleteUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.DELETE, DELETE_PREFIX);
-                    cli.append(".withCommand(" + DELETE_PREFIX + rootClassName + CMD_SUFFIX + ".class)");
+                    cli.append(".withCommand(" + DELETE_PREFIX)
+                       .append(rootClassName)
+                       .append(CMD_SUFFIX)
+                       .append(".class)");
                     trapeaseCliUnit.addImport(Utils.getFullQualifiedName(deleteUnit));
-                    save(DELETE_PREFIX + rootClassName + CMD_SUFFIX, rootClassUnit, deleteUnit);
+                    save(DELETE_PREFIX + rootClassName + CMD_SUFFIX, deleteUnit);
                 }
 
                 cli.append(";");
@@ -161,8 +173,9 @@ public class CmdGenerator {
         Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, content.toString());
     }
 
-    static CompilationUnit createClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
-                                       String rootClassName, String operation, String classPrefix) throws IOException {
+    private static CompilationUnit createClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
+                                               String rootClassName, String operation, String classPrefix)
+            throws IOException {
 
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(Configuration.CMD_PACKAGE);
         final String className = classPrefix + rootClassName + CMD_SUFFIX;
@@ -177,7 +190,7 @@ public class CmdGenerator {
         Utils.addLicense(rootClassUnit, newClassCompilationUnit);
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
 
-        handleExtendedClasses(rootClassUnit, rootClass, operation, newClass, classPrefix);
+        handleExtendedClasses(rootClassUnit, rootClass, operation, newClass);
         Optional<FieldDeclaration> id = Utils.getId(rootClass);
 
         if (!id.isPresent()) {
@@ -185,13 +198,11 @@ public class CmdGenerator {
         }
 
         // For DELETE and  UPDATE only ID is needed
-        if (operation == Operation.DELETE || operation == Operation.READ) {
+        if (Objects.equals(operation, Operation.DELETE) || Objects.equals(operation, Operation.READ)) {
             handleId(id.get(), rootClassUnit, newClass);
-        } else if (operation == Operation.CREATE || operation == Operation.UPDATE) {
+        } else if (Objects.equals(operation, Operation.CREATE) || Objects.equals(operation, Operation.UPDATE)) {
             // Other fields must be written or flattened
-            rootClass.getFields().stream().forEach(f -> {
-                writeFieldOrFlattenClass(rootClassUnit, operation, classPrefix, newClass, f, null, null, null);
-            });
+            rootClass.getFields().forEach(f -> writeFieldOrFlattenClass(rootClassUnit, operation, classPrefix, newClass, f, null, null, null));
         }
         createRunMethod(rootClassUnit, newClassCompilationUnit, newClass, classPrefix, operation, id.get());
         Utils.addImports(rootClassUnit, newClassCompilationUnit);
@@ -220,15 +231,21 @@ public class CmdGenerator {
         StringBuilder builder = new StringBuilder();
         String modelName = Utils.getRootName(Utils.getClazz(rootClassUnit)).toLowerCase();
 
-        if (operation == Operation.CREATE || operation == Operation.UPDATE) {
-            builder.append("final " + className + " " + modelName + " = " + className + ".builder()");
+        if (Objects.equals(operation, Operation.CREATE) || Objects.equals(operation, Operation.UPDATE)) {
+            builder.append("final ")
+                   .append(className)
+                   .append(" ")
+                   .append(modelName)
+                   .append(" = ")
+                   .append(className)
+                   .append(".builder()");
             extractBuilderNonFlattenedFields(newClass, builder);
 
             Map<String, List<FieldDeclaration>> fieldByClass = groupExpandableFieldsByClass(newClass);
 
             HashMap<String, String> builderMap = new HashMap<>();
             List<String> sortedKeys = fieldByClass.keySet().stream().sorted().collect(Collectors.toList());
-            sortedKeys.stream().forEach(key -> {
+            sortedKeys.forEach(key -> {
                 String builderClazzName = key.substring(key.lastIndexOf("-") + 1, key.length());
                 String builderClazzPkg = key.substring(0, key.lastIndexOf("-"));
 
@@ -243,7 +260,7 @@ public class CmdGenerator {
                         }
                     });
                 }
-                appendToExistingBuilder(builderClazzPkg, builderClazzName, newClassCompilationUnit, builderMap, fieldByClass);
+                appendToExistingBuilder(builderClazzPkg, builderClazzName, builderMap, fieldByClass);
             });
             organizeBuilds(sortedKeys, builderMap, builder);
             builder.append(".build();");
@@ -294,7 +311,9 @@ public class CmdGenerator {
         });
     }
 
-    private static void appendToExistingBuilder(String builderClazzPkg, String builderClazzName, CompilationUnit newClassCompilationUnit, HashMap<String, String> builderMap, Map<String, List<FieldDeclaration>> fieldByClass) {
+    private static void appendToExistingBuilder(String builderClazzPkg, String builderClazzName,
+                                                HashMap<String, String> builderMap,
+                                                Map<String, List<FieldDeclaration>> fieldByClass) {
         String lastClass = builderClazzName;
         if (builderClazzName.contains(".")) {
             String[] classes = builderClazzName.split("\\.");
@@ -314,8 +333,7 @@ public class CmdGenerator {
         if (!builderClassImport.isPresent()) {
             unit.addImport(builderPkg + "." + builderClazzName);
         }
-        StringBuilder builder = new StringBuilder();
-        return builder.append("." + WordUtils.uncapitalize(builderClazzName) + "(" + builderClazzName + ".builder().build())").toString();
+        return ("." + WordUtils.uncapitalize(builderClazzName) + "(" + builderClazzName + ".builder().build())");
     }
 
     private static Map<String, List<FieldDeclaration>> groupExpandableFieldsByClass(ClassOrInterfaceDeclaration newClass) {
@@ -333,7 +351,7 @@ public class CmdGenerator {
                 .forEach(f -> {
                     String varName = f.getVariables().stream().findFirst().get().getNameAsString();
                     if (f.getAnnotationByName("Option").isPresent()) {
-                        builder.append("." + varName + "(this." + varName + ")");
+                        builder.append(".").append(varName).append("(this.").append(varName).append(")");
                     }
                 });
     }
@@ -342,8 +360,7 @@ public class CmdGenerator {
         return clazzFields.stream().map(f -> {
             String currentFieldName = f.getVariables().stream().findFirst().get().getNameAsString();
             String originalFieldName = currentFieldName.replace(WordUtils.uncapitalize(clazz), "");
-            String line = WordUtils.uncapitalize(originalFieldName) + "(" + currentFieldName + ")";
-            return line;
+            return WordUtils.uncapitalize(originalFieldName) + "(" + currentFieldName + ")";
         }).collect(Collectors.toList());
     }
 
@@ -360,7 +377,7 @@ public class CmdGenerator {
     private static void resolveFieldClass(CompilationUnit rootClassUnit, String operation, String classPrefix,
                                           ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String objectName) {
         VariableDeclarator type = f.getVariables().stream().findFirst().get();
-        ResolvedReferenceTypeDeclaration solvedType = null;
+        ResolvedReferenceTypeDeclaration solvedType;
         try {
             solvedType = JavaParserFacade.get(TrapeaseTypeSolver.get())
                     .getType(type)
@@ -398,16 +415,15 @@ public class CmdGenerator {
         });
     }
 
-    private static void handleExtendedClasses(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass, String operation, ClassOrInterfaceDeclaration newClass, String prefix) throws IOException {
+    private static void handleExtendedClasses(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
+                                              String operation, ClassOrInterfaceDeclaration newClass) throws IOException {
         NodeList<ClassOrInterfaceType> extendedTypes = rootClass.getExtendedTypes();
         while (extendedTypes.size() > 0) {
             for (ClassOrInterfaceType et : extendedTypes) {
                 ClassOrInterfaceDeclaration extendedClass =
                         Utils.getExtendedClass(rootClassUnit, et.getNameAsString());
 
-                extendedClass.getFields().forEach(f -> {
-                    writeField(operation, rootClassUnit, newClass, f, null, null, null, false);
-                });
+                extendedClass.getFields().forEach(f -> writeField(operation, rootClassUnit, newClass, f, null, null, null, false));
                 Utils.addImports(extendedClass.findCompilationUnit().get(), newClass.findCompilationUnit().get());
                 extendedTypes = extendedClass.getExtendedTypes();
             }
@@ -445,7 +461,7 @@ public class CmdGenerator {
             if (pkg != null && clazzName != null) {
                 newClassCompilationUnit.addImport(pkg + "." + clazzName);
             }
-        } else if (Utils.isId(newField) && operation == Operation.UPDATE) {
+        } else if (Utils.isId(newField) && Objects.equals(operation, Operation.UPDATE)) {
             handleId(newField, rootClassUnit, newClass);
         }
     }
@@ -469,7 +485,7 @@ public class CmdGenerator {
             field.addAnnotation(JavaParser.parseAnnotation("@Arguments(required = " + id + ")"));
             unit.addImport(ImportManager.getImport("Arguments"));
         } else {
-            annotation.append("@Option(name = {\"--" + Utils.formatCamelCaseTo(fieldName, "-") + "\"}");
+            annotation.append("@Option(name = {\"--").append(Utils.formatCamelCaseTo(fieldName, "-")).append("\"}");
             if (required) {
                 annotation.append(", required = true ");
             }
@@ -479,7 +495,7 @@ public class CmdGenerator {
         }
     }
 
-    public static void save(String className, CompilationUnit rootClassUnit, CompilationUnit classToBeSaved) throws IOException {
+    private static void save(String className, CompilationUnit classToBeSaved) throws IOException {
         if (classToBeSaved == null) {
             return;
         }
