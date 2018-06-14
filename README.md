@@ -75,7 +75,7 @@ The ```Model``` suffix in AccountModel tells Trapease that it should look into t
 * BulkAccountResult - This is used in the result of bulk operations.
 * AccountFilter - This is used to return the used filters in the search so the user knows.
 
-A field or a class without ```operation``` specified in the @Model will enable operations.
+A field or a class without ```operation``` specified in the @Model will enable all operations.
 
 ### Resources
 
