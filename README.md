@@ -7,7 +7,9 @@ even a command line client for your REST API.
 
 The Trapease API has the annotations that you will use to configure your model.
 Main annotations are:
-```@Model```  - Add model configuration.
+
+```@Model```  - Add model configuration
+
 ```@Resource```  - Add it if you want a resource to be generated from that model class.
 
 Maven depedency
