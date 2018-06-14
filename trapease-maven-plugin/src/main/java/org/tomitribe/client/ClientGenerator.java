@@ -55,13 +55,22 @@ public class ClientGenerator {
     public static void execute() throws IOException {
         createBaseClientClasses();
         CompilationUnit genericClientUnit = createResourceClient();
+        ClassOrInterfaceDeclaration genericClientClass = Utils.getClazz(genericClientUnit);
         genericClientUnit.addImport(ImportManager.getImport("RestClientBuilder"));
         genericClientUnit.addImport(ImportManager.getImport("JohnzonProvider"));
+
+        StringBuilder cBuilder = new StringBuilder();
+        cBuilder.append("RestClientBuilder builder = RestClientBuilder.newBuilder()");
+        cBuilder.append(".baseUrl(config.getUrl())");
+        cBuilder.append(".register(JohnzonProvider.class)");
+        cBuilder.append(".register(" + Configuration.CLIENT_NAME + "ExceptionMapper.class);");
+        ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
+        constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(cBuilder.toString()));
 
         List<File> relatedResources = Utils.getResources();
 
         for (File resource : relatedResources) {
-            generateClient(resource, Utils.getClazz(genericClientUnit));
+            generateClient(resource, genericClientClass);
         }
         save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
     }
@@ -220,14 +229,9 @@ public class ClientGenerator {
         genericClientClass.addMember(referenceMethod);
 
         ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
-
-        StringBuilder cBuilder = new StringBuilder();
-        cBuilder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = RestClientBuilder.newBuilder()");
-        cBuilder.append(".baseUrl(config.getUrl())");
-        cBuilder.append(".register(JohnzonProvider.class)");
-        cBuilder.append(".register(TribestreamApiGatewayExceptionMapper.class)");
-        cBuilder.append(".build(" + resourceClientClass.getNameAsString() + ".class);");
-        constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(cBuilder.toString()));
+        StringBuilder builder = new StringBuilder();
+        builder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = builder.build(" + resourceClientClass.getNameAsString() + ".class);");
+        constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(builder.toString()));
 
     }
 
