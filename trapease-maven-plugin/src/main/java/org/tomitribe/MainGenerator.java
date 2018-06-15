@@ -106,6 +106,23 @@ public class MainGenerator extends AbstractMojo {
             }
 
             if (generateCmd) {
+                boolean clientExistsInCurrentProject = new File(Configuration.getClientPath()).exists();
+                if (clientExistsInCurrentProject) {
+                    Configuration.CLIENT_SOURCES = Configuration.getClientPath();
+                } else {
+                    List<Artifact> clientDependencies = artifacts.stream()
+                                                                 .filter(a -> hasClient(a.getFile()))
+                                                                 .collect(Collectors.toList());
+
+                    if (clientDependencies.size() == 0) {
+                        throw new MojoExecutionException(
+                                "Clients were not found. Add the correct 'resourcePackage' for " +
+                                "this project or add a jar with the .java files for the resources.");
+                    }
+
+                    clientDependencies.forEach(m -> extractJavaFiles(m.getFile()));
+                    Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
+                }
                 Configuration.CMD_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd";
                 getLog().info("Started Command Code Generation.");
                 CmdGenerator.execute();
@@ -214,7 +231,24 @@ public class MainGenerator extends AbstractMojo {
         return false;
     }
 
-    public void extractJavaFiles(File jarFile) {
+    private boolean hasClient(File jarFile) {
+        try {
+            JarFile jar = new JarFile(jarFile);
+            Enumeration<? extends JarEntry> enumeration = jar.entries();
+            while (enumeration.hasMoreElements()) {
+                ZipEntry zipEntry = enumeration.nextElement();
+                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE) + File.separator + "client")) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private void extractJavaFiles(File jarFile) {
         try {
             JarFile jar = new JarFile(jarFile);
             Enumeration<? extends JarEntry> enumeration = jar.entries();
