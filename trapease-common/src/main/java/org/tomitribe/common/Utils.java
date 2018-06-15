@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -123,14 +122,6 @@ public class Utils {
         return getAnnotation(method, "Operation");
     }
 
-    public static NormalAnnotationExpr getApi(final MethodDeclaration method) {
-        return getAnnotation(method, "Api");
-    }
-
-    public static NormalAnnotationExpr getApiParam(final MethodDeclaration method) {
-        return getAnnotation(method, "ApiParam");
-    }
-
     public static NormalAnnotationExpr getAnnotation(final MethodDeclaration method, final String annotationName) {
         final Optional<AnnotationExpr> annotationByName = method.getAnnotationByName(annotationName);
 
@@ -144,18 +135,13 @@ public class Utils {
         return (NormalAnnotationExpr) annotationByName.orElse(null);
     }
 
-    // TODO move to a Nodes static class
-    public static <N extends Node> void sortNodes(final Supplier<NodeList<N>> listSupplier, final Function<N, String> classifier, final String... patterns) {
-        sortNodes(listSupplier.get(), classifier, patterns);
-    }
-
     public static <N extends Node> void sortNodes(final NodeList<N> ns, final Function<N, String> classifier, final String... patterns) {
         ns.sort(Comparator.comparing(annotation -> sort(classifier.apply(annotation),
                 patterns
         )));
     }
 
-    public static int sort(final String name, final String... patterns) {
+    private static int sort(final String name, final String... patterns) {
         for (int i = 0; i < patterns.length; i++) {
             if (name.matches(patterns[i])) return i;
         }
@@ -191,10 +177,7 @@ public class Utils {
 
         final NodeList<NormalAnnotationExpr> annotations = arrayValue(value.getValue());
 
-        final boolean has409 = annotations.stream()
-                .filter(has("responseCode", "\"" + code + "\""))
-                .findFirst()
-                .isPresent();
+        final boolean has409 = annotations.stream().anyMatch(has("responseCode", "\"" + code + "\""));
 
         if (!has409) {
             annotations.add((NormalAnnotationExpr) JavaParser.parseAnnotation(RESPONSE));
@@ -203,11 +186,9 @@ public class Utils {
         }
     }
 
-    public static ArrayInitializerExpr asArray(NodeList<? extends Expression> annotations) {
+    private static ArrayInitializerExpr asArray(NodeList<? extends Expression> annotations) {
         final NodeList<Expression> expressions = new NodeList<>();
-        for (final Expression annotation : annotations) {
-            expressions.add(annotation);
-        }
+        expressions.addAll(annotations);
         return new ArrayInitializerExpr(expressions);
     }
 
@@ -281,11 +262,7 @@ public class Utils {
     public static boolean isMethodReadAll(final MethodDeclaration method) {
         AnnotationExpr pathAnnotation = Utils.getAnnotation(method, "Path");
         boolean hasPathAnnotation = pathAnnotation != null;
-        boolean isMethodReadAll = Utils.isGET(method) && !hasPathAnnotation;
-        if (isMethodReadAll) {
-            return true;
-        }
-        return false;
+        return Utils.isGET(method) && !hasPathAnnotation;
     }
 
     public static boolean isMethodRead(final MethodDeclaration method, final String idField) {
@@ -308,11 +285,7 @@ public class Utils {
     public static boolean isMethodCreate(MethodDeclaration method) {
         AnnotationExpr pathAnnotation = Utils.getAnnotation(method, "Path");
         boolean hasPathAnnotation = pathAnnotation != null;
-        boolean isMethodCreate = Utils.isPOST(method) && !hasPathAnnotation && !isBulkMethod(method);
-        if (isMethodCreate) {
-            return true;
-        }
-        return false;
+        return Utils.isPOST(method) && !hasPathAnnotation && !isBulkMethod(method);
     }
 
     public static boolean isMethodUpdate(MethodDeclaration method, String idField) {
@@ -350,27 +323,15 @@ public class Utils {
     }
 
     public static boolean isMethodBulkCreate(MethodDeclaration method) {
-        boolean isMethodBulkCreate = Utils.isPOST(method) && Utils.isBulkMethod(method);
-        if (isMethodBulkCreate) {
-            return true;
-        }
-        return false;
+        return Utils.isPOST(method) && Utils.isBulkMethod(method);
     }
 
     public static boolean isMethodBulkDelete(MethodDeclaration method) {
-        boolean isMethodBulkDelete = Utils.isDELETE(method) && Utils.isBulkMethod(method);
-        if (isMethodBulkDelete) {
-            return true;
-        }
-        return false;
+        return Utils.isDELETE(method) && Utils.isBulkMethod(method);
     }
 
     public static boolean isMethodBulkUpdate(MethodDeclaration method) {
-        boolean isMethodBulkUpdate = Utils.isPUT(method) && Utils.isBulkMethod(method);
-        if (isMethodBulkUpdate) {
-            return true;
-        }
-        return false;
+        return Utils.isPUT(method) && Utils.isBulkMethod(method);
     }
 
     public static boolean isBulkMethod(MethodDeclaration m) {
@@ -378,7 +339,7 @@ public class Utils {
     }
 
     public static boolean hasMethodInClass(ClassOrInterfaceDeclaration clazz, Predicate<MethodDeclaration> methodPredicate) {
-        return clazz.getMethods().stream().filter(methodPredicate).findFirst().isPresent();
+        return clazz.getMethods().stream().anyMatch(methodPredicate);
     }
 
     public static ClassOrInterfaceDeclaration getExtendedClass(CompilationUnit classUnit, String extendedClassName) throws IOException {
@@ -398,29 +359,7 @@ public class Utils {
     public static ClassOrInterfaceDeclaration getClazz(String filePath) throws IOException {
         final String source = IO.slurp(new File(filePath));
         final CompilationUnit classUnit = JavaParser.parse(source);
-        ClassOrInterfaceDeclaration clazz = getClazz(classUnit);
-        return clazz;
-    }
-
-    public static List<NormalAnnotationExpr> getExtensions(NormalAnnotationExpr schema) {
-        Map<String, MemberValuePair> pairs = Utils.pairs(schema);
-
-        MemberValuePair extensions = pairs.get("extensions");
-
-        if (extensions != null) {
-            ArrayInitializerExpr arrayInitializerExpr = extensions.getValue().asArrayInitializerExpr();
-            NodeList<Expression> extValues = arrayInitializerExpr.getValues();
-            NormalAnnotationExpr extension = extValues.stream()
-                    .filter(e -> e.asNormalAnnotationExpr().toString().contains("generator"))
-                    .findFirst().get().asNormalAnnotationExpr();
-            MemberValuePair properties = Utils.pairs(extension).get("properties");
-            ArrayInitializerExpr propValues = properties.getValue().asArrayInitializerExpr();
-            NodeList<Expression> values = propValues.getValues();
-            return values.stream()
-                    .map(v -> v.asNormalAnnotationExpr())
-                    .collect(Collectors.toList());
-        }
-        return null;
+        return getClazz(classUnit);
     }
 
     public static String getExample(FieldDeclaration field) {
@@ -445,10 +384,7 @@ public class Utils {
 
         Map<String, MemberValuePair> pairs = Utils.pairs(modelAnnotation.get().asNormalAnnotationExpr());
         MemberValuePair id = pairs.get("id");
-        if (id == null) {
-            return false;
-        }
-        return id.getValue().asBooleanLiteralExpr().getValue();
+        return id != null && id.getValue().asBooleanLiteralExpr().getValue();
     }
 
     public static String getRootName(ClassOrInterfaceDeclaration rootClass) {
@@ -457,10 +393,7 @@ public class Utils {
 
     public static boolean isRootResource(final String rootClassName, final String resourceName) {
         final String expectedSingularResource = rootClassName + "Resource";
-        if (expectedSingularResource.equals(resourceName)) {
-            return true;
-        }
-        return false;
+        return expectedSingularResource.equals(resourceName);
     }
 
     public static List<String> getClassOperations(ClassOrInterfaceDeclaration rootClass) {
@@ -476,11 +409,11 @@ public class Utils {
                     if (value.isArrayInitializerExpr()) {
                         ArrayInitializerExpr values = value.asArrayInitializerExpr();
                         classOperations = values.getValues().stream()
-                                .map(a -> a.toString())
+                                .map(Node::toString)
                                 .collect(Collectors.toList());
                     } else {
                         FieldAccessExpr field = value.asFieldAccessExpr();
-                        classOperations = Arrays.asList(field.toString());
+                        classOperations = Collections.singletonList(field.toString());
                     }
                 }
             }
@@ -503,11 +436,9 @@ public class Utils {
                         f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
                 .collect(Collectors.toList());
 
-        List<File> resources = Stream.concat(src.stream(), generatedSources.stream())
-                .distinct()
-                .collect(Collectors.toList());
-
-        return resources;
+        return Stream.concat(src.stream(), generatedSources.stream())
+                     .distinct()
+                     .collect(Collectors.toList());
     }
 
     public static List<File> getResources() {
@@ -516,11 +447,9 @@ public class Utils {
         List<File> src = Files.collect(srcFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java");
         List<File> generatedSources = Files.collect(generatedFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java");
 
-        List<File> resources = Stream.concat(src.stream(), generatedSources.stream())
-                .distinct()
-                .collect(Collectors.toList());
-
-        return resources;
+        return Stream.concat(src.stream(), generatedSources.stream())
+                     .distinct()
+                     .collect(Collectors.toList());
     }
 
     public static List<File> getModel() {
@@ -545,7 +474,7 @@ public class Utils {
 
 
     public static Optional<FieldDeclaration> getId(ClassOrInterfaceDeclaration rootClass) {
-        Optional<FieldDeclaration> idField = rootClass.getFields().stream().filter(f -> {
+        return rootClass.getFields().stream().filter(f -> {
             Optional<AnnotationExpr> modelOptional = f.getAnnotationByName("Model");
             if (modelOptional.isPresent()) {
                 NormalAnnotationExpr modelAnnotation = modelOptional.get().asNormalAnnotationExpr();
@@ -558,8 +487,6 @@ public class Utils {
             }
             return false;
         }).findFirst();
-
-        return idField;
     }
 
     public static boolean isOperationPresent(final FieldDeclaration f, final String operation) {
@@ -576,7 +503,7 @@ public class Utils {
                 return valuePair.get().getValue().toString().contains(operation);
             } else {
                 NodeList<Expression> values = valuePair.get().getValue().asArrayInitializerExpr().getValues();
-                return values.stream().map(v -> v.toString()).filter(v -> v.equals(operation)).findFirst().isPresent();
+                return values.stream().map(Node::toString).anyMatch(v -> v.equals(operation));
             }
 
         }
@@ -589,7 +516,7 @@ public class Utils {
                 .filter(a -> a.getName().toString().equals("Model"))
                 .map(a -> a.asNormalAnnotationExpr().getPairs())
                 .flatMap(Collection::stream)
-                .filter(a -> a.getName().toString().equals("operation")).findFirst().isPresent();
+                .anyMatch(a -> a.getName().toString().equals("operation"));
     }
 
     public static String toPlural(String singular) {
@@ -637,9 +564,7 @@ public class Utils {
     }
 
     public static void addImports(CompilationUnit oldClassUnit, CompilationUnit newClassUnit) {
-        oldClassUnit.getImports().stream().forEach(i -> {
-            newClassUnit.addImport(i);
-        });
+        oldClassUnit.getImports().forEach(newClassUnit::addImport);
     }
 
     public static void save(String fileName, String pkg, String content) throws IOException {
@@ -650,7 +575,7 @@ public class Utils {
         }
         File newFile = new File(path.toAbsolutePath().toString(), fileName);
 
-        IO.copy(IO.read(content.toString()), newFile);
+        IO.copy(IO.read(content), newFile);
     }
 
     public static String transformPackageToPath(String pkg) {
@@ -659,17 +584,12 @@ public class Utils {
 
     public static void addLicense(CompilationUnit rootUnit, CompilationUnit newClassUnit) {
         Optional<Comment> license = rootUnit.getComment();
-        if (license.isPresent()) {
-            newClassUnit.setComment(license.get());
-        }
+        license.ifPresent(newClassUnit::setComment);
     }
 
     public static boolean isJaxRSAnnotation(AnnotationExpr a) {
         String importValue = ImportManager.getImport(a.getNameAsString());
-        if (importValue != null && importValue.contains("javax.ws.rs.")) {
-            return true;
-        }
-        return false;
+        return importValue != null && importValue.contains("javax.ws.rs.");
     }
 
     public static String getResponseImplementation(MethodDeclaration m) {
@@ -722,27 +642,6 @@ public class Utils {
         } catch (RuntimeException e) {
         }
 
-        if (f.getCommonType().isPrimitiveType() || isWrapper || isDate) {
-            return true;
-        }
-        return false;
+        return f.getCommonType().isPrimitiveType() || isWrapper || isDate;
     }
-
-
-    public static void main(String[] args) {
-        System.out.println(formatCamelCaseTo("LdapAccountSource", "/"));
-        System.out.println(formatCamelCaseTo("LdapAccountSource", " "));
-        System.out.println(toPlural("body"));
-        System.out.println(toPlural("key"));
-        System.out.println(toPlural("car"));
-        System.out.println(toPlural("ball"));
-        System.out.println(toPlural("entry"));
-        System.out.println(toPlural("journey"));
-        System.out.println(toPlural("tray"));
-        System.out.println(toPlural("country"));
-        System.out.println(toPlural("baby"));
-        System.out.println(toPlural("sky"));
-    }
-
-
 }
