@@ -13,7 +13,6 @@ package org.tomitribe.cmd;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -45,8 +44,6 @@ import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +51,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.groupingBy;
 import static org.tomitribe.common.Utils.getClassOperations;
 import static org.tomitribe.common.Utils.getClazz;
 import static org.tomitribe.common.Utils.getModel;
@@ -204,13 +200,19 @@ public class CmdGenerator {
             // Other fields must be written or flattened
             rootClass.getFields().forEach(f -> writeFieldOrFlattenClass(rootClassUnit, operation, classPrefix, newClass, f, null, null, null));
         }
-        createRunMethod(rootClassUnit, newClassCompilationUnit, newClass, classPrefix, operation, id.get());
+        createRunMethod(rootClassUnit, newClassCompilationUnit, rootClass, newClass, classPrefix, operation, id.get());
         Utils.addImports(rootClassUnit, newClassCompilationUnit);
 
         return newClassCompilationUnit;
     }
 
-    private static void createRunMethod(CompilationUnit rootClassUnit, CompilationUnit newClassCompilationUnit, ClassOrInterfaceDeclaration newClass, String classPrefix, String operation, FieldDeclaration id) {
+    private static void createRunMethod(CompilationUnit rootClassUnit,
+                                        CompilationUnit newClassCompilationUnit,
+                                        ClassOrInterfaceDeclaration rootClass,
+                                        ClassOrInterfaceDeclaration newClass,
+                                        String classPrefix,
+                                        String operation,
+                                        FieldDeclaration id) {
         MethodDeclaration method = new MethodDeclaration();
         method.setName("run");
         method.setPublic(true);
@@ -228,44 +230,11 @@ public class CmdGenerator {
         String className = newClass.getNameAsString();
         className = className.substring(0, className.indexOf("Cmd"));
         String action = classPrefix.toLowerCase();
-        StringBuilder builder = new StringBuilder();
         String modelName = Utils.getRootName(Utils.getClazz(rootClassUnit)).toLowerCase();
-
         if (Objects.equals(operation, Operation.CREATE) || Objects.equals(operation, Operation.UPDATE)) {
-            builder.append("final ")
-                   .append(className)
-                   .append(" ")
-                   .append(modelName)
-                   .append(" = ")
-                   .append(className)
-                   .append(".builder()");
-            extractBuilderNonFlattenedFields(newClass, builder);
 
-            Map<String, List<FieldDeclaration>> fieldByClass = groupExpandableFieldsByClass(newClass);
+            addBuilder(rootClassUnit, rootClass, method, className, modelName, operation);
 
-            HashMap<String, String> builderMap = new HashMap<>();
-            List<String> sortedKeys = fieldByClass.keySet().stream().sorted().collect(Collectors.toList());
-            sortedKeys.forEach(key -> {
-                String builderClazzName = key.substring(key.lastIndexOf("-") + 1, key.length());
-                String builderClazzPkg = key.substring(0, key.lastIndexOf("-"));
-
-                if (!builderClazzName.contains(".")) {
-                    builderMap.put(builderClazzName, createBuilderForClass(builderClazzName, builderClazzPkg, newClassCompilationUnit));
-                } else {
-                    List<String> classes = Arrays.asList(builderClazzName.split("\\."));
-                    classes.forEach(clazz -> {
-                        String builderValue = builderMap.get(clazz);
-                        if (builderValue == null) {
-                            builderMap.put(clazz, createBuilderForClass(clazz, builderClazzPkg, newClassCompilationUnit));
-                        }
-                    });
-                }
-                appendToExistingBuilder(builderClazzPkg, builderClazzName, builderMap, fieldByClass);
-            });
-            organizeBuilds(sortedKeys, builderMap, builder);
-            builder.append(".build();");
-            Statement builderStatement = JavaParser.parseStatement(builder.toString());
-            method.getBody().get().asBlockStmt().addStatement(builderStatement);
             Statement actionStatement = null;
             if (action.equals("create")) {
                 actionStatement = JavaParser.parseStatement("resourceClient." + modelName + "()." + action + "(" + modelName + ");");
@@ -283,85 +252,107 @@ public class CmdGenerator {
         newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.ResourceClient");
     }
 
-    private static void organizeBuilds(List<String> sortedKeys, HashMap<String, String> builderMap, StringBuilder builder) {
-        sortedKeys.forEach(k -> {
-            String[] line = k.split("-");
-            String clazz = line[1];
-            List<String> classes = Arrays.asList(clazz.split("\\."));
+    private static void addBuilder(final CompilationUnit rootClassUnit,
+                                   final ClassOrInterfaceDeclaration rootClass,
+                                   final MethodDeclaration method,
+                                   final String className,
+                                   final String modelName,
+                                   final String operation) {
 
-            if (classes.size() > 1) {
-                String previous = null;
-                for (String c : classes) {
-                    String builderValue = builderMap.get(c);
-                    if (builderValue.equals("added")) {
-                        previous = c;
-                        continue;
-                    }
+        final String builder = "final " +
+                               className +
+                               " " +
+                               modelName +
+                               " = " +
+                               className +
+                               ".builder()" +
+                               readBuilderFields(rootClassUnit, rootClass.getFields(), operation, "") +
+                               ".build();";
 
-                    if (previous == null) {
-                        previous = c;
-                        builder.insert(builder.length(), builderValue);
-                    } else {
-                        String startingPrevious = previous + ".builder()";
-                        builder.insert(builder.indexOf(startingPrevious) + startingPrevious.length(), builderValue);
-                    }
-                    builderMap.put(c, "added");
-                }
+        try {
+            method.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(builder));
+        } catch (Exception e) {
+
+        }
+    }
+
+    private static String readBuilderFields(final CompilationUnit rootClassUnit, final List<FieldDeclaration> fields,
+                                            final String operation, final String prefix) {
+        return fields
+                .stream()
+                .map(fieldDeclaration -> readFieldOrUnflattenClass(rootClassUnit, fieldDeclaration, operation, prefix))
+                .collect(Collectors.joining());
+    }
+
+    private static String readFieldOrUnflattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field,
+                                                    final String operation, final String prefix) {
+        if (Utils.isWrapperOrPrimitiveOrDate(field)) {
+            return readField(field, operation, prefix);
+        } else {
+            return unFlattenClass(rootClassUnit, field, operation, prefix);
+        }
+    }
+
+    private static String unFlattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field,
+                                         final String operation, final String prefix) {
+        final ResolvedReferenceTypeDeclaration resolvedType =
+                JavaParserFacade.get(TrapeaseTypeSolver.get())
+                                .getType(field.getVariables().get(0))
+                                .asReferenceType()
+                                .getTypeDeclaration();
+
+        if (resolvedType.isEnum()) {
+            return readField(field, operation, prefix);
+        } else {
+            final List<ResolvedFieldDeclaration> allFields = resolvedType.getAllFields();
+
+            final List<FieldDeclaration> fieldsToBeExpanded =
+                    allFields.stream()
+                             .filter(f -> f instanceof JavaParserFieldDeclaration)
+                             .filter(f -> ((JavaParserFieldDeclaration) f).getWrappedNode() != null)
+                             .map(f -> ((JavaParserFieldDeclaration) f).getWrappedNode())
+                             .filter(f -> !f.getAnnotationByName("Model").isPresent() ||
+                                          !Utils.hasOperations(f) ||
+                                          Utils.isOperationPresent(f, operation))
+                             .collect(Collectors.toList());
+
+            if (fieldsToBeExpanded.isEmpty()) {
+                return "";
             }
-        });
-    }
 
-    private static void appendToExistingBuilder(String builderClazzPkg, String builderClazzName,
-                                                HashMap<String, String> builderMap,
-                                                Map<String, List<FieldDeclaration>> fieldByClass) {
-        String lastClass = builderClazzName;
-        if (builderClazzName.contains(".")) {
-            String[] classes = builderClazzName.split("\\.");
-            lastClass = classes[classes.length - 1];
+            final String objectClass;
+            final int model = resolvedType.getName().indexOf("Model");
+            if (model == -1) {
+                objectClass = resolvedType.getName();
+                rootClassUnit.addImport(resolvedType.getQualifiedName());
+            } else {
+                objectClass = operation.contains("CREATE") ?
+                              "Create" + resolvedType.getName().substring(0, model) :
+                              "Update" + resolvedType.getName().substring(0, model);
+                rootClassUnit.addImport(resolvedType.getPackageName() + "." + objectClass);
+            }
+
+            return "." + field.getVariables().get(0) +
+                   "(" +
+                   objectClass +
+                   ".builder()" +
+                   readBuilderFields(rootClassUnit, fieldsToBeExpanded, operation, field.getVariables().get(0).getNameAsString()) +
+                   ".build()" +
+                   ")";
         }
-        List<FieldDeclaration> clazzFields = fieldByClass.get(builderClazzPkg + "-" + builderClazzName);
-        List<String> builderParams = extractBuilderParams(lastClass, clazzFields);
-        String params = "." + String.join(".", builderParams);
-        String builderValue = builderMap.get(lastClass);
-        StringBuilder builder = new StringBuilder(builderValue);
-        builder.insert(builderValue.indexOf("builder()") + "builder()".length(), params);
-        builderMap.put(lastClass, builder.toString());
     }
 
-    private static String createBuilderForClass(String builderClazzName, String builderPkg, CompilationUnit unit) {
-        Optional<ImportDeclaration> builderClassImport = unit.getImports().stream().filter(i -> i.toString().contains(builderClazzName + ";")).findFirst();
-        if (!builderClassImport.isPresent()) {
-            unit.addImport(builderPkg + "." + builderClazzName);
+    private static String readField(final FieldDeclaration field, final String operation, final String prefix) {
+        FieldDeclaration newField = field.clone();
+        if (!newField.getAnnotationByName("Model").isPresent() ||
+            !Utils.hasOperations(newField) ||
+            Utils.isOperationPresent(newField, operation)) {
+            final String fieldName = field.getVariables().get(0).getNameAsString();
+            final String readFieldName = "".equals(prefix) ? fieldName : prefix + WordUtils.capitalize(fieldName);
+            return "." + fieldName + "( " + readFieldName + ")";
         }
-        return ("." + WordUtils.uncapitalize(builderClazzName) + "(" + builderClazzName + ".builder().build())");
-    }
 
-    private static Map<String, List<FieldDeclaration>> groupExpandableFieldsByClass(ClassOrInterfaceDeclaration newClass) {
-        return newClass.getFields().stream()
-                .filter(f -> f.getAnnotationByName("TypeInfo").isPresent())
-                .filter(f -> Utils.pairs(f.getAnnotationByName("TypeInfo").get().asNormalAnnotationExpr()).get("isEnum") == null)
-                .collect(
-                        groupingBy(f -> Utils.pairs(f.getAnnotationByName("TypeInfo").get()
-                                .asNormalAnnotationExpr()).get("value").getValue().toString().replace("\"", "")));
-    }
-
-    private static void extractBuilderNonFlattenedFields(ClassOrInterfaceDeclaration newClass, StringBuilder builder) {
-        newClass.getFields().stream()
-                .filter(f -> !f.getAnnotationByName("TypeInfo").isPresent())
-                .forEach(f -> {
-                    String varName = f.getVariables().stream().findFirst().get().getNameAsString();
-                    if (f.getAnnotationByName("Option").isPresent()) {
-                        builder.append(".").append(varName).append("(this.").append(varName).append(")");
-                    }
-                });
-    }
-
-    private static List<String> extractBuilderParams(String clazz, List<FieldDeclaration> clazzFields) {
-        return clazzFields.stream().map(f -> {
-            String currentFieldName = f.getVariables().stream().findFirst().get().getNameAsString();
-            String originalFieldName = currentFieldName.replace(WordUtils.uncapitalize(clazz), "");
-            return WordUtils.uncapitalize(originalFieldName) + "(" + currentFieldName + ")";
-        }).collect(Collectors.toList());
+        return "";
     }
 
     private static void writeFieldOrFlattenClass(CompilationUnit rootClassUnit, String operation, String classPrefix,
