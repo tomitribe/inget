@@ -464,7 +464,7 @@ public class CmdGenerator {
         if (isEnum) {
             typeInfo.addPair("isEnum", "true");
         }
-        newClassCompilationUnit.addImport("org.org.tomitribe.api.TypeInfo");
+        newClassCompilationUnit.addImport("org.tomitribe.api.TypeInfo");
         newField.addAnnotation(typeInfo);
     }
 
