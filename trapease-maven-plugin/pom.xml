@@ -12,7 +12,6 @@
 
     <artifactId>trapease-maven-plugin</artifactId>
     <name>Trapease Maven Plugin</name>
-    <description>Translate Rest APIs with Ease</description>
     <packaging>maven-plugin</packaging>
 
     <prerequisites>
