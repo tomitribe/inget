@@ -10,7 +10,7 @@
  *
  */
 
-package org.tomitribe.model;
+package org.tomitribe.common;
 
 public class Operation {
 
