@@ -21,7 +21,7 @@ public class Configuration {
     public static String RESOURCE_SOURCES;
     public static String MODEL_SOURCES;
     public static String GENERATED_SOURCES;
-    public static String MAIN_CLASS = "org.tomitribe.model.ModelGenerator";
+    public static String MAIN_CLASS = "org.org.tomitribe.model.ModelGenerator";
     public static String MODEL_PACKAGE;
     public static String RESOURCE_PACKAGE ;
     public static String RESOURCE_SUFFIX;

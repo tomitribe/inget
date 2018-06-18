@@ -37,6 +37,8 @@
   <modules>
     <module>trapease-maven-plugin</module>
     <module>trapease-api</module>
+    <module>trapease-common</module>
+    <module>trapease-client-java</module>
   </modules>
 
 </project>

@@ -29,7 +29,6 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
-import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 
