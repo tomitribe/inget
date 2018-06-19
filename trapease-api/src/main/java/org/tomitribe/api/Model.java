@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 import static org.tomitribe.api.Model.Operation.CREATE;
 import static org.tomitribe.api.Model.Operation.DELETE;
-import static org.tomitribe.api.Model.Operation.LIST;
 import static org.tomitribe.api.Model.Operation.READ;
+import static org.tomitribe.api.Model.Operation.READ_ALL;
 import static org.tomitribe.api.Model.Operation.UPDATE;
 
 @Target({ElementType.FIELD, ElementType.TYPE})
@@ -21,11 +21,11 @@ public @interface Model {
             CREATE,
             UPDATE,
             DELETE,
-            LIST
+            READ_ALL
     };
 
     enum Operation {
-        READ, CREATE, UPDATE, DELETE, LIST
+        READ, CREATE, UPDATE, DELETE, READ_ALL, BULK_CREATE, BULK_UPDATE, BULK_DELETE
     }
 
     Filter filter() default @Filter;

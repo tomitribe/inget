@@ -18,5 +18,8 @@ public class Operation {
     public static final String UPDATE = "Model.Operation.UPDATE";
     public static final String READ = "Model.Operation.READ";
     public static final String DELETE = "Model.Operation.DELETE";
-    public static final String LIST = "Model.Operation.LIST";
+    public static final String READ_ALL = "Model.Operation.READ_ALL";
+    public static final String BULK_CREATE = "Model.Operation.BULK_CREATE";
+    public static final String BULK_UPDATE = "Model.Operation.BULK_UPDATE";
+    public static final String BULK_DELETE = "Model.Operation.BULK_DELETE";
 }
