@@ -18,6 +18,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import org.tomitribe.common.Operation;
 import org.tomitribe.common.Utils;
 
 import java.util.List;

@@ -20,9 +20,9 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.type.TypeParameter;
+import org.tomitribe.common.Operation;
 import org.tomitribe.common.Utils;
 import org.tomitribe.exception.GeneratorException;
-import org.tomitribe.model.Operation;
 import org.tomitribe.util.Strings;
 
 import java.util.Arrays;

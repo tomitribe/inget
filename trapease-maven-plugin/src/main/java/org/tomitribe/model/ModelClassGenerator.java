@@ -30,6 +30,7 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
+import org.tomitribe.common.Operation;
 import org.tomitribe.common.Utils;
 import org.tomitribe.model.base.ModelTemplates;
 import org.tomitribe.util.Join;

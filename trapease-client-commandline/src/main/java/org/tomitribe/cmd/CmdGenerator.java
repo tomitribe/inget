@@ -35,11 +35,11 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.TrapeaseTemplates;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
+import org.tomitribe.common.Operation;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.TrapeaseTypeSolver;
 import org.tomitribe.common.Utils;
-import org.tomitribe.model.Operation;
 import org.tomitribe.util.IO;
 
 import java.io.File;
