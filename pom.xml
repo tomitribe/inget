@@ -12,6 +12,13 @@
   <description>Translate Rest APIs with Ease</description>
   <packaging>pom</packaging>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.version>3.3.9</maven.version>
+  </properties>
+
   <repositories>
     <repository>
       <id>tomitribe-all</id>
@@ -40,6 +47,8 @@
     <module>trapease-common</module>
     <module>trapease-client-java</module>
     <module>trapease-client-commandline</module>
+    <module>trapease-model</module>
+    <module>trapease-resources</module>
   </modules>
 
 </project>
