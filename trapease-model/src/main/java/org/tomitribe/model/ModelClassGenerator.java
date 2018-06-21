@@ -167,7 +167,7 @@ public class ModelClassGenerator {
         newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.Page");
 
         rootClass.getFields().stream()
-                .filter(f -> Utils.isOperationPresent(f, Operation.LIST))
+                .filter(f -> Utils.isOperationPresent(f, Operation.READ_ALL))
                 .forEach(f -> {
                     FieldDeclaration newField = f.clone();
                     newField.remove(newField.getAnnotationByName("Model").get());

@@ -61,15 +61,15 @@ public class ModelGenerator {
                 CompilationUnit filterUnit = ModelClassGenerator.createFilterClass(rootClass, rootClassUnit, filterClassName);
                 save(filterClassName, rootClassUnit, filterUnit);
 
-                if (classOperations == null || classOperations.contains(Operation.LIST)) {
+                if (classOperations == null || classOperations.contains(Operation.READ_ALL)) {
                     String listClassName = Utils.toPlural(rootClassName);
                     CompilationUnit listUnit = ModelClassGenerator.createListClass(rootClassUnit, rootClass, rootClassName, filterUnit, summaryUnit, listClassName);
                     save(listClassName, rootClassUnit, listUnit);
-
-                    String bulkClassName = "Bulk" + rootClassName + "Result";
-                    CompilationUnit bulkUnit = ModelClassGenerator.createBulkClass(rootClassUnit, rootClassName, bulkClassName);
-                    save(bulkClassName, rootClassUnit, bulkUnit);
                 }
+
+                String bulkClassName = "Bulk" + rootClassName + "Result";
+                CompilationUnit bulkUnit = ModelClassGenerator.createBulkClass(rootClassUnit, rootClassName, bulkClassName);
+                save(bulkClassName, rootClassUnit, bulkUnit);
 
                 if (classOperations == null || classOperations.contains(Operation.CREATE)) {
                     createUnit = ModelClassGenerator.createClass(rootClassUnit, rootClass, rootClassName, Operation.CREATE, CREATE_PREFIX);

@@ -79,8 +79,20 @@ A field or a class without ```operation``` specified in the @Model will enable a
 
 ### Resources
 
-To generate REST endpoints Trapease looks for the ```@Resource``` annotation in the Model classes. It will generate two
-REST endpoint interfaces for each Model if configured to have all operations enabled by default. For example:
+To generate REST endpoints Trapease looks for the ```@Resource``` annotation in the Model classes. Also it relies in the operations of ```@Model``` to generated the methods based on the enabled operations.
+```java
+@Model(operation = {
+        Model.Operation.CREATE,
+        Model.Operation.UPDATE,
+        Model.Operation.DELETE,
+        Model.Operation.READ,
+        Model.Operation.READ_ALL,
+        Model.Operation.BULK_CREATE,
+        Model.Operation.BULK_UPDATE,
+        Model.Operation.BULK_DELETE})
+```
+
+The generator will generate two REST endpoint interfaces for each Model like the following:
 
 **AccountResource**
 
@@ -101,7 +113,6 @@ Path: /account
     Response bulkUpdate(final List<UpdateAccount> accounts);
     Response bulkDelete(final List<String> usernames);
 ```
-The AccountsResource will only be created if operation ```LIST``` is enabled in the @Model.
 
 
 ### Client
