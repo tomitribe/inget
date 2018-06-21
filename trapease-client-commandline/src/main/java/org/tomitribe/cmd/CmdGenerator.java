@@ -31,10 +31,12 @@ import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
+import com.github.javaparser.utils.Pair;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.TrapeaseTemplates;
@@ -161,7 +163,7 @@ public class CmdGenerator {
                                                  final CompilationUnit command,
                                                  final ClassOrInterfaceDeclaration commandClass) {
         for (final ResolvedFieldDeclaration field : parameter.getAllFields()) {
-            if (isTypePrimitiveOrValueOf(field.getType())) {
+            if (isTypePrimitiveOrValueOf(field.getType()) || isCollection(field.getType())) {
                 addOptionFlag(field.getType().describe(), field.getName(), command, commandClass);
             }
         }
@@ -210,6 +212,21 @@ public class CmdGenerator {
                                       .filter(method -> method.getName().equals("valueOf"))
                                       .anyMatch(method -> method.getNumberOfParams() == 1)) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isCollection(final ResolvedType type) {
+        if (type.isReferenceType()) {
+            final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
+
+            if (typeDeclaration.canBeAssignedTo(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
+                final List<ResolvedType> collectionParameters = type.asReferenceType().typeParametersValues();
+                if (collectionParameters.size() == 1) {
+                    return isTypePrimitiveOrValueOf(collectionParameters.get(0));
+                }
             }
         }
 
