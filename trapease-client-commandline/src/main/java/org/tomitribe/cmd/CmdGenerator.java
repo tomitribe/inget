@@ -31,12 +31,10 @@ import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
-import com.github.javaparser.utils.Pair;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.TrapeaseTemplates;
@@ -59,6 +57,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.tomitribe.common.Utils.formatCamelCaseTo;
+import static org.tomitribe.common.Utils.sortNodes;
 
 public class CmdGenerator {
     private static final String CMD_SUFFIX = "Cmd";
@@ -136,7 +135,7 @@ public class CmdGenerator {
                                         final CompilationUnit command,
                                         final ClassOrInterfaceDeclaration commandClass) {
         for (final Parameter parameter : parameters) {
-            if (isTypePrimitiveOrValueOf(parameter.getType().resolve())) {
+            if (isPrimitiveOrValueOf(parameter.getType().resolve())) {
                 addCommandFlag(parameter, command, commandClass);
             } else {
                 expandParameterReference(JavaParserFacade.get(TrapeaseTypeSolver.get())
@@ -163,8 +162,12 @@ public class CmdGenerator {
                                                  final CompilationUnit command,
                                                  final ClassOrInterfaceDeclaration commandClass) {
         for (final ResolvedFieldDeclaration field : parameter.getAllFields()) {
-            if (isTypePrimitiveOrValueOf(field.getType()) || isCollection(field.getType())) {
-                addOptionFlag(field.getType().describe(), field.getName(), command, commandClass);
+            final ResolvedType type = field.getType();
+
+            if (isPrimitiveOrValueOf(type) || isCollection(type)) {
+                addOptionFlag(type.describe(), field.getName(), command, commandClass);
+            } else if (type.isReferenceType()) {
+                //expandParameterReference(type.asReferenceType().getTypeDeclaration(), command, commandClass);
             }
         }
     }
@@ -195,7 +198,7 @@ public class CmdGenerator {
         flag.addAnnotation(argumentsAnnotation);
     }
 
-    private static boolean isTypePrimitiveOrValueOf(final ResolvedType type) {
+    private static boolean isPrimitiveOrValueOf(final ResolvedType type) {
         if (type.isPrimitive()) {
             return true;
         }
@@ -212,6 +215,11 @@ public class CmdGenerator {
                                       .filter(method -> method.getName().equals("valueOf"))
                                       .anyMatch(method -> method.getNumberOfParams() == 1)) {
                 return true;
+            } else if (typeDeclaration.isClass()) {
+                return typeDeclaration.asClass().getConstructors()
+                                      .stream()
+                                      .filter(constructor -> constructor.getNumberOfParams() == 1)
+                                      .anyMatch(constructor -> constructor.getParam(0).describeType().contains("String"));
             }
         }
 
@@ -225,7 +233,7 @@ public class CmdGenerator {
             if (typeDeclaration.canBeAssignedTo(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
                 final List<ResolvedType> collectionParameters = type.asReferenceType().typeParametersValues();
                 if (collectionParameters.size() == 1) {
-                    return isTypePrimitiveOrValueOf(collectionParameters.get(0));
+                    return isPrimitiveOrValueOf(collectionParameters.get(0));
                 }
             }
         }
