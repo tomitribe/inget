@@ -12,6 +12,7 @@
 package org.tomitribe.cmd;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -23,11 +24,15 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
+import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.types.ResolvedType;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
@@ -40,10 +45,10 @@ import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.TrapeaseTypeSolver;
 import org.tomitribe.common.Utils;
-import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,97 +56,184 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.tomitribe.common.Utils.getClassOperations;
-import static org.tomitribe.common.Utils.getClazz;
-import static org.tomitribe.common.Utils.getModel;
-import static org.tomitribe.common.Utils.getRootName;
+import static org.tomitribe.common.Utils.formatCamelCaseTo;
 
 public class CmdGenerator {
-
-    private static final String CREATE_PREFIX = "Create";
-    private static final String UPDATE_PREFIX = "Update";
-    private static final String READ_PREFIX = "Read";
-    private static final String DELETE_PREFIX = "Delete";
     private static final String CMD_SUFFIX = "Cmd";
     private static final String BASE_OUTPUT_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd.base";
 
     public static void execute() throws IOException {
-        createBaseTrapeaseCmd();
-        CompilationUnit trapeaseCliUnit = createBaseTrapeaseCli();
-        ClassOrInterfaceDeclaration trapeaseCliClass = Utils.getClazz(trapeaseCliUnit);
+        final List<File> sourceClients = Utils.getClient();
 
-        MethodDeclaration commands = getCommandMethod(trapeaseCliClass);
+        generateBaseCommand();
+        JavaParser.setStaticConfiguration(
+                new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(TrapeaseTypeSolver.get())));
 
-        List<File> modelFiles = getModel();
-        for (File rootClassFile : modelFiles) {
-            final String rootClassSource = IO.slurp(rootClassFile);
-            final CompilationUnit rootClassUnit = JavaParser.parse(rootClassSource);
-            ClassOrInterfaceDeclaration rootClass = getClazz(rootClassUnit);
+        for (final File sourceClient : sourceClients) {
+            final CompilationUnit client = JavaParser.parse(sourceClient);
+            final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
+            final String clientGroup =
+                    clientClass.getNameAsString().replace(Configuration.RESOURCE_SUFFIX + "Client", "");
+            final List<MethodDeclaration> methods = clientClass.getMethods();
+            methods.forEach(methodDeclaration -> generateCommandFromClientMethod(methodDeclaration, clientGroup));
+        }
+    }
 
-            if (rootClass != null) {
-                if (!rootClass.getAnnotationByName("Resource").isPresent()) {
-                    continue;
-                }
+    private static void generateBaseCommand() throws IOException {
+        final CompilationUnit baseCommand = JavaParser.parse(TrapeaseTemplates.TRAPEASE_COMMAND);
+        baseCommand.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
+        Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null);
+        Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCommand.toString());
+    }
 
-                final String rootClassName = getRootName(getClazz(rootClassUnit));
+    private static void generateCommandFromClientMethod(final MethodDeclaration clientMethod,
+                                                        final String clientGroup) {
+        final CompilationUnit command = new CompilationUnit(BASE_OUTPUT_PACKAGE);
 
-                StringBuilder cli = new StringBuilder();
-                cli.append("trapease.withGroup(\"").append(rootClassName.toLowerCase()).append("\")");
-                cli.append(".withDescription(\"Manages ").append(rootClassName).append(".\")");
-                cli.append(".withDefaultCommand(Help.class)");
+        final String commandClassName = clientGroup + WordUtils.capitalize(clientMethod.getNameAsString()) + "Cmd";
+        command.addClass(commandClassName);
 
-                List<String> classOperations = getClassOperations(rootClass);
+        final ClassOrInterfaceDeclaration commandClass =
+                command.getClassByName(commandClassName).orElseThrow(IllegalArgumentException::new);
+        addCommandAnnotation(clientMethod.getNameAsString(), command, commandClass);
+        extendCommandBaseClass(command, commandClass);
+        addCommandFlags(clientMethod.getParameters(), command, commandClass);
 
-                CompilationUnit createUnit;
-                CompilationUnit updateUnit;
+        saveCommand(commandClassName, command);
+    }
 
-                if (classOperations == null || classOperations.contains(Operation.CREATE)) {
-                    createUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.CREATE, CREATE_PREFIX);
-                    cli.append(".withCommand(" + CREATE_PREFIX)
-                       .append(rootClassName)
-                       .append(CMD_SUFFIX)
-                       .append(".class)");
-                    trapeaseCliUnit.addImport(Utils.getFullQualifiedName(createUnit));
-                    save(CREATE_PREFIX + rootClassName + CMD_SUFFIX, createUnit);
-                }
+    private static void addCommandAnnotation(final String clientMethodName,
+                                             final CompilationUnit command,
+                                             final ClassOrInterfaceDeclaration commandClass) {
+        final NormalAnnotationExpr commandAnnotation = new NormalAnnotationExpr();
+        commandAnnotation.setName("Command");
+        commandAnnotation.addPair("name", "\"" + formatCamelCaseTo(clientMethodName, "-") + "\"");
+        commandClass.addAnnotation(commandAnnotation);
+        command.addImport(ImportManager.getImport("Command"));
+    }
 
-                if (classOperations == null || classOperations.contains(Operation.UPDATE)) {
-                    updateUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.UPDATE, UPDATE_PREFIX);
-                    cli.append(".withCommand(" + UPDATE_PREFIX)
-                       .append(rootClassName)
-                       .append(CMD_SUFFIX)
-                       .append(".class)");
-                    trapeaseCliUnit.addImport(Utils.getFullQualifiedName(updateUnit));
-                    save(UPDATE_PREFIX + rootClassName + CMD_SUFFIX, updateUnit);
-                }
+    private static void extendCommandBaseClass(final CompilationUnit command,
+                                               final ClassOrInterfaceDeclaration commandClass) {
+        commandClass.addExtendedType("TrapeaseCommand");
+        command.addImport(BASE_OUTPUT_PACKAGE + ".TrapeaseCommand");
 
-                if (classOperations == null || classOperations.contains(Operation.READ)) {
-                    CompilationUnit readUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.READ, READ_PREFIX);
-                    cli.append(".withCommand(" + READ_PREFIX)
-                       .append(rootClassName)
-                       .append(CMD_SUFFIX)
-                       .append(".class)");
-                    trapeaseCliUnit.addImport(Utils.getFullQualifiedName(readUnit));
-                    save(READ_PREFIX + rootClassName + CMD_SUFFIX, readUnit);
-                }
+        final MethodDeclaration method = new MethodDeclaration();
+        method.setName("run");
+        method.setPublic(true);
+        method.setType(new VoidType());
+        method.addMarkerAnnotation(Override.class);
+        method.addParameter(
+                new Parameter(EnumSet.of(Modifier.FINAL),
+                              new TypeParameter("ClientConfiguration"),
+                              new SimpleName("clientConfiguration")));
+        commandClass.addMember(method);
+        command.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
+    }
 
-                if (classOperations == null || classOperations.contains(Operation.DELETE)) {
-                    CompilationUnit deleteUnit = createClass(rootClassUnit, rootClass, rootClassName, Operation.DELETE, DELETE_PREFIX);
-                    cli.append(".withCommand(" + DELETE_PREFIX)
-                       .append(rootClassName)
-                       .append(CMD_SUFFIX)
-                       .append(".class)");
-                    trapeaseCliUnit.addImport(Utils.getFullQualifiedName(deleteUnit));
-                    save(DELETE_PREFIX + rootClassName + CMD_SUFFIX, deleteUnit);
-                }
-
-                cli.append(";");
-                Statement commandGroup = JavaParser.parseStatement(cli.toString());
-                commands.getBody().get().addStatement(commandGroup);
-
+    private static void addCommandFlags(final NodeList<Parameter> parameters,
+                                        final CompilationUnit command,
+                                        final ClassOrInterfaceDeclaration commandClass) {
+        for (final Parameter parameter : parameters) {
+            if (isTypePrimitiveOrValueOf(parameter.getType().resolve())) {
+                addCommandFlag(parameter, command, commandClass);
+            } else {
+                expandParameterReference(JavaParserFacade.get(TrapeaseTypeSolver.get())
+                                                         .getType(parameter)
+                                                         .asReferenceType()
+                                                         .getTypeDeclaration(),
+                                         command,
+                                         commandClass);
             }
         }
-        Utils.save("TrapeaseCli.java", BASE_OUTPUT_PACKAGE, trapeaseCliUnit.toString());
+    }
+
+    private static void addCommandFlag(final Parameter parameter,
+                                       final CompilationUnit command,
+                                       final ClassOrInterfaceDeclaration commandClass) {
+        if (parameter.isAnnotationPresent("PathParam")) {
+            addArgumentFlag(parameter.getType().asString(), parameter.getNameAsString(), command, commandClass);
+        } else {
+            addOptionFlag(parameter.getType().asString(), parameter.getNameAsString(), command, commandClass);
+        }
+    }
+
+    private static void expandParameterReference(final ResolvedReferenceTypeDeclaration parameter,
+                                                 final CompilationUnit command,
+                                                 final ClassOrInterfaceDeclaration commandClass) {
+        for (final ResolvedFieldDeclaration field : parameter.getAllFields()) {
+            if (isTypePrimitiveOrValueOf(field.getType())) {
+                addOptionFlag(field.getType().describe(), field.getName(), command, commandClass);
+            }
+        }
+    }
+
+    private static void addArgumentFlag(final String type,
+                                        final String name,
+                                        final CompilationUnit command,
+                                        final ClassOrInterfaceDeclaration commandClass) {
+        final FieldDeclaration flag = commandClass.addField(type, name, Modifier.PRIVATE);
+
+        final NormalAnnotationExpr argumentsAnnotation = new NormalAnnotationExpr();
+        argumentsAnnotation.setName("Arguments");
+        argumentsAnnotation.addPair("required", "true");
+        command.addImport(ImportManager.getImport("Arguments"));
+        flag.addAnnotation(argumentsAnnotation);
+    }
+
+    private static void addOptionFlag(final String type,
+                                      final String name,
+                                      final CompilationUnit command,
+                                      final ClassOrInterfaceDeclaration commandClass) {
+        final FieldDeclaration flag = commandClass.addField(type, name, Modifier.PRIVATE);
+
+        final NormalAnnotationExpr argumentsAnnotation = new NormalAnnotationExpr();
+        argumentsAnnotation.setName("Option");
+        argumentsAnnotation.addPair("name", "\"--" + formatCamelCaseTo(name, "-") + "\"");
+        command.addImport(ImportManager.getImport("Option"));
+        flag.addAnnotation(argumentsAnnotation);
+    }
+
+    private static boolean isTypePrimitiveOrValueOf(final ResolvedType type) {
+        if (type.isPrimitive()) {
+            return true;
+        }
+
+        if (type.isReferenceType()) {
+            final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
+
+            if (typeDeclaration.isEnum()) {
+                return false; // TODO - change
+            } else if (typeDeclaration.getName().equals("String")) {
+                return true;
+            } else if (typeDeclaration.getDeclaredMethods()
+                                      .stream()
+                                      .filter(method -> method.getName().equals("valueOf"))
+                                      .anyMatch(method -> method.getNumberOfParams() == 1)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void saveCommand(final String className, final CompilationUnit classToBeSaved) {
+        if (classToBeSaved == null) {
+            return;
+        }
+
+        final String modified =
+                Stream.of(classToBeSaved.toString())
+                      .map(RemoveDuplicateImports::apply)
+                      .map(Reformat::apply)
+                      .map(RemoveUnusedImports::removeUnusedImports)
+                      .findFirst()
+                      .orElseThrow(IllegalStateException::new);
+
+        try {
+            Utils.save(className + ".java", Configuration.RESOURCE_PACKAGE + ".cmd", modified);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static MethodDeclaration getCommandMethod(ClassOrInterfaceDeclaration trapeaseCliClass) {
@@ -162,13 +254,6 @@ public class CmdGenerator {
         return content;
     }
 
-    private static void createBaseTrapeaseCmd() throws IOException {
-        final CompilationUnit content = JavaParser.parse(TrapeaseTemplates.TRAPEASE_COMMAND);
-        content.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
-        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
-        Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, content.toString());
-    }
-
     private static CompilationUnit createClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
                                                String rootClassName, String operation, String classPrefix)
             throws IOException {
@@ -178,7 +263,7 @@ public class CmdGenerator {
         newClassCompilationUnit.addClass(className, Modifier.PUBLIC);
 
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(className).get();
-        addClassCommandAnnotation(classPrefix, newClassCompilationUnit, newClass);
+        addCommandAnnotation(classPrefix, newClassCompilationUnit, newClass);
 
         newClass.addExtendedType("TrapeaseCommand");
         newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".cmd.base.TrapeaseCommand");
@@ -476,7 +561,7 @@ public class CmdGenerator {
             field.addAnnotation(JavaParser.parseAnnotation("@Arguments(required = " + id + ")"));
             unit.addImport(ImportManager.getImport("Arguments"));
         } else {
-            annotation.append("@Option(name = {\"--").append(Utils.formatCamelCaseTo(fieldName, "-")).append("\"}");
+            annotation.append("@Option(name = {\"--").append(formatCamelCaseTo(fieldName, "-")).append("\"}");
             if (required) {
                 annotation.append(", required = true ");
             }
@@ -484,19 +569,6 @@ public class CmdGenerator {
             field.addAnnotation(JavaParser.parseAnnotation(annotation.toString()));
             unit.addImport(ImportManager.getImport("Option"));
         }
-    }
-
-    private static void save(String className, CompilationUnit classToBeSaved) throws IOException {
-        if (classToBeSaved == null) {
-            return;
-        }
-        String modified = Stream.of(classToBeSaved.toString())
-                .map(RemoveDuplicateImports::apply)
-                .map(Reformat::apply)
-                .map(RemoveUnusedImports::removeUnusedImports)
-                .findFirst().get();
-
-        Utils.save(className + ".java", Configuration.RESOURCE_PACKAGE + ".cmd", modified);
     }
 
     private static boolean getRequired(FieldDeclaration field) {

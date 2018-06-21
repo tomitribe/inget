@@ -1,5 +1,6 @@
 package org.tomitribe.common;
 
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -17,7 +18,7 @@ public class TrapeaseTypeSolver {
         combinedTypeSolver.add(new JavaParserTypeSolver(new File(Configuration.GENERATED_SOURCES)));
     }
 
-    public static CombinedTypeSolver get() {
+    public static TypeSolver get() {
         return combinedTypeSolver;
     }
 }

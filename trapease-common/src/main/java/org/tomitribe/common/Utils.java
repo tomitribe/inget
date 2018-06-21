@@ -462,6 +462,11 @@ public class Utils {
         }
     }
 
+    public static List<File> getClient() {
+        final File srcFolder = new File(Configuration.CLIENT_SOURCES);
+        return Files.collect(srcFolder, "(.*)" + "Client" + "\\.java");
+    }
+
     public static String getIdName(ClassOrInterfaceDeclaration rootClass) {
         Optional<FieldDeclaration> idField = getId(rootClass);
 
@@ -471,7 +476,6 @@ public class Utils {
 
         return "id";
     }
-
 
     public static Optional<FieldDeclaration> getId(ClassOrInterfaceDeclaration rootClass) {
         return rootClass.getFields().stream().filter(f -> {
