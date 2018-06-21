@@ -28,6 +28,7 @@ import org.tomitribe.model.ModelGenerator;
 import org.tomitribe.resource.ResourcesGenerator;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
@@ -48,6 +49,12 @@ public class MainGenerator extends AbstractMojo {
 
     @Parameter(property = "generate.resource_package")
     private String resourcePackage;
+
+    @Parameter(property = "generate.generate_model", defaultValue = "false")
+    private Boolean generateModel;
+
+    @Parameter(property = "generate.generate_resources", defaultValue = "false")
+    private Boolean generateResources;
 
     @Parameter(property = "generate.generate_client", defaultValue = "false")
     private Boolean generateClient;
@@ -84,62 +91,21 @@ public class MainGenerator extends AbstractMojo {
         Configuration.TEMP_SOURCE = project.getBuild().getDirectory() + File.separator + "temp-source";
 
         try {
-            if (modelPackage != null) {
-                boolean existsInCurrentProject = new File(Configuration.getModelPath()).exists();
-                if (existsInCurrentProject) {
-                    getLog().info("Started Model Code Generation.");
-                    ModelGenerator.execute();
-                    getLog().info("Finished Model Code Generation.");
-                } else {
-                    List<Artifact> modelDependencies = artifacts.stream()
-                            .filter(a -> hasModel(a.getFile())).collect(Collectors.toList());
-
-                    if(modelDependencies.size() == 0){
-                        throw new MojoExecutionException(
-                                "Model was not found. Add the correct 'modelPackage' for " +
-                                "this project or add a jar with the .java files for the model.");
-                    }
-
-                    modelDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
-                    Configuration.MODEL_SOURCES = Configuration.TEMP_SOURCE;
-                }
-            }
-
-            if (resourcePackage != null) {
-                boolean resourcesExistsInCurrentProject = new File(Configuration.getResourcePath()).exists();
-                if (resourcesExistsInCurrentProject) {
-                    getLog().info("Started Resource Code Generation.");
-                    ResourcesGenerator.execute();
-                    getLog().info("Finished Resource Code Generation.");
-                } else {
-                    List<Artifact> resourceDependencies = artifacts.stream()
-                            .filter(a -> hasResources(a.getFile())).collect(Collectors.toList());
-
-                    if(resourceDependencies.size() == 0){
-                        throw new MojoExecutionException(
-                                "Resources were not found. Add the correct 'resourcePackage' for " +
-                                        "this project or add a jar with the .java files for the resources.");
-                    }
-
-                    resourceDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
-                    Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
-                }
-            } else {
-                getLog().info("Skipping Resources Code Generation, " +
-                        "resource package not found. Add a valid 'resourcePackage'.");
-            }
+            generateModel(artifacts);
+            generateResources(artifacts);
 
             FileUtils.mkdir(generatedSources);
             // Only after resolving the model and resource paths
             TrapeaseTypeSolver.init();
 
-            if(generateClient){
+            if (generateClient) {
+                requireResourcePackage();
                 getLog().info("Started Client Code Generation.");
                 ClientGenerator.execute();
                 getLog().info("Finished Client Code Generation.");
             }
 
-            if(generateCmd){
+            if (generateCmd) {
                 Configuration.CMD_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd";
                 getLog().info("Started Command Code Generation.");
                 CmdGenerator.execute();
@@ -147,6 +113,70 @@ public class MainGenerator extends AbstractMojo {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void generateResources(Set<Artifact> artifacts) throws IOException, MojoExecutionException {
+        if (generateResources) {
+            requireModelPackage();
+
+            if (resourcePackage == null) {
+                Configuration.RESOURCE_PACKAGE = "org.tomitribe.resources";
+            }
+
+            File resourceFolder = new File(Configuration.getResourcePath());
+            boolean resourcesExistsInCurrentProject = resourceFolder.exists();
+            if (!resourcesExistsInCurrentProject) {
+                resourceFolder.mkdirs();
+            }
+
+            getLog().info("Started Resource Code Generation.");
+            ResourcesGenerator.execute();
+            getLog().info("Finished Resource Code Generation.");
+
+        } else {
+            if (resourcePackage != null) {
+                List<Artifact> resourceDependencies = artifacts.stream()
+                        .filter(a -> hasResources(a.getFile())).collect(Collectors.toList());
+
+                if (resourceDependencies.size() == 0) {
+                    throw new MojoExecutionException(
+                            "Resources were not found. Add the correct 'resourcePackage' for " +
+                                    "this project or add a jar with the .java files for the resources.");
+                } else {
+                    resourceDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
+                    Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
+                }
+            }
+        }
+    }
+
+    private void generateModel(Set<Artifact> artifacts) throws IOException, MojoExecutionException {
+        if (generateModel) {
+            requireModelPackage();
+
+            File modelFolder = new File(Configuration.getModelPath());
+            boolean existsInCurrentProject = modelFolder.exists();
+            if (!existsInCurrentProject) {
+                modelFolder.mkdirs();
+            }
+            getLog().info("Started Model Code Generation.");
+            ModelGenerator.execute();
+            getLog().info("Finished Model Code Generation.");
+        } else {
+            if (modelPackage != null) {
+                List<Artifact> modelDependencies = artifacts.stream()
+                        .filter(a -> hasModel(a.getFile())).collect(Collectors.toList());
+
+                if (modelDependencies.size() == 0) {
+                    throw new MojoExecutionException(
+                            "Model was not found. Add the correct 'modelPackage' for " +
+                                    "this project or add a jar with the .java files for the model.");
+                }
+
+                modelDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
+                Configuration.MODEL_SOURCES = Configuration.TEMP_SOURCE;
+            }
         }
     }
 
@@ -209,6 +239,20 @@ public class MainGenerator extends AbstractMojo {
             jar.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void requireResourcePackage() throws MojoExecutionException {
+        if (resourcePackage == null) {
+            throw new MojoExecutionException(
+                    "The 'resourcePackage' configuration was not found.");
+        }
+    }
+
+    private void requireModelPackage() throws MojoExecutionException {
+        if (modelPackage == null) {
+            throw new MojoExecutionException(
+                    "The 'modelPackage' configuration was not found.");
         }
     }
 }
