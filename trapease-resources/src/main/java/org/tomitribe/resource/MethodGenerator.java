@@ -17,14 +17,19 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.type.TypeParameter;
+import org.tomitribe.common.Configuration;
+import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Operation;
 import org.tomitribe.common.Utils;
 import org.tomitribe.exception.GeneratorException;
 import org.tomitribe.util.Strings;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -338,6 +343,36 @@ public class MethodGenerator {
 
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Read all " + Utils.toPlural(rootClassName) + ".\")");
         final MethodDeclaration baseMethod = createBaseMethod("readAll", "GET", false, clazz, unit, operation);
+
+        String modelPackage = rootClass.findCompilationUnit().get().getPackageDeclaration().get().getNameAsString();
+
+        File filterFile = new File(
+                Configuration.MODEL_SOURCES + File.separator +
+                        Utils.transformPackageToPath(modelPackage) + File.separator + rootClassName + "Filter.java");
+
+        if (filterFile.exists()) {
+            ClassOrInterfaceDeclaration filterClazz = null;
+            CompilationUnit filterUnit = null;
+            try {
+                filterUnit = JavaParser.parse(filterFile);
+                filterClazz = Utils.getClazz(filterUnit);
+            } catch (FileNotFoundException e) {
+                //This will never happend as we are checking if it exists()
+            }
+
+            List<FieldDeclaration> filterClazzFields = filterClazz.getFields();
+
+            for (FieldDeclaration filterClazzField : filterClazzFields) {
+                VariableDeclarator var = filterClazzField.getVariables().stream().findFirst().get();
+                Parameter parameter = new Parameter(var.getType(), var.getNameAsString());
+                parameter.addSingleMemberAnnotation("QueryParam", "\"" + var.getNameAsString() + "\"");
+                baseMethod.addParameter(parameter);
+                unit.addImport(ImportManager.getImport("QueryParam"));
+            }
+
+            Utils.addImports(filterUnit, unit);
+        }
+
         rootClass.addMember(baseMethod);
     }
 }
