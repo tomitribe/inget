@@ -31,6 +31,7 @@ public class ImportManager {
         // JAX-RS
         importMap.put("Path", "javax.ws.rs.Path");
         importMap.put("PathParam", "javax.ws.rs.PathParam");
+        importMap.put("QueryParam", "javax.ws.rs.QueryParam");
         importMap.put("Response", "javax.ws.rs.core.Response");
         importMap.put("POST", "javax.ws.rs.POST");
         importMap.put("GET", "javax.ws.rs.GET");
