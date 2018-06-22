@@ -26,8 +26,6 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
@@ -101,7 +99,7 @@ public class CmdGenerator {
 
     private static String generateCommandFromClientMethod(final MethodDeclaration clientMethod,
                                                           final String clientGroup) {
-        final CompilationUnit command = new CompilationUnit(BASE_OUTPUT_PACKAGE);
+        final CompilationUnit command = new CompilationUnit(Configuration.RESOURCE_PACKAGE + ".cmd");
 
         final String commandClassName = clientGroup + WordUtils.capitalize(clientMethod.getNameAsString()) + "Cmd";
         command.addClass(commandClassName);
@@ -167,7 +165,7 @@ public class CmdGenerator {
                                        final CompilationUnit command,
                                        final ClassOrInterfaceDeclaration commandClass) {
         if (parameter.isAnnotationPresent("PathParam")) {
-            addArgumentFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
+            //addArgumentFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
         } else {
             addOptionFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
         }
@@ -200,6 +198,7 @@ public class CmdGenerator {
         final NormalAnnotationExpr argumentsAnnotation = new NormalAnnotationExpr();
         argumentsAnnotation.setName("Arguments");
         argumentsAnnotation.addPair("required", "true");
+        argumentsAnnotation.addPair("title", "\"" + name + "\"");
         command.addImport(ImportManager.getImport("Arguments"));
         flag.addAnnotation(argumentsAnnotation);
     }
@@ -278,6 +277,9 @@ public class CmdGenerator {
         final BlockStmt block = new BlockStmt();
         cli.addImport(ImportManager.getImport("Cli"));
         block.addStatement("final Cli.CliBuilder<Runnable> tag = Cli.builder(\"tag\");");
+        cli.addImport(ImportManager.getImport("Help"));
+        block.addStatement("tag.withDefaultCommand(Help.class);");
+        block.addStatement("tag.withCommand(Help.class);");
 
         main.setBody(block);
         cliClass.addMember(main);
@@ -285,13 +287,18 @@ public class CmdGenerator {
         for (final String group : groups.keySet()) {
             final StringBuilder groupCommand = new StringBuilder();
             groupCommand.append("tag.withGroup(\"").append(formatCamelCaseTo(group, "-")).append("\")");
+            groupCommand.append(".withDefaultCommand(Help.class)");
             final List<String> commands = groups.get(group);
             for (final String command : commands) {
                 groupCommand.append(".withCommand(").append(command).append(".class").append(")");
+                cli.addImport(Configuration.RESOURCE_PACKAGE + ".cmd." + command);
             }
             groupCommand.append(";");
             block.addStatement(groupCommand.toString());
         }
+
+        block.addStatement("final Cli<Runnable> cli = tag.build();");
+        block.addStatement("cli.parse(args).run();");
 
         Utils.save("TrapeaseCli.java", BASE_OUTPUT_PACKAGE, cli.toString());
     }
