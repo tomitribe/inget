@@ -35,6 +35,7 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.TrapeaseTemplates;
 import org.tomitribe.common.Configuration;
@@ -108,8 +109,8 @@ public class CmdGenerator {
         final ClassOrInterfaceDeclaration commandClass =
                 command.getClassByName(commandClassName).orElseThrow(IllegalArgumentException::new);
         addCommandAnnotation(clientMethod.getNameAsString(), command, commandClass);
-        addCommandFlags(clientMethod.getParameters(), command, commandClass);
         extendCommandBaseClass(command, commandClass);
+        addCommandFlags(clientMethod.getParameters(), command, commandClass);
 
         save(commandClassName, command);
 
@@ -169,13 +170,14 @@ public class CmdGenerator {
             if (isPrimitiveOrValueOf(option.getType().resolve())) {
                 addOptionFlag(option.getType().resolve().describe(), option.getNameAsString(), command, commandClass);
             } else {
-                expandParameterReference(JavaParserFacade.get(TrapeaseTypeSolver.get())
-                                                         .getType(option)
-                                                         .asReferenceType()
-                                                         .getTypeDeclaration(),
-                                         "",
-                                         command,
-                                         commandClass);
+                final ResolvedReferenceTypeDeclaration typeDeclaration =
+                        JavaParserFacade.get(TrapeaseTypeSolver.get())
+                                        .getType(option)
+                                        .asReferenceType()
+                                        .getTypeDeclaration();
+
+                expandParameterReference(typeDeclaration, "", command, commandClass);
+                //addBuilder(typeDeclaration, command, commandClass);
             }
         }
     }
@@ -234,6 +236,43 @@ public class CmdGenerator {
         argumentsAnnotation.addPair("name", "\"--" + formatCamelCaseTo(name, "-") + "\"");
         command.addImport(ImportManager.getImport("Option"));
         flag.addAnnotation(argumentsAnnotation);
+    }
+
+    private static void addBuilder(final ResolvedReferenceTypeDeclaration parameter,
+                                   final CompilationUnit command,
+                                   final ClassOrInterfaceDeclaration commandClass) {
+        final MethodDeclaration run =
+                commandClass.getMethodsByName("run").stream().findFirst().orElseThrow(IllegalArgumentException::new);
+
+        if (parameter.getDeclaredMethods().stream().anyMatch(method -> method.getName().contains("builder"))) {
+            final String builder = "final " +
+                                   parameter.getQualifiedName() +
+                                   " " +
+                                   StringUtils.uncapitalize(parameter.getName()) +
+                                   " = " +
+                                   parameter.getQualifiedName() +
+                                   ".builder()" +
+            //readBuilderFields(command, commandClass.getFields(), operation, "") +
+            ".build();";
+        }
+
+        /*
+        final String builder = "final " +
+                               type +
+                               " " +
+                               name +
+                               " = " +
+                               type +
+                               ".builder()" +
+                               //readBuilderFields(command, commandClass.getFields(), operation, "") +
+                               ".build();";
+
+        try {
+            run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(builder));
+        } catch (Exception e) {
+
+        }
+        */
     }
 
     private static boolean isPrimitiveOrValueOf(final ResolvedType type) {
@@ -340,30 +379,6 @@ public class CmdGenerator {
             Utils.save(className + ".java", Configuration.RESOURCE_PACKAGE + ".cmd", modified);
         } catch (final IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private static void addBuilder(final CompilationUnit rootClassUnit,
-                                   final ClassOrInterfaceDeclaration rootClass,
-                                   final MethodDeclaration method,
-                                   final String className,
-                                   final String modelName,
-                                   final String operation) {
-
-        final String builder = "final " +
-                               className +
-                               " " +
-                               modelName +
-                               " = " +
-                               className +
-                               ".builder()" +
-                               readBuilderFields(rootClassUnit, rootClass.getFields(), operation, "") +
-                               ".build();";
-
-        try {
-            method.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(builder));
-        } catch (Exception e) {
-
         }
     }
 
