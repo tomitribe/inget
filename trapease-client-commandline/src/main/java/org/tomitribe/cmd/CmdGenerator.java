@@ -47,6 +47,8 @@ import org.tomitribe.common.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +63,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.tomitribe.common.Utils.formatCamelCaseTo;
 
 public class CmdGenerator {
-    private static final String CMD_SUFFIX = "Cmd";
     private static final String BASE_OUTPUT_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd.base";
 
     public static void execute() throws IOException {
@@ -107,8 +108,8 @@ public class CmdGenerator {
         final ClassOrInterfaceDeclaration commandClass =
                 command.getClassByName(commandClassName).orElseThrow(IllegalArgumentException::new);
         addCommandAnnotation(clientMethod.getNameAsString(), command, commandClass);
-        extendCommandBaseClass(command, commandClass);
         addCommandFlags(clientMethod.getParameters(), command, commandClass);
+        extendCommandBaseClass(command, commandClass);
 
         save(commandClassName, command);
 
@@ -146,28 +147,36 @@ public class CmdGenerator {
     private static void addCommandFlags(final NodeList<Parameter> parameters,
                                         final CompilationUnit command,
                                         final ClassOrInterfaceDeclaration commandClass) {
-        for (final Parameter parameter : parameters) {
-            if (isPrimitiveOrValueOf(parameter.getType().resolve())) {
-                addCommandFlag(parameter, command, commandClass);
+
+        final List<Parameter> arguments =
+                parameters.stream()
+                          .filter(parameter -> parameter.isAnnotationPresent("PathParam"))
+                          .collect(Collectors.toList());
+
+        if (arguments.size() == 1) {
+            final Parameter parameter = arguments.get(0);
+            addArgumentFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
+        }
+
+        if (arguments.size() > 1) {
+            addArgumentsFlag(command, commandClass);
+        }
+
+        final List<Parameter> options = new ArrayList<>(parameters);
+        options.removeAll(arguments);
+
+        for (final Parameter option : options) {
+            if (isPrimitiveOrValueOf(option.getType().resolve())) {
+                addOptionFlag(option.getType().resolve().describe(), option.getNameAsString(), command, commandClass);
             } else {
                 expandParameterReference(JavaParserFacade.get(TrapeaseTypeSolver.get())
-                                                         .getType(parameter)
+                                                         .getType(option)
                                                          .asReferenceType()
                                                          .getTypeDeclaration(),
                                          "",
                                          command,
                                          commandClass);
             }
-        }
-    }
-
-    private static void addCommandFlag(final Parameter parameter,
-                                       final CompilationUnit command,
-                                       final ClassOrInterfaceDeclaration commandClass) {
-        if (parameter.isAnnotationPresent("PathParam")) {
-            //addArgumentFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
-        } else {
-            addOptionFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
         }
     }
 
@@ -198,7 +207,18 @@ public class CmdGenerator {
         final NormalAnnotationExpr argumentsAnnotation = new NormalAnnotationExpr();
         argumentsAnnotation.setName("Arguments");
         argumentsAnnotation.addPair("required", "true");
-        argumentsAnnotation.addPair("title", "\"" + name + "\"");
+        command.addImport(ImportManager.getImport("Arguments"));
+        flag.addAnnotation(argumentsAnnotation);
+    }
+
+    private static void addArgumentsFlag(final CompilationUnit command,
+                                         final ClassOrInterfaceDeclaration commandClass) {
+        final FieldDeclaration flag = commandClass.addField("Collection<String>", "arguments", Modifier.PRIVATE);
+        command.addImport(Collection.class);
+
+        final NormalAnnotationExpr argumentsAnnotation = new NormalAnnotationExpr();
+        argumentsAnnotation.setName("Arguments");
+        argumentsAnnotation.addPair("required", "true");
         command.addImport(ImportManager.getImport("Arguments"));
         flag.addAnnotation(argumentsAnnotation);
     }
