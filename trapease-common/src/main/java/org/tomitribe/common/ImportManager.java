@@ -51,6 +51,7 @@ public class ImportManager {
         importMap.put("Option", "io.airlift.airline.Option");
         importMap.put("Command", "io.airlift.airline.Command");
         importMap.put("Arguments", "io.airlift.airline.Arguments");
+        importMap.put("Cli", "io.airlift.airline.Cli");
     }
 
     public static String getImport(String className) {

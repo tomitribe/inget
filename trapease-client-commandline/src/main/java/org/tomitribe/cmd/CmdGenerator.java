@@ -25,6 +25,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
@@ -49,6 +50,7 @@ import org.tomitribe.common.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,14 +73,23 @@ public class CmdGenerator {
         JavaParser.setStaticConfiguration(
                 new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(TrapeaseTypeSolver.get())));
 
+        final Map<String, List<String>> groups = new HashMap<>();
         for (final File sourceClient : sourceClients) {
             final CompilationUnit client = JavaParser.parse(sourceClient);
             final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
             final String clientGroup =
                     clientClass.getNameAsString().replace(Configuration.RESOURCE_SUFFIX + "Client", "");
+
             final List<MethodDeclaration> methods = clientClass.getMethods();
-            methods.forEach(methodDeclaration -> generateCommandFromClientMethod(methodDeclaration, clientGroup));
+            final List<String> commands =
+                    methods.stream()
+                           .map(methodDeclaration -> generateCommandFromClientMethod(methodDeclaration, clientGroup))
+                           .collect(Collectors.toList());
+
+            groups.put(clientGroup, commands);
         }
+
+        generateCli(groups);
     }
 
     private static void generateBaseCommand() throws IOException {
@@ -88,8 +99,8 @@ public class CmdGenerator {
         Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCommand.toString());
     }
 
-    private static void generateCommandFromClientMethod(final MethodDeclaration clientMethod,
-                                                        final String clientGroup) {
+    private static String generateCommandFromClientMethod(final MethodDeclaration clientMethod,
+                                                          final String clientGroup) {
         final CompilationUnit command = new CompilationUnit(BASE_OUTPUT_PACKAGE);
 
         final String commandClassName = clientGroup + WordUtils.capitalize(clientMethod.getNameAsString()) + "Cmd";
@@ -101,7 +112,9 @@ public class CmdGenerator {
         extendCommandBaseClass(command, commandClass);
         addCommandFlags(clientMethod.getParameters(), command, commandClass);
 
-        saveCommand(commandClassName, command);
+        save(commandClassName, command);
+
+        return commandClassName;
     }
 
     private static void addCommandAnnotation(final String clientMethodName,
@@ -232,8 +245,6 @@ public class CmdGenerator {
         return false;
     }
 
-
-
     private static boolean isCollection(final ResolvedType type) {
         if (type.isReferenceType()) {
             final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
@@ -249,7 +260,43 @@ public class CmdGenerator {
         return false;
     }
 
-    private static void saveCommand(final String className, final CompilationUnit classToBeSaved) {
+    private static void generateCli(final Map<String, List<String>> groups) throws IOException {
+        final CompilationUnit cli = new CompilationUnit(BASE_OUTPUT_PACKAGE);
+        cli.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
+        cli.addClass("TrapeaseCli");
+
+        final ClassOrInterfaceDeclaration cliClass =
+                cli.getClassByName("TrapeaseCli").orElseThrow(IllegalArgumentException::new);
+
+        final MethodDeclaration main = new MethodDeclaration();
+        main.setPublic(true);
+        main.setStatic(true);
+        main.setType("void");
+        main.setName("main");
+        main.addAndGetParameter(String.class, "args").setVarArgs(true);
+
+        final BlockStmt block = new BlockStmt();
+        cli.addImport(ImportManager.getImport("Cli"));
+        block.addStatement("final Cli.CliBuilder<Runnable> tag = Cli.builder(\"tag\");");
+
+        main.setBody(block);
+        cliClass.addMember(main);
+
+        for (final String group : groups.keySet()) {
+            final StringBuilder groupCommand = new StringBuilder();
+            groupCommand.append("tag.withGroup(\"").append(formatCamelCaseTo(group, "-")).append("\")");
+            final List<String> commands = groups.get(group);
+            for (final String command : commands) {
+                groupCommand.append(".withCommand(").append(command).append(".class").append(")");
+            }
+            groupCommand.append(";");
+            block.addStatement(groupCommand.toString());
+        }
+
+        Utils.save("TrapeaseCli.java", BASE_OUTPUT_PACKAGE, cli.toString());
+    }
+
+    private static void save(final String className, final CompilationUnit classToBeSaved) {
         if (classToBeSaved == null) {
             return;
         }
