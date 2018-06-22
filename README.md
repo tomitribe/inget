@@ -152,6 +152,8 @@ To setup Trapease, you just need to add the trapease maven plugin as following :
 <configuration>
   <modelPackage>yourpackage.model</modelPackage>
   <resourcePackage>yourpackage.rest</resourcePackage>
+  <!--<generateModel>true</generateModel> -->
+  <!--<generateResources>true</generateResources> -->
   <!--<generateClient>true</generateClient> -->
   <!--<modelSuffix>Entity</modelSuffix>-->
   <!--<resourceSuffix>Service</resourceSuffix>-->
