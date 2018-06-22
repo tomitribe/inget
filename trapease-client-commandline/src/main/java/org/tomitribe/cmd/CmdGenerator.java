@@ -316,107 +316,6 @@ public class CmdGenerator {
         }
     }
 
-    private static MethodDeclaration getCommandMethod(ClassOrInterfaceDeclaration trapeaseCliClass) {
-        MethodDeclaration commands = new MethodDeclaration();
-        commands.setName("commands");
-        commands.setPublic(true);
-        commands.setStatic(true);
-        commands.addParameter(new Parameter(new TypeParameter("Cli.CliBuilder<Runnable>"), "trapease"));
-        commands.setType("void");
-        trapeaseCliClass.addMember(commands);
-        return commands;
-    }
-
-    private static CompilationUnit createBaseTrapeaseCli() throws IOException {
-        final CompilationUnit content = JavaParser.parse(TrapeaseTemplates.TRAPEASE_CLI);
-        content.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
-        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
-        return content;
-    }
-
-    private static CompilationUnit createClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
-                                               String rootClassName, String operation, String classPrefix)
-            throws IOException {
-
-        final CompilationUnit newClassCompilationUnit = new CompilationUnit(Configuration.CMD_PACKAGE);
-        final String className = classPrefix + rootClassName + CMD_SUFFIX;
-        newClassCompilationUnit.addClass(className, Modifier.PUBLIC);
-
-        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(className).get();
-        addCommandAnnotation(classPrefix, newClassCompilationUnit, newClass);
-
-        newClass.addExtendedType("TrapeaseCommand");
-        newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".cmd.base.TrapeaseCommand");
-
-        Utils.addLicense(rootClassUnit, newClassCompilationUnit);
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
-
-        handleExtendedClasses(rootClassUnit, rootClass, operation, newClass);
-        Optional<FieldDeclaration> id = Utils.getId(rootClass);
-
-        if (!id.isPresent()) {
-            throw new RuntimeException(rootClass.getNameAsString() + " must have one field annotated with '@Model(id = true).'");
-        }
-
-        // For DELETE and  UPDATE only ID is needed
-        if (Objects.equals(operation, Operation.DELETE) || Objects.equals(operation, Operation.READ)) {
-            handleId(id.get(), rootClassUnit, newClass);
-        } else if (Objects.equals(operation, Operation.CREATE) || Objects.equals(operation, Operation.UPDATE)) {
-            // Other fields must be written or flattened
-            rootClass.getFields().forEach(f -> writeFieldOrFlattenClass(rootClassUnit, operation, classPrefix, newClass, f, null, null, null));
-        }
-        createRunMethod(rootClassUnit, newClassCompilationUnit, rootClass, newClass, classPrefix, operation, id.get());
-        Utils.addImports(rootClassUnit, newClassCompilationUnit);
-
-        return newClassCompilationUnit;
-    }
-
-    private static void createRunMethod(CompilationUnit rootClassUnit,
-                                        CompilationUnit newClassCompilationUnit,
-                                        ClassOrInterfaceDeclaration rootClass,
-                                        ClassOrInterfaceDeclaration newClass,
-                                        String classPrefix,
-                                        String operation,
-                                        FieldDeclaration id) {
-        MethodDeclaration method = new MethodDeclaration();
-        method.setName("run");
-        method.setPublic(true);
-        method.setType(new TypeParameter("void"));
-        method.addMarkerAnnotation("Override");
-        method.addParameter(new TypeParameter("ClientConfiguration"), "config");
-        newClass.addMember(method);
-
-        newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client." + Configuration.CLIENT_NAME);
-        Statement statement = JavaParser.parseStatement("final " +
-                                                        Configuration.CLIENT_NAME + " resourceClient = new " +
-                                                        Configuration.CLIENT_NAME + "(config);");
-        method.getBody().get().asBlockStmt().addStatement(statement);
-
-        String className = newClass.getNameAsString();
-        className = className.substring(0, className.indexOf("Cmd"));
-        String action = classPrefix.toLowerCase();
-        String modelName = Utils.getRootName(Utils.getClazz(rootClassUnit)).toLowerCase();
-        if (Objects.equals(operation, Operation.CREATE) || Objects.equals(operation, Operation.UPDATE)) {
-
-            addBuilder(rootClassUnit, rootClass, method, className, modelName, operation);
-
-            Statement actionStatement = null;
-            if (action.equals("create")) {
-                actionStatement = JavaParser.parseStatement("resourceClient." + modelName + "()." + action + "(" + modelName + ");");
-            } else if (action.equals("update")) {
-                actionStatement = JavaParser.parseStatement("resourceClient." + modelName + "()." + action + "(" + id.getVariables().stream().findFirst().get() + "," + modelName + ");");
-            }
-            method.getBody().get().asBlockStmt().addStatement(actionStatement);
-        } else {
-            Statement actionStatement = JavaParser.parseStatement("resourceClient." + modelName + "()." + action + "(" + id.getVariables().stream().findFirst().get() + ");");
-            method.getBody().get().asBlockStmt().addStatement(actionStatement);
-        }
-
-        newClassCompilationUnit.addImport(rootClassUnit.getPackageDeclaration().get().getNameAsString() + "." + className);
-        newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
-        newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.ResourceClient");
-    }
-
     private static void addBuilder(final CompilationUnit rootClassUnit,
                                    final ClassOrInterfaceDeclaration rootClass,
                                    final MethodDeclaration method,
@@ -571,21 +470,6 @@ public class CmdGenerator {
         });
     }
 
-    private static void handleExtendedClasses(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
-                                              String operation, ClassOrInterfaceDeclaration newClass) throws IOException {
-        NodeList<ClassOrInterfaceType> extendedTypes = rootClass.getExtendedTypes();
-        while (extendedTypes.size() > 0) {
-            for (ClassOrInterfaceType et : extendedTypes) {
-                ClassOrInterfaceDeclaration extendedClass =
-                        Utils.getExtendedClass(rootClassUnit, et.getNameAsString());
-
-                extendedClass.getFields().forEach(f -> writeField(operation, rootClassUnit, newClass, f, null, null, null, false));
-                Utils.addImports(extendedClass.findCompilationUnit().get(), newClass.findCompilationUnit().get());
-                extendedTypes = extendedClass.getExtendedTypes();
-            }
-        }
-    }
-
     private static void handleId(FieldDeclaration f, CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration newClass) {
         FieldDeclaration newField = f.clone();
         newClass.addMember(newField);
@@ -665,13 +549,4 @@ public class CmdGenerator {
         }
         return false;
     }
-
-    private static void addClassCommandAnnotation(String classPrefix, CompilationUnit newClassCompilationUnit, ClassOrInterfaceDeclaration newClass) {
-        NormalAnnotationExpr command = new NormalAnnotationExpr();
-        command.setName("Command");
-        command.addPair("name", "\"" + classPrefix.toLowerCase() + "\"");
-        newClass.addAnnotation(command);
-        newClassCompilationUnit.addImport(ImportManager.getImport("Command"));
-    }
-
 }
