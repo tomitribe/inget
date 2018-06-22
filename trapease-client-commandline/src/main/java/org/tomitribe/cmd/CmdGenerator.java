@@ -56,8 +56,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.StringUtils.capitalize;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.tomitribe.common.Utils.formatCamelCaseTo;
-import static org.tomitribe.common.Utils.sortNodes;
 
 public class CmdGenerator {
     private static final String CMD_SUFFIX = "Cmd";
@@ -142,6 +143,7 @@ public class CmdGenerator {
                                                          .getType(parameter)
                                                          .asReferenceType()
                                                          .getTypeDeclaration(),
+                                         "",
                                          command,
                                          commandClass);
             }
@@ -152,22 +154,26 @@ public class CmdGenerator {
                                        final CompilationUnit command,
                                        final ClassOrInterfaceDeclaration commandClass) {
         if (parameter.isAnnotationPresent("PathParam")) {
-            addArgumentFlag(parameter.getType().asString(), parameter.getNameAsString(), command, commandClass);
+            addArgumentFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
         } else {
-            addOptionFlag(parameter.getType().asString(), parameter.getNameAsString(), command, commandClass);
+            addOptionFlag(parameter.getType().resolve().describe(), parameter.getNameAsString(), command, commandClass);
         }
     }
 
     private static void expandParameterReference(final ResolvedReferenceTypeDeclaration parameter,
+                                                 final String prefix,
                                                  final CompilationUnit command,
                                                  final ClassOrInterfaceDeclaration commandClass) {
         for (final ResolvedFieldDeclaration field : parameter.getAllFields()) {
             final ResolvedType type = field.getType();
 
             if (isPrimitiveOrValueOf(type) || isCollection(type)) {
-                addOptionFlag(type.describe(), field.getName(), command, commandClass);
+                addOptionFlag(type.describe(),
+                              isEmpty(prefix) ? field.getName() : prefix + capitalize(field.getName()),
+                              command,
+                              commandClass);
             } else if (type.isReferenceType()) {
-                //expandParameterReference(type.asReferenceType().getTypeDeclaration(), command, commandClass);
+                expandParameterReference(type.asReferenceType().getTypeDeclaration(), field.getName(), command, commandClass);
             }
         }
     }
@@ -207,7 +213,7 @@ public class CmdGenerator {
             final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
 
             if (typeDeclaration.isEnum()) {
-                return false; // TODO - change
+                return true;
             } else if (typeDeclaration.getName().equals("String")) {
                 return true;
             } else if (typeDeclaration.getDeclaredMethods()
@@ -225,6 +231,8 @@ public class CmdGenerator {
 
         return false;
     }
+
+
 
     private static boolean isCollection(final ResolvedType type) {
         if (type.isReferenceType()) {
