@@ -574,6 +574,11 @@ public class Utils {
     public static void save(String fileName, String pkg, String content) throws IOException {
         Path path = Paths.get(Configuration.GENERATED_SOURCES + File.separator + transformPackageToPath(pkg));
 
+        content = Stream.of(content)
+                        .map(RemoveDuplicateImports::apply)
+                        .map(Reformat::apply)
+                        .findFirst().get();
+
         if (!java.nio.file.Files.exists(path)) {
             java.nio.file.Files.createDirectories(path);
         }

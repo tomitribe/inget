@@ -52,7 +52,7 @@ public class Reformat {
                         true,
                         DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE,
                         DefaultCodeFormatterConstants.INDENT_DEFAULT));
-
+        options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 180);
         options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, JavaCore.INSERT);
         options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, JavaCore.INSERT);
         options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, JavaCore.INSERT);

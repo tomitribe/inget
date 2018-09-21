@@ -142,6 +142,7 @@ public class ClientGenerator {
                                                    new ObjectCreationExpr(null, JavaParser.parseClassOrInterfaceType(
                                                            entityNotFoundExceptionClass.getNameAsString()),
                                                                           new NodeList<>())))));
+        switchStmt.getEntries().addLast(new SwitchEntryStmt());
         toThrowableBody.addStatement(switchStmt);
         toThrowableBody.addStatement(new ReturnStmt(new NullLiteralExpr()));
         toThrowable.setBody(toThrowableBody);

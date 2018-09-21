@@ -116,8 +116,7 @@ public class MainGenerator extends AbstractMojo {
 
                     if (clientDependencies.size() == 0) {
                         throw new MojoExecutionException(
-                                "Clients were not found. Add the correct 'resourcePackage' for " +
-                                "this project or add a jar with the .java files for the resources.");
+                                "Clients were not found. Generate the client adding the 'resourcePackage' and 'generateClient' as true.");
                     }
 
                     clientDependencies.forEach(m -> extractJavaFiles(m.getFile()));
@@ -150,7 +149,7 @@ public class MainGenerator extends AbstractMojo {
             getLog().info("Started Resource Code Generation.");
             ResourcesGenerator.execute();
             getLog().info("Finished Resource Code Generation.");
-
+            Configuration.RESOURCE_SOURCES = Configuration.GENERATED_SOURCES;
         } else {
             if (resourcePackage != null) {
                 List<Artifact> resourceDependencies = artifacts.stream()

@@ -68,19 +68,19 @@ public class MethodGenerator {
     }
 
     private static void createListResourceMethods(CompilationUnit resourceUnit, ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass, String rootClassName, String rootClassPackage, List<String> classOperations) {
-        if (classOperations != null && classOperations.contains(Operation.BULK_CREATE)) {
+        if (classOperations == null || classOperations.contains(Operation.BULK_CREATE)) {
             bulkCreate(rootClassName, rootClassPackage, resourceClass, resourceUnit);
         }
 
-        if (classOperations != null && classOperations.contains(Operation.BULK_UPDATE)) {
+        if (classOperations == null || classOperations.contains(Operation.BULK_UPDATE)) {
             bulkUpdate(rootClassName, rootClassPackage, resourceClass, resourceUnit);
         }
 
-        if (classOperations != null && classOperations.contains(Operation.BULK_DELETE)) {
+        if (classOperations == null || classOperations.contains(Operation.BULK_DELETE)) {
             bulkDelete(rootClassName, rootClass, resourceClass, resourceUnit);
         }
 
-        if (classOperations != null && classOperations.contains(Operation.READ_ALL)) {
+        if (classOperations == null || classOperations.contains(Operation.READ_ALL)) {
             readAll(rootClassName, rootClass, resourceClass, resourceUnit);
         }
     }

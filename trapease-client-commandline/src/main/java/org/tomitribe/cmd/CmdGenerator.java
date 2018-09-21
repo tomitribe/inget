@@ -325,6 +325,7 @@ public class CmdGenerator {
 
         final ClassOrInterfaceDeclaration cliClass =
                 cli.getClassByName("TrapeaseCli").orElseThrow(IllegalArgumentException::new);
+        cliClass.addConstructor(Modifier.PRIVATE);
 
         final MethodDeclaration main = new MethodDeclaration();
         main.setPublic(true);
@@ -335,17 +336,17 @@ public class CmdGenerator {
 
         final BlockStmt block = new BlockStmt();
         cli.addImport(ImportManager.getImport("Cli"));
-        block.addStatement("final Cli.CliBuilder<Runnable> tag = Cli.builder(\"tag\");");
+        block.addStatement("final Cli.CliBuilder<Runnable> cliBuilder = Cli.builder(\"trapease\");");
         cli.addImport(ImportManager.getImport("Help"));
-        block.addStatement("tag.withDefaultCommand(Help.class);");
-        block.addStatement("tag.withCommand(Help.class);");
+        block.addStatement("cliBuilder.withDefaultCommand(Help.class);");
+        block.addStatement("cliBuilder.withCommand(Help.class);");
 
         main.setBody(block);
         cliClass.addMember(main);
 
         for (final String group : groups.keySet()) {
             final StringBuilder groupCommand = new StringBuilder();
-            groupCommand.append("tag.withGroup(\"").append(formatCamelCaseTo(group, "-")).append("\")");
+            groupCommand.append("cliBuilder.withGroup(\"").append(formatCamelCaseTo(group, "-")).append("\")");
             groupCommand.append(".withDefaultCommand(Help.class)");
             final List<String> commands = groups.get(group);
             for (final String command : commands) {
@@ -356,7 +357,7 @@ public class CmdGenerator {
             block.addStatement(groupCommand.toString());
         }
 
-        block.addStatement("final Cli<Runnable> cli = tag.build();");
+        block.addStatement("final Cli<Runnable> cli = cliBuilder.build();");
         block.addStatement("cli.parse(args).run();");
 
         Utils.save("TrapeaseCli.java", BASE_OUTPUT_PACKAGE, cli.toString());
