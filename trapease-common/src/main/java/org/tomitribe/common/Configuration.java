@@ -40,4 +40,8 @@ public class Configuration {
     public static String getClientPath() {
         return getResourcePath() + File.separator + "client";
     }
+
+    public static String getClientPackage(){
+        return Configuration.RESOURCE_PACKAGE + ".client";
+    }
 }

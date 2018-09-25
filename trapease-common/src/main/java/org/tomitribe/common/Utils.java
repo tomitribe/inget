@@ -464,7 +464,7 @@ public class Utils {
 
     public static List<File> getClient() {
         final File srcFolder = new File(Configuration.CLIENT_SOURCES);
-        return Files.collect(srcFolder, "(.*)" + "Client" + "\\.java");
+        return Files.collect(srcFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "Client" + "\\.java");
     }
 
     public static String getIdName(ClassOrInterfaceDeclaration rootClass) {
@@ -639,15 +639,18 @@ public class Utils {
         }
 
         try {
-            TrapeaseTypeSolver.get().solveType("java.lang." + type);
+            type = (type.startsWith("java.lang"))? type : "java.lang." + type;
+            TrapeaseTypeSolver.get().solveType(type);
             isWrapper = true;
         } catch (RuntimeException e) {
         }
 
         boolean isDate = false;
         try {
-            TrapeaseTypeSolver.get().solveType("java.util." + type);
-            isDate = true;
+            TrapeaseTypeSolver.get().solveType(type);
+            if(type.startsWith("java.util")){
+                isDate = true;
+            }
         } catch (RuntimeException e) {
         }
 
