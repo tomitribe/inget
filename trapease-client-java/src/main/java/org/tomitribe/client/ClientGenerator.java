@@ -82,7 +82,7 @@ public class ClientGenerator {
     }
 
     private static CompilationUnit createResourceClient() throws IOException {
-        final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client";
+        final String outputBasePackage = Configuration.getClientPackage();
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(outputBasePackage);
         newClassCompilationUnit.addClass(Configuration.CLIENT_NAME, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(Configuration.CLIENT_NAME).get();
