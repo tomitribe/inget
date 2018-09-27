@@ -19,6 +19,7 @@ public class ImportManager {
 
         // Lombok
         importMap.put("Builder", "lombok.Builder");
+        importMap.put("ToString", "lombok.ToString");
         importMap.put("EqualsAndHashCode", "lombok.EqualsAndHashCode");
         importMap.put("AllArgsConstructor", "lombok.AllArgsConstructor");
         importMap.put("Value", "lombok.Value");

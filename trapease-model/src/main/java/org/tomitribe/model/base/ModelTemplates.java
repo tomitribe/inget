@@ -32,29 +32,29 @@ public class ModelTemplates {
                     "public class DefaultFilter {\n" +
                     "}";
 
-    public static String PAGE = "import " + Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter;\n" +
-            "import io.swagger.v3.oas.annotations.media.Schema;\n" +
-            "import lombok.AllArgsConstructor;\n" +
-            "import lombok.Data;\n" +
+    public static String RESULT = "import io.swagger.v3.oas.annotations.media.Schema;\n" +
+            "import lombok.Builder;\n" +
+            "import lombok.EqualsAndHashCode;\n" +
+            "import lombok.Value;\n" +
             "\n" +
+            "import javax.annotation.Generated;\n" +
             "import java.util.Collection;\n" +
             "\n" +
-            "// @value not possible with abstract\n" +
-            "@Data\n" +
-            "@AllArgsConstructor\n" +
-            "@Schema(description = \"A generic page result used for any search request on server managed entities.\")\n" +
-            "public abstract class Page<ITEM> {\n" +
+            "@Value\n" +
+            "@Builder\n" +
+            "@EqualsAndHashCode\n" +
+            "@Generated(value = \"org.tomitribe.model.ModelGenerator\")\n" +
+            "@Schema(description = \"The list of %ITEMS_NAME available for a given search request with associated metadata.\")\n" +
+            "public class %ENTITYResult {\n" +
             "\n" +
             "    @Schema(description = \"The list of items for the given page. The list may be a partial list when pagination is used (default)\", required = true)\n" +
-            "    private final Collection<ITEM> items;\n" +
+            "    private final Collection<%ENTITY> items;\n" +
             "\n" +
             "    @Schema(description = \"Contains the elements that can be used for filtering: labels, by default.\", required = true)\n" +
-            "    private final DefaultFilter filters;\n" +
-            "\n" +
-            "    @Schema(description = \"The paging state is used for paginating results call after call. It needs to be passed in again on the next search request.\", required = false)\n" +
-            "    private final String pagingState;\n" +
+            "    private final %FILTER filters;\n" +
             "\n" +
             "    @Schema(description = \"The total number of items for the search request. It may be higher than the number of items returned because of the pagination.\", required = true)\n" +
             "    private final Long total;\n" +
+            "\n" +
             "}";
 }

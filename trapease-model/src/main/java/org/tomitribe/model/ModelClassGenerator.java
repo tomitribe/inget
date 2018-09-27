@@ -17,9 +17,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -30,13 +28,10 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
-import org.tomitribe.common.Operation;
 import org.tomitribe.common.Utils;
 import org.tomitribe.model.base.ModelTemplates;
-import org.tomitribe.util.Join;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -144,79 +139,34 @@ public class ModelClassGenerator {
     static CompilationUnit createListClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
                                            String rootClassName, CompilationUnit filterClassUnit,
                                            CompilationUnit summaryClassUnit, String listClassName) throws IOException {
-        final CompilationUnit newClassCompilationUnit = new CompilationUnit(rootClassUnit.getPackageDeclaration().get().getName().toString());
-        newClassCompilationUnit.addClass(listClassName, Modifier.PUBLIC);
-        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(listClassName).get();
-
-        newClass.addMarkerAnnotation("Value");
-        newClassCompilationUnit.addImport(ImportManager.getImport("Value"));
-        NormalAnnotationExpr equalsAndHashCode = new NormalAnnotationExpr();
-        equalsAndHashCode.setName("EqualsAndHashCode");
-        equalsAndHashCode.addPair("callSuper", "true");
-        newClassCompilationUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
-        newClass.addAnnotation(equalsAndHashCode);
-
-        Utils.addLicense(rootClassUnit, newClassCompilationUnit);
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
-
-        NormalAnnotationExpr schema = new NormalAnnotationExpr();
-        schema.setName("Schema");
-        schema.addPair("description", "\"The list of " + listClassName.toLowerCase() + " available for a given search request with associated metadata.\"");
-        newClass.addAnnotation(schema);
-        newClassCompilationUnit.addImport(ImportManager.getImport("Schema"));
-        newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.Page");
-
-        rootClass.getFields().stream()
-                .filter(f -> Utils.isOperationPresent(f, Operation.READ_ALL))
-                .forEach(f -> {
-                    FieldDeclaration newField = f.clone();
-                    newField.remove(newField.getAnnotationByName("Model").get());
-                    newClass.addMember(newField);
-                });
-
-        Utils.addImports(rootClassUnit, newClassCompilationUnit);
-
+        if(!rootClass.getAnnotationByName("Resource").isPresent()){
+            return null;
+        }
         String summaryClassValue = rootClassName;
         if (summaryClassUnit != null) {
             summaryClassValue = Utils.getClazz(summaryClassUnit).getNameAsString();
         }
 
         String filterName = "";
+        boolean importDefault = false;
         if (filterClassUnit == null) {
             filterName = "DefaultFilter";
-            newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
         } else {
             filterName = Utils.getClazz(filterClassUnit).getNameAsString();
         }
 
-        newClass.addExtendedType("Page<" + summaryClassValue + ">");
+        String resultTextClass = ModelTemplates.RESULT
+                .replaceAll("%ENTITY", summaryClassValue)
+                .replaceAll("%FILTER", filterName)
+                .replaceAll("%ITEMS_NAME", listClassName.toLowerCase());
 
-        final StringBuilder constructor = new StringBuilder();
-        constructor.append("@Builder public %classname(");
-        constructor.append("final Collection<%itemsType> items, final %filter filter, final String pagingState, final Long total");
-        newClass.getFields().stream().forEach(f -> {
-            VariableDeclarator field = f.getVariables().stream().findFirst().get();
-            String fieldName = field.getNameAsString();
-            String fieldType = field.getTypeAsString();
-            constructor.append(", final " + fieldType + " " + fieldName);
-        });
-        constructor.append(") {");
-        constructor.append("super(items, filter, pagingState, total);");
-        newClass.getFields().stream().forEach(f -> {
-            String fieldName = f.getVariables().stream().findFirst().get().getNameAsString();
-            constructor.append("this." + fieldName + " = " + fieldName + ";");
-        });
-        constructor.append(" }");
-        String result = constructor.toString()
-                .replaceAll("%classname", listClassName)
-                .replaceAll("%filter", filterName)
-                .replaceAll("%itemsType", summaryClassValue);
+        CompilationUnit newClassCompilationUnit = JavaParser.parse(resultTextClass);
+        newClassCompilationUnit.setPackageDeclaration(rootClassUnit.getPackageDeclaration().get().getNameAsString());
 
-        ConstructorDeclaration constructorDeclaration = JavaParser.parseBodyDeclaration(result).asConstructorDeclaration();
-        newClass.addMember(constructorDeclaration);
-        newClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
-        newClassCompilationUnit.addImport(ImportManager.getImport("Collection"));
-
+        Utils.addLicense(rootClassUnit, newClassCompilationUnit);
+        if (importDefault) {
+            newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
+        }
         return newClassCompilationUnit;
     }
 
@@ -245,13 +195,13 @@ public class ModelClassGenerator {
         final ClassOrInterfaceDeclaration filterClass = filterClassCompilationUnit.getClassByName(filterClassName).get();
         filterClass.addExtendedType("DefaultFilter");
         filterClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
-        filterClass.addMarkerAnnotation("Value");
-        filterClassCompilationUnit.addImport(ImportManager.getImport("Value"));
+        filterClass.addMarkerAnnotation("Builder");
+        filterClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
+        filterClass.addMarkerAnnotation("ToString");
+        filterClassCompilationUnit.addImport(ImportManager.getImport("ToString"));
         Utils.addLicense(rootClassUnit, filterClassCompilationUnit);
 
 
-        final List<String> constructorArgs = new ArrayList<String>();
-        final List<String> constructorThis = new ArrayList<String>();
         filterFields.stream().forEach(f -> {
             NormalAnnotationExpr model = f.getAnnotationByName("Model").get().asNormalAnnotationExpr();
             Map<String, MemberValuePair> modelPairs = Utils.pairs(model);
@@ -283,25 +233,15 @@ public class ModelClassGenerator {
             }
             newField.addAnnotation(schema);
             filterClassCompilationUnit.addImport(ImportManager.getImport("Schema"));
-            constructorArgs.add("final " + type + " " + name);
-            constructorThis.add("this." + name + " = " + name + ";");
         });
-
-        StringBuilder constructorBuilder = new StringBuilder();
-        constructorBuilder.append("public " + filterClassName + "(");
-        constructorBuilder.append(Join.join(",", constructorArgs));
-        constructorBuilder.append(") {");
-        constructorThis.stream().forEach(v -> {
-            constructorBuilder.append(v);
-        });
-        constructorBuilder.append("}");
-        BodyDeclaration<?> constructor = JavaParser.parseBodyDeclaration(constructorBuilder.toString());
-        filterClass.addMember(constructor);
 
         return filterClassCompilationUnit;
     }
 
-    static CompilationUnit createBulkClass(CompilationUnit rootClassUnit, String rootClassName, String bulkClassName) throws IOException {
+    static CompilationUnit createBulkClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass, String rootClassName, String bulkClassName) throws IOException {
+        if(!rootClass.getAnnotationByName("Resource").isPresent()){
+            return null;
+        }
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(rootClassUnit.getPackageDeclaration().get().getName().toString());
         newClassCompilationUnit.addClass(bulkClassName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(bulkClassName).get();
@@ -385,7 +325,6 @@ public class ModelClassGenerator {
 
     public static void createBaseClasses() throws IOException {
         String outputBasePackage = Configuration.MODEL_PACKAGE + ".base";
-        createPageClass(outputBasePackage);
         createFailureClass(outputBasePackage);
         createDefaultFilterClass(outputBasePackage);
     }
@@ -404,12 +343,5 @@ public class ModelClassGenerator {
         content.setPackageDeclaration(pkg);
         Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
         Utils.save("DefaultFilter.java", pkg, content.toString());
-    }
-
-    private static void createPageClass(String outputBasePackage) throws IOException {
-        CompilationUnit content = JavaParser.parse(ModelTemplates.PAGE);
-        content.setPackageDeclaration(outputBasePackage);
-        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
-        Utils.save("Page.java", outputBasePackage, content.toString());
     }
 }
