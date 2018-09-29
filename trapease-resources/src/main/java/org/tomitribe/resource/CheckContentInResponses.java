@@ -88,7 +88,7 @@ public class CheckContentInResponses {
                             ClassOrInterfaceDeclaration resourceClass = Utils.getClazz(resourceClassUnit);
 
                             if (!Utils.isRootResource(modelClassName, resourceClass.getNameAsString())) {
-                                className = Utils.toPlural(modelClassName);
+                                className = modelClassName + "Result";
                             }
                             unit.addImport(modelClassPackage + "." + className);
                             responseAnnotation.addPair("content", "@Content(schema = @Schema(implementation = " + className + ".class))");

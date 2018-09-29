@@ -280,19 +280,19 @@ public class CmdGenerator {
     private static void addRunStatement(CompilationUnit command, final ClassOrInterfaceDeclaration commandClass, String clientGroup, MethodDeclaration clientMethod) {
         command.addImport(Configuration.getClientPackage() + "." + Configuration.CLIENT_NAME);
 
-        List<String> runParams = clientMethod.getParameters().stream().map(p ->  {
-            if(p.getTypeAsString().startsWith("List")){
+        List<String> runParams = clientMethod.getParameters().stream().map(p -> {
+            if (p.getTypeAsString().startsWith("List")) {
                 Type type = p.getType().asClassOrInterfaceType().getTypeArguments().get().stream().findFirst().get();
-                if(isPrimitiveOrValueOf(type.resolve())){
+                if (isPrimitiveOrValueOf(type.resolve())) {
                     return p.getNameAsString();
-                } else{
+                } else {
                     ClassOrInterfaceDeclaration clazz = ((JavaParserClassDeclaration) JavaParserFacade.get(TrapeaseTypeSolver.get())
                             .convertToUsage(type)
                             .asReferenceType().getTypeDeclaration())
                             .getWrappedNode();
                     boolean wasGenerated = clazz.getAnnotationByName("Generated") != null;
-                    if(wasGenerated){
-                        return "java.util.Arrays.asList("+p.getNameAsString()+")";
+                    if (wasGenerated) {
+                        return "java.util.Arrays.asList(" + p.getNameAsString() + ")";
                     }
                     //TODO: What if the object was not generated and has a List?
                 }
@@ -302,8 +302,15 @@ public class CmdGenerator {
 
         final MethodDeclaration run =
                 commandClass.getMethodsByName("run").stream().findFirst().orElseThrow(IllegalArgumentException::new);
+
         String runCommand = "new " + Configuration.CLIENT_NAME + "(clientConfiguration)." + clientGroup.toLowerCase() + "()."
-                + clientMethod.getNameAsString() + "(" + Join.join(",", runParams) + ");";
+                + clientMethod.getNameAsString() + "(" + Join.join(",", runParams) + ")";
+
+        if (!clientMethod.getType().isVoidType()) {
+            runCommand = "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().build().writeObjectAsString(" + runCommand + "));";
+        } else {
+            runCommand += ";";
+        }
         run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(runCommand));
     }
 
