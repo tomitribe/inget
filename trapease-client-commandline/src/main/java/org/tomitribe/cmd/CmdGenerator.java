@@ -307,7 +307,7 @@ public class CmdGenerator {
                 + clientMethod.getNameAsString() + "(" + Join.join(",", runParams) + ")";
 
         if (!clientMethod.getType().isVoidType()) {
-            runCommand = "System.out.println(" + runCommand + ");";
+            runCommand = "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().build().writeObjectAsString(" + runCommand + "));";
         } else {
             runCommand += ";";
         }

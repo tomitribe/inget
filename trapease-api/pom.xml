@@ -45,12 +45,37 @@
       <version>3.2.2</version>
     </dependency>
 
+    <!-- TODO: Check why we were using 1.1.8-SNAPSHOT -->
     <dependency>
       <groupId>org.apache.johnzon</groupId>
       <artifactId>johnzon-jaxrs</artifactId>
-      <version>1.1.8-SNAPSHOT</version>
+      <version>1.1.9</version>
     </dependency>
 
+
+    <!-- CLI - JAXB -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-core</artifactId>
+      <version>2.2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.2.7</version>
+    </dependency>
+
+    <!-- CLI - Tomcat -->
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-servlet-api</artifactId>
+      <version>8.5.20</version>
+    </dependency>
   </dependencies>
 
 </project>

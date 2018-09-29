@@ -151,6 +151,7 @@ public class ModelClassGenerator {
         boolean importDefault = false;
         if (filterClassUnit == null) {
             filterName = "DefaultFilter";
+            importDefault = true;
         } else {
             filterName = Utils.getClazz(filterClassUnit).getNameAsString();
         }
