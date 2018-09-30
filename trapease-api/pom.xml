@@ -45,14 +45,6 @@
       <version>3.2.2</version>
     </dependency>
 
-    <!-- TODO: Check why we were using 1.1.8-SNAPSHOT -->
-    <dependency>
-      <groupId>org.apache.johnzon</groupId>
-      <artifactId>johnzon-jaxrs</artifactId>
-      <version>1.1.9</version>
-    </dependency>
-
-
     <!-- CLI - JAXB -->
     <dependency>
       <groupId>javax.xml.bind</groupId>
@@ -76,6 +68,31 @@
       <artifactId>tomcat-servlet-api</artifactId>
       <version>8.5.20</version>
     </dependency>
+
+    <!-- CLI Johnzon-->
+    <dependency>
+      <groupId>org.apache.johnzon</groupId>
+      <artifactId>johnzon-jaxrs</artifactId>
+      <version>1.1.10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.johnzon</groupId>
+      <artifactId>johnzon-core</artifactId>
+      <version>1.1.10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.johnzon</groupId>
+      <artifactId>johnzon-mapper</artifactId>
+      <version>1.1.10</version>
+    </dependency>
+
+    <!-- CLI and Resources TODO: check why this is needed-->
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>1.1</version>
+    </dependency>
   </dependencies>
+
 
 </project>
