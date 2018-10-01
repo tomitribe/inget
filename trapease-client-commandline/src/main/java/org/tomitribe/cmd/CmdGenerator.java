@@ -78,9 +78,12 @@ public class CmdGenerator {
         final Map<String, List<String>> groups = new HashMap<>();
         for (final File sourceClient : sourceClients) {
             final CompilationUnit client = JavaParser.parse(sourceClient);
+            if (!client.toString().contains("javax.ws.rs.Path")) {
+                continue;
+            }
             final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
             final String clientGroup =
-                    clientClass.getNameAsString().replace(Configuration.RESOURCE_SUFFIX + "Client", "");
+                    clientClass.getNameAsString().replace("Client", "");
 
             final List<MethodDeclaration> methods = clientClass.getMethods();
             final List<String> commands =
@@ -112,7 +115,7 @@ public class CmdGenerator {
                 command.getClassByName(commandClassName).orElseThrow(IllegalArgumentException::new);
         addCommandAnnotation(clientMethod.getNameAsString(), command, commandClass);
         extendCommandBaseClass(command, commandClass);
-        addCommandFlags(clientMethod.getParameters(), command, commandClass, clientGroup, clientMethod);
+        addCommandFlags(command, commandClass, clientGroup, clientMethod);
 
         save(commandClassName, command);
 
@@ -147,11 +150,11 @@ public class CmdGenerator {
         command.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
     }
 
-    private static void addCommandFlags(final NodeList<Parameter> parameters,
-                                        final CompilationUnit command,
+    private static void addCommandFlags(final CompilationUnit command,
                                         final ClassOrInterfaceDeclaration commandClass,
                                         final String clientGroup,
                                         final MethodDeclaration clientMethod) {
+        final NodeList<Parameter> parameters = clientMethod.getParameters();
 
         final List<Parameter> arguments =
                 parameters.stream()
@@ -172,7 +175,7 @@ public class CmdGenerator {
         for (final Parameter option : options) {
             ResolvedType resolvedType = option.getType().resolve();
             if (isPrimitiveOrValueOf(resolvedType) || isPrimitiveOrValueOfCollection(resolvedType)) {
-                addOptionFlag(option.getType().resolve().describe(), option.getNameAsString(), command, commandClass);
+                addOptionFlag(resolvedType.describe(), option.getNameAsString(), command, commandClass);
             } else {
                 ResolvedReferenceTypeDeclaration typeDeclaration = null;
                 boolean isGeneric = option.toString().contains("<");
@@ -200,6 +203,9 @@ public class CmdGenerator {
                                                  final CompilationUnit command,
                                                  final ClassOrInterfaceDeclaration commandClass) {
         for (final ResolvedFieldDeclaration field : parameter.getAllFields()) {
+            if(field.isStatic()){
+                continue;
+            }
             final ResolvedType type = field.getType();
 
             if (isPrimitiveOrValueOf(type) || isPrimitiveOrValueOfCollection(type)) {
@@ -425,6 +431,7 @@ public class CmdGenerator {
     private static String readBuilderFields(final CompilationUnit rootClassUnit, final List<FieldDeclaration> fields, final String prefix) {
         return fields
                 .stream()
+                .filter(f -> !f.isStatic())
                 .map(fieldDeclaration -> readFieldOrUnflattenClass(rootClassUnit, fieldDeclaration, prefix))
                 .collect(Collectors.joining());
     }
