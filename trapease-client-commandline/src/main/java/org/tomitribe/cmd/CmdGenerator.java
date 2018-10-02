@@ -320,7 +320,7 @@ public class CmdGenerator {
                             .getWrappedNode();
                     boolean wasGenerated = clazz.getAnnotationByName("Generated") != null;
                     if (wasGenerated) {
-                        return "java.util.Arrays.asList(" + p.getNameAsString() + ")";
+                        return "java.util.Arrays.asList(" + p.getNameAsString() + ");\n";
                     }
                     //TODO: What if the object was not generated and has a List?
                 }
@@ -529,7 +529,7 @@ public class CmdGenerator {
 
                 if (variable.getTypeAsString().contains("List<")) {
                     statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded, resolvedType.getClassName().toLowerCase(), resolvedType.getClassName().toLowerCase(), ModelType.SETTER);
-                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(java.util.Arrays.asList(" + resolvedType.getClassName().toLowerCase() + "));";
+                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(java.util.Arrays.asList(" + resolvedType.getClassName().toLowerCase() + "));\n";
                 } else {
                     statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded, variable.getNameAsString(), variable.getNameAsString(), ModelType.SETTER);
                     statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(" + variable.getNameAsString() + ");\n";
