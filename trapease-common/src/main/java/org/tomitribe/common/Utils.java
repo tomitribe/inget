@@ -29,6 +29,8 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.types.ResolvedType;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 
@@ -40,6 +42,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -437,19 +441,37 @@ public class Utils {
                 .collect(Collectors.toList());
 
         return Stream.concat(src.stream(), generatedSources.stream())
-                     .distinct()
-                     .collect(Collectors.toList());
+                .distinct()
+                .collect(Collectors.toList());
     }
 
-    public static List<File> getResources() {
+    public static Map<String, String> getResources() {
         final File srcFolder = new File(Configuration.RESOURCE_SOURCES);
         final File generatedFolder = new File(Configuration.GENERATED_SOURCES);
-        List<File> src = Files.collect(srcFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java");
-        List<File> generatedSources = Files.collect(generatedFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java");
+        List<File> src = Files.collect(srcFolder, "(.*)\\.java");
+        List<File> generatedSources = Files.collect(generatedFolder, "(.*)\\.java");
 
-        return Stream.concat(src.stream(), generatedSources.stream())
-                     .distinct()
-                     .collect(Collectors.toList());
+        Map<String, File> collect = Stream.concat(src.stream(), generatedSources.stream())
+                .distinct()
+                .collect(Collectors.toMap(File::getName, f -> f));
+
+        Map<String,String> resourcesMap = new HashMap<>();
+
+        Iterator<Map.Entry<String, File>> it = collect.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<String, File> next = it.next();
+            String content = null;
+            try {
+                content = IO.slurp(next.getValue());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if(content != null && content.contains("javax.ws.rs.Path")){
+                resourcesMap.put(next.getKey(), content);
+            }
+        }
+        return resourcesMap;
     }
 
     public static List<File> getModel() {
@@ -464,7 +486,7 @@ public class Utils {
 
     public static List<File> getClient() {
         final File srcFolder = new File(Configuration.CLIENT_SOURCES);
-        return Files.collect(srcFolder, "(.*)" + Configuration.RESOURCE_SUFFIX + "Client" + "\\.java");
+        return Files.collect(srcFolder, "(.*)Client" + "\\.java");
     }
 
     public static String getIdName(ClassOrInterfaceDeclaration rootClass) {
@@ -575,9 +597,9 @@ public class Utils {
         Path path = Paths.get(Configuration.GENERATED_SOURCES + File.separator + transformPackageToPath(pkg));
 
         content = Stream.of(content)
-                        .map(RemoveDuplicateImports::apply)
-                        .map(Reformat::apply)
-                        .findFirst().get();
+                .map(RemoveDuplicateImports::apply)
+                .map(Reformat::apply)
+                .findFirst().get();
 
         if (!java.nio.file.Files.exists(path)) {
             java.nio.file.Files.createDirectories(path);
@@ -639,7 +661,7 @@ public class Utils {
         }
 
         try {
-            type = (type.startsWith("java.lang"))? type : "java.lang." + type;
+            type = (type.startsWith("java.lang")) ? type : "java.lang." + type;
             TrapeaseTypeSolver.get().solveType(type);
             isWrapper = true;
         } catch (RuntimeException e) {
@@ -648,12 +670,24 @@ public class Utils {
         boolean isDate = false;
         try {
             TrapeaseTypeSolver.get().solveType(type);
-            if(type.startsWith("java.util")){
+            if (type.startsWith("java.util")) {
                 isDate = true;
             }
         } catch (RuntimeException e) {
         }
 
         return f.getCommonType().isPrimitiveType() || isWrapper || isDate;
+    }
+
+    public static boolean isCollection(final ResolvedType type) {
+        if (type.isReferenceType()) {
+            final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
+
+            if (typeDeclaration.canBeAssignedTo(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -103,6 +103,7 @@ public class MainGenerator extends AbstractMojo {
                 getLog().info("Started Client Code Generation.");
                 ClientGenerator.execute();
                 getLog().info("Finished Client Code Generation.");
+                Configuration.CLIENT_SOURCES = Configuration.GENERATED_SOURCES;
             }
 
             if (generateCmd) {
@@ -152,6 +153,17 @@ public class MainGenerator extends AbstractMojo {
             Configuration.RESOURCE_SOURCES = Configuration.GENERATED_SOURCES;
         } else {
             if (resourcePackage != null) {
+                List<String> compileSourceRoots = project.getCompileSourceRoots();
+                if(compileSourceRoots != null){
+                    for(String source : compileSourceRoots){
+                        File folder = new File(source, Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE));
+                        if(folder.exists()){
+                            Configuration.RESOURCE_SOURCES = source;
+                            return;
+                        }
+                    }
+                }
+
                 List<Artifact> resourceDependencies = artifacts.stream()
                         .filter(a -> hasResources(a.getFile())).collect(Collectors.toList());
 
@@ -165,6 +177,7 @@ public class MainGenerator extends AbstractMojo {
                 }
             }
         }
+        Configuration.CLIENT_SOURCES = Configuration.RESOURCE_SOURCES;
     }
 
     private void generateModel(Set<Artifact> artifacts) throws IOException, MojoExecutionException {
@@ -181,6 +194,17 @@ public class MainGenerator extends AbstractMojo {
             getLog().info("Finished Model Code Generation.");
         } else {
             if (modelPackage != null) {
+                List<String> compileSourceRoots = project.getCompileSourceRoots();
+                if(compileSourceRoots != null){
+                    for(String source : compileSourceRoots){
+                        File folder = new File(source, Utils.transformPackageToPath(Configuration.MODEL_PACKAGE));
+                        if(folder.exists()){
+                            Configuration.MODEL_SOURCES = source;
+                            return;
+                        }
+                    }
+                }
+
                 List<Artifact> modelDependencies = artifacts.stream()
                         .filter(a -> hasModel(a.getFile())).collect(Collectors.toList());
 

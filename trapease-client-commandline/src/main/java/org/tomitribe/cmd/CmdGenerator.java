@@ -31,6 +31,7 @@ import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
@@ -38,6 +39,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserFieldDeclaration;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
+import org.tomitribe.cmd.base.ModelType;
 import org.tomitribe.cmd.base.TrapeaseTemplates;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
@@ -78,9 +80,12 @@ public class CmdGenerator {
         final Map<String, List<String>> groups = new HashMap<>();
         for (final File sourceClient : sourceClients) {
             final CompilationUnit client = JavaParser.parse(sourceClient);
+            if (!client.toString().contains("javax.ws.rs.Path")) {
+                continue;
+            }
             final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
             final String clientGroup =
-                    clientClass.getNameAsString().replace(Configuration.RESOURCE_SUFFIX + "Client", "");
+                    clientClass.getNameAsString().replace("Client", "");
 
             final List<MethodDeclaration> methods = clientClass.getMethods();
             final List<String> commands =
@@ -112,7 +117,7 @@ public class CmdGenerator {
                 command.getClassByName(commandClassName).orElseThrow(IllegalArgumentException::new);
         addCommandAnnotation(clientMethod.getNameAsString(), command, commandClass);
         extendCommandBaseClass(command, commandClass);
-        addCommandFlags(clientMethod.getParameters(), command, commandClass, clientGroup, clientMethod);
+        addCommandFlags(command, commandClass, clientGroup, clientMethod);
 
         save(commandClassName, command);
 
@@ -147,11 +152,11 @@ public class CmdGenerator {
         command.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
     }
 
-    private static void addCommandFlags(final NodeList<Parameter> parameters,
-                                        final CompilationUnit command,
+    private static void addCommandFlags(final CompilationUnit command,
                                         final ClassOrInterfaceDeclaration commandClass,
                                         final String clientGroup,
                                         final MethodDeclaration clientMethod) {
+        final NodeList<Parameter> parameters = clientMethod.getParameters();
 
         final List<Parameter> arguments =
                 parameters.stream()
@@ -171,8 +176,8 @@ public class CmdGenerator {
 
         for (final Parameter option : options) {
             ResolvedType resolvedType = option.getType().resolve();
-            if (isPrimitiveOrValueOf(resolvedType) || isPrimitiveOrValueOfCollection(resolvedType)) {
-                addOptionFlag(option.getType().resolve().describe(), option.getNameAsString(), command, commandClass);
+            if (isPrimitiveOrValueOf(resolvedType) || isPrimitiveAndValueOfCollection(resolvedType)) {
+                addOptionFlag(resolvedType.describe(), option.getNameAsString(), command, commandClass);
             } else {
                 ResolvedReferenceTypeDeclaration typeDeclaration = null;
                 boolean isGeneric = option.toString().contains("<");
@@ -189,7 +194,7 @@ public class CmdGenerator {
                                     .getTypeDeclaration();
                 }
                 expandParameterReference(typeDeclaration, null, command, commandClass);
-                addBuilder(option.getNameAsString(), typeDeclaration, command, commandClass);
+                addInstantiation(option.getNameAsString(), typeDeclaration, command, commandClass);
             }
         }
         addRunStatement(command, commandClass, clientGroup, clientMethod);
@@ -200,15 +205,24 @@ public class CmdGenerator {
                                                  final CompilationUnit command,
                                                  final ClassOrInterfaceDeclaration commandClass) {
         for (final ResolvedFieldDeclaration field : parameter.getAllFields()) {
+            if (field.isStatic()) {
+                continue;
+            }
             final ResolvedType type = field.getType();
 
-            if (isPrimitiveOrValueOf(type) || isPrimitiveOrValueOfCollection(type)) {
+            if (isPrimitiveOrValueOf(type) || isPrimitiveAndValueOfCollection(type)) {
                 addOptionFlag(type.describe(),
                         isEmpty(prefix) ? field.getName() : prefix + capitalize(field.getName()),
                         command,
                         commandClass);
             } else if (type.isReferenceType()) {
-                expandParameterReference(type.asReferenceType().getTypeDeclaration(), field.getName(), command, commandClass);
+                if (Utils.isCollection(type)) {
+                    ResolvedReferenceType resolvedReferenceType = type.asReferenceType().getTypeParametersMap().get(0).b.asReferenceType();
+                    ResolvedReferenceTypeDeclaration typeDeclaration = resolvedReferenceType.getTypeDeclaration();
+                    expandParameterReference(typeDeclaration, typeDeclaration.getName().toLowerCase(), command, commandClass);
+                } else {
+                    expandParameterReference(type.asReferenceType().getTypeDeclaration(), field.getName(), command, commandClass);
+                }
             }
         }
     }
@@ -251,19 +265,20 @@ public class CmdGenerator {
         flag.addAnnotation(argumentsAnnotation);
     }
 
-    private static void addBuilder(String fieldName, final ResolvedReferenceTypeDeclaration parameter,
-                                   final CompilationUnit command,
-                                   final ClassOrInterfaceDeclaration commandClass) {
+    private static void addInstantiation(String fieldName, final ResolvedReferenceTypeDeclaration parameter,
+                                         final CompilationUnit command,
+                                         final ClassOrInterfaceDeclaration commandClass) {
         final MethodDeclaration run =
                 commandClass.getMethodsByName("run").stream().findFirst().orElseThrow(IllegalArgumentException::new);
 
 
         boolean isBuilderClass = Optional.of(parameter.isClass() &&
                 parameter instanceof JavaParserClassDeclaration &&
-                ((JavaParserClassDeclaration) parameter).getWrappedNode().getAnnotationByName("Builder") != null).orElse(false);
+                ((JavaParserClassDeclaration) parameter).getWrappedNode().getAnnotationByName("Builder").isPresent()).orElse(false);
+
+        List<FieldDeclaration> fields = parameter.getAllFields().stream().map(f -> ((JavaParserFieldDeclaration) f).getWrappedNode()).collect(Collectors.toList());
 
         if (isBuilderClass) {
-            List<FieldDeclaration> fields = parameter.getAllFields().stream().map(f -> ((JavaParserFieldDeclaration) f).getWrappedNode()).collect(Collectors.toList());
             final String builder = "final " +
                     parameter.getQualifiedName() +
                     " " +
@@ -271,9 +286,22 @@ public class CmdGenerator {
                     " = " +
                     parameter.getQualifiedName() +
                     ".builder()" +
-                    readBuilderFields(command, fields, "") +
+                    readInstanceFields(command, fields, "", fieldName, ModelType.BUILDER) +
                     ".build();";
             run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(builder));
+        } else {
+            String call = "final " +
+                    parameter.getQualifiedName() +
+                    " " +
+                    fieldName +
+                    " = new " + parameter.getQualifiedName() + "();\n";
+
+            call += readInstanceFields(command, fields, "", fieldName, ModelType.SETTER);
+            String[] statements = call.split("\n");
+            for (String statement : statements) {
+                run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(statement));
+            }
+
         }
     }
 
@@ -342,7 +370,7 @@ public class CmdGenerator {
         return false;
     }
 
-    private static boolean isPrimitiveOrValueOfCollection(final ResolvedType type) {
+    private static boolean isPrimitiveAndValueOfCollection(final ResolvedType type) {
         if (type.isReferenceType()) {
             final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
 
@@ -422,30 +450,42 @@ public class CmdGenerator {
         }
     }
 
-    private static String readBuilderFields(final CompilationUnit rootClassUnit, final List<FieldDeclaration> fields, final String prefix) {
+    private static String readInstanceFields(final CompilationUnit rootClassUnit, final List<FieldDeclaration> fields, final String prefix, final String classFieldName, final ModelType modelType) {
         return fields
                 .stream()
-                .map(fieldDeclaration -> readFieldOrUnflattenClass(rootClassUnit, fieldDeclaration, prefix))
+                .filter(f -> !f.isStatic())
+                .map(fieldDeclaration -> readFieldOrUnflattenClass(rootClassUnit, fieldDeclaration, prefix, classFieldName, modelType))
                 .collect(Collectors.joining());
     }
 
-    private static String readFieldOrUnflattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field, final String prefix) {
+    private static String readFieldOrUnflattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field, final String prefix, final String classFieldName, final ModelType modelType) {
         if (Utils.isWrapperOrPrimitiveOrDate(field)) {
-            return readField(field, prefix);
+            return readField(field, prefix, classFieldName, modelType);
         } else {
-            return unFlattenClass(rootClassUnit, field, prefix);
+            return unFlattenClass(rootClassUnit, field, prefix, classFieldName, modelType);
         }
     }
 
-    private static String unFlattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field, final String prefix) {
-        final ResolvedReferenceTypeDeclaration resolvedType =
-                JavaParserFacade.get(TrapeaseTypeSolver.get())
-                        .getType(field.getVariables().get(0))
-                        .asReferenceType()
-                        .getTypeDeclaration();
+    private static String unFlattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field, final String prefix, final String classFieldName, final ModelType modelType) {
+        ResolvedReferenceTypeDeclaration resolvedType = null;
+
+
+        if (Utils.isCollection(field.getElementType().resolve())) {
+            resolvedType = field.getElementType().resolve()
+                    .asReferenceType()
+                    .getTypeParametersMap()
+                    .get(0).b
+                    .asReferenceType()
+                    .getTypeDeclaration();
+        } else {
+            resolvedType = JavaParserFacade.get(TrapeaseTypeSolver.get())
+                    .getType(field.getVariables().get(0))
+                    .asReferenceType()
+                    .getTypeDeclaration();
+        }
 
         if (resolvedType.isEnum()) {
-            return readField(field, prefix);
+            return readField(field, prefix, classFieldName, modelType);
         } else {
             final List<ResolvedFieldDeclaration> allFields = resolvedType.getAllFields();
 
@@ -475,23 +515,43 @@ public class CmdGenerator {
                 rootClassUnit.addImport(resolvedType.getPackageName() + "." + objectClass);
             }
 
-            return "." + field.getVariables().get(0) +
-                    "(" +
-                    objectClass +
-                    ".builder()" +
-                    readBuilderFields(rootClassUnit, fieldsToBeExpanded, field.getVariables().get(0).getNameAsString()) +
-                    ".build()" +
-                    ")";
+            if (modelType == ModelType.BUILDER) {
+                return "." + field.getVariables().get(0) +
+                        "(" +
+                        objectClass +
+                        ".builder()" +
+                        readInstanceFields(rootClassUnit, fieldsToBeExpanded, field.getVariables().get(0).getNameAsString(), classFieldName, ModelType.BUILDER) +
+                        ".build()" +
+                        ")";
+            } else {
+                VariableDeclarator variable = field.getVariables().get(0);
+                String statements = "final " + resolvedType.getClassName() + " " + resolvedType.getClassName().toLowerCase() + " = new " + resolvedType.getClassName() + "();\n";
+
+                if (variable.getTypeAsString().contains("List<")) {
+                    statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded, resolvedType.getClassName().toLowerCase(), resolvedType.getClassName().toLowerCase(), ModelType.SETTER);
+                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(java.util.Arrays.asList(" + resolvedType.getClassName().toLowerCase() + "));";
+                } else {
+                    statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded, variable.getNameAsString(), variable.getNameAsString(), ModelType.SETTER);
+                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(" + variable.getNameAsString() + ");\n";
+                }
+                return statements;
+            }
+
         }
     }
 
-    private static String readField(final FieldDeclaration field, final String prefix) {
+    private static String readField(final FieldDeclaration field, final String prefix, final String classFieldName, final ModelType modelType) {
         FieldDeclaration newField = field.clone();
         if (!newField.getAnnotationByName("Model").isPresent() ||
                 !Utils.hasOperations(newField)) {
             final String fieldName = field.getVariables().get(0).getNameAsString();
             final String readFieldName = "".equals(prefix) ? fieldName : prefix + WordUtils.capitalize(fieldName);
-            return "." + fieldName + "( " + readFieldName + ")";
+
+            if (modelType == ModelType.BUILDER) {
+                return "." + fieldName + "( " + readFieldName + ")";
+            } else {
+                return classFieldName + ".set" + WordUtils.capitalize(fieldName) + "(" + readFieldName + ");\n";
+            }
         }
 
         return "";

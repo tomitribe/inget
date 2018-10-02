@@ -42,12 +42,12 @@ import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.Utils;
-import org.tomitribe.util.IO;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,10 +67,12 @@ public class ClientGenerator {
         ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(cBuilder.toString()));
 
-        List<File> relatedResources = Utils.getResources();
+        Map<String, String> relatedResources = Utils.getResources();
 
-        for (File resource : relatedResources) {
-            generateClient(resource, genericClientClass);
+        Iterator<Map.Entry<String, String>> it = relatedResources.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<String, String> resource = it.next();
+            generateClient(resource.getKey(), resource.getValue(), genericClientClass);
         }
         save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
     }
@@ -158,14 +160,13 @@ public class ClientGenerator {
         Utils.save("ClientConfiguration.java", outputBasePackage, content.toString());
     }
 
-    private static void generateClient(File resource, ClassOrInterfaceDeclaration genericResourceClientClass) throws IOException {
-        final String resourceClientSource = IO.slurp(resource);
-        final CompilationUnit resourceClientUnit = JavaParser.parse(resourceClientSource);
+    private static void generateClient(String fileName, String resourceContent, ClassOrInterfaceDeclaration genericResourceClientClass) throws IOException {
+        final CompilationUnit resourceClientUnit = JavaParser.parse(resourceContent);
         final ClassOrInterfaceDeclaration resourceClientClass = Utils.getClazz(resourceClientUnit);
 
         final String clientClassPackage = Configuration.RESOURCE_PACKAGE + ".client.interfaces";
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(clientClassPackage);
-        final String clientName = resource.getName().replace(".java", "Client");
+        final String clientName = fileName.replace(".java", "Client");
         newClassCompilationUnit.addClass(clientName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(clientName).get();
         newClass.setInterface(true);
@@ -221,7 +222,7 @@ public class ClientGenerator {
         FieldDeclaration reference = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), var);
         genericClientClass.getMembers().add(0, reference);
         genericClientClass.findCompilationUnit().get().addImport(pkg + "." + clientName);
-        String name = clientName.replace(Configuration.RESOURCE_SUFFIX + "Client", "");
+        String name = clientName.replace("Client", "");
         MethodDeclaration referenceMethod = new MethodDeclaration();
         referenceMethod.setModifiers(EnumSet.of(Modifier.PUBLIC));
         referenceMethod.setName(name.toLowerCase());

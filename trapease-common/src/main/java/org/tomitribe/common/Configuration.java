@@ -38,7 +38,7 @@ public class Configuration {
     }
 
     public static String getClientPath() {
-        return getResourcePath() + File.separator + "client";
+        return CLIENT_SOURCES + File.separator + Utils.transformPackageToPath(RESOURCE_PACKAGE) + File.separator + "client";
     }
 
     public static String getClientPackage(){
