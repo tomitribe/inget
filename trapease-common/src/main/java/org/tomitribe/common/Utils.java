@@ -29,6 +29,8 @@ import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.types.ResolvedType;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 
@@ -675,5 +677,17 @@ public class Utils {
         }
 
         return f.getCommonType().isPrimitiveType() || isWrapper || isDate;
+    }
+
+    public static boolean isCollection(final ResolvedType type) {
+        if (type.isReferenceType()) {
+            final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
+
+            if (typeDeclaration.canBeAssignedTo(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
