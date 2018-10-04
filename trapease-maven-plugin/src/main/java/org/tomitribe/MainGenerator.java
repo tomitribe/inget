@@ -122,6 +122,7 @@ public class MainGenerator extends AbstractMojo {
 
                     clientDependencies.forEach(m -> extractJavaFiles(m.getFile()));
                     Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
+                    Configuration.CLIENT_SOURCES = Configuration.TEMP_SOURCE;
                 }
                 Configuration.CMD_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd";
                 getLog().info("Started Command Code Generation.");
@@ -260,7 +261,8 @@ public class MainGenerator extends AbstractMojo {
             Enumeration<? extends JarEntry> enumeration = jar.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = enumeration.nextElement();
-                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE) + File.separator + "client")) {
+                String pkg = Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE) + File.separator + "client";
+                if (zipEntry.getName().equals(pkg) || zipEntry.getName().equals(pkg + File.separator)) {
                     return true;
                 }
             }

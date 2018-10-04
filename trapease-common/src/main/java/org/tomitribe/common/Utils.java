@@ -467,7 +467,7 @@ public class Utils {
                 e.printStackTrace();
             }
 
-            if(content != null && content.contains("javax.ws.rs.Path")){
+            if(content != null && content.contains("javax.ws.rs") && content.contains("@Path")){
                 resourcesMap.put(next.getKey(), content);
             }
         }

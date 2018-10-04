@@ -80,7 +80,7 @@ public class CmdGenerator {
         final Map<String, List<String>> groups = new HashMap<>();
         for (final File sourceClient : sourceClients) {
             final CompilationUnit client = JavaParser.parse(sourceClient);
-            if (!client.toString().contains("javax.ws.rs.Path")) {
+            if (!(client.toString().contains("javax.ws.rs") && client.toString().contains("@Path"))) {
                 continue;
             }
             final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
@@ -256,6 +256,15 @@ public class CmdGenerator {
                                       final String name,
                                       final CompilationUnit command,
                                       final ClassOrInterfaceDeclaration commandClass) {
+
+        boolean isPresent = commandClass.getFields()
+                .stream().filter(f -> f.getVariables().get(0).getNameAsString().equals(name))
+                .findFirst()
+                .isPresent();
+        if(isPresent){
+            return;
+        }
+
         final FieldDeclaration flag = commandClass.addField(type, name, Modifier.PRIVATE);
 
         final NormalAnnotationExpr argumentsAnnotation = new NormalAnnotationExpr();
@@ -335,7 +344,7 @@ public class CmdGenerator {
                 + clientMethod.getNameAsString() + "(" + Join.join(",", runParams) + ")";
 
         if (!clientMethod.getType().isVoidType()) {
-            runCommand = "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().build().writeObjectAsString(" + runCommand + "));";
+            runCommand = "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(" + runCommand + "));";
         } else {
             runCommand += ";";
         }
