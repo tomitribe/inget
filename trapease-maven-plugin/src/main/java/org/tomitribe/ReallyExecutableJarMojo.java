@@ -13,6 +13,7 @@ package org.tomitribe;/*
  */
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -100,21 +101,34 @@ public class ReallyExecutableJarMojo extends AbstractMojo
     @Parameter(property = "really-executable-jar.scriptFile")
     private String scriptFile = null;
 
+    @Parameter(property = "really-executable-jar.shadedJar")
+    private String shadedJar = null;
+
     @Override
     public void execute() throws MojoExecutionException
     {
         try {
+
             List<File> files = new ArrayList<File>();
+            if(!StringUtils.isEmpty(shadedJar)){
+                File f = new File(project.getBasedir() + "/target", shadedJar);
+                if(f.exists()){
+                    files.add(f);
+                }
+            } else {
+                if (shouldProcess(project.getArtifact())) {
+                    files.add(project.getArtifact().getFile());
+                }
 
-            if (shouldProcess(project.getArtifact())) {
-                files.add(project.getArtifact().getFile());
-            }
-
-            for (Artifact item : project.getAttachedArtifacts()) {
-                if (shouldProcess(item)) {
-                    files.add(item.getFile());
+                for (Artifact item : project.getAttachedArtifacts()) {
+                    if (shouldProcess(item)) {
+                        files.add(item.getFile());
+                    }
                 }
             }
+
+
+
 
             if (files.isEmpty()) {
                 throw new MojoExecutionException("Could not find any jars to make executable");
