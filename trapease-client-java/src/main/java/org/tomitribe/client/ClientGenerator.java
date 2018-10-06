@@ -36,11 +36,11 @@ import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
-import org.tomitribe.client.base.ClientTemplates;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
+import org.tomitribe.common.TemplateUtil;
 import org.tomitribe.common.Utils;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class ClientGenerator {
         Map<String, String> relatedResources = Utils.getResources();
 
         Iterator<Map.Entry<String, String>> it = relatedResources.entrySet().iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             Map.Entry<String, String> resource = it.next();
             generateClient(resource.getKey(), resource.getValue(), genericClientClass);
         }
@@ -79,7 +79,11 @@ public class ClientGenerator {
 
     private static void createBaseClientClasses() throws IOException {
         final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client.base";
-        createClientConfiguration(outputBasePackage);
+        createTemplateClass(outputBasePackage, "ClientConfiguration.java");
+        createTemplateClass(outputBasePackage, "SignatureConfiguration.java");
+        createTemplateClass(outputBasePackage, "SignatureAuthenticator.java");
+        createTemplateClass(outputBasePackage, "BasicConfiguration.java");
+        createTemplateClass(outputBasePackage, "BasicAuthenticator.java");
         createClientExceptions(outputBasePackage);
     }
 
@@ -122,8 +126,8 @@ public class ClientGenerator {
                 exceptionMapper.getClassByName(Configuration.CLIENT_NAME + "ExceptionMapper").get();
         exceptionMapperClass.addImplementedType("ResponseExceptionMapper");
         exceptionMapperClass.getImplementedTypes()
-                            .get(0)
-                            .setTypeArguments(new TypeParameter(clientExceptionClass.getNameAsString()));
+                .get(0)
+                .setTypeArguments(new TypeParameter(clientExceptionClass.getNameAsString()));
         exceptionMapper.addImport("org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper");
 
         exceptionMapperClass.addAnnotation("Provider");
@@ -139,11 +143,11 @@ public class ClientGenerator {
         final SwitchStmt switchStmt = new SwitchStmt();
         switchStmt.setSelector(new MethodCallExpr(new NameExpr("response"), "getStatus"));
         switchStmt.getEntries()
-                  .add(new SwitchEntryStmt(new IntegerLiteralExpr(404),
-                                           new NodeList<>(new ReturnStmt(
-                                                   new ObjectCreationExpr(null, JavaParser.parseClassOrInterfaceType(
-                                                           entityNotFoundExceptionClass.getNameAsString()),
-                                                                          new NodeList<>())))));
+                .add(new SwitchEntryStmt(new IntegerLiteralExpr(404),
+                        new NodeList<>(new ReturnStmt(
+                                new ObjectCreationExpr(null, JavaParser.parseClassOrInterfaceType(
+                                        entityNotFoundExceptionClass.getNameAsString()),
+                                        new NodeList<>())))));
         switchStmt.getEntries().addLast(new SwitchEntryStmt());
         toThrowableBody.addStatement(switchStmt);
         toThrowableBody.addStatement(new ReturnStmt(new NullLiteralExpr()));
@@ -153,11 +157,10 @@ public class ClientGenerator {
         save(outputBasePackage, Configuration.CLIENT_NAME + "ExceptionMapper", exceptionMapper);
     }
 
-    private static void createClientConfiguration(final String outputBasePackage) throws IOException {
-        final CompilationUnit content = JavaParser.parse(ClientTemplates.CLIENT_CONFIGURATION);
+    private static void createTemplateClass(final String outputBasePackage, final String clazzName) throws IOException {
+        final CompilationUnit content = JavaParser.parse(TemplateUtil.readTemplate(clazzName));
         content.setPackageDeclaration(outputBasePackage);
-        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
-        Utils.save("ClientConfiguration.java", outputBasePackage, content.toString());
+        Utils.save(clazzName, outputBasePackage, content.toString());
     }
 
     private static void generateClient(String fileName, String resourceContent, ClassOrInterfaceDeclaration genericResourceClientClass) throws IOException {
@@ -222,7 +225,9 @@ public class ClientGenerator {
         FieldDeclaration reference = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), var);
         genericClientClass.getMembers().add(0, reference);
         genericClientClass.findCompilationUnit().get().addImport(pkg + "." + clientName);
-        String name = clientName.replace("Client", "");
+        final String replaceValue = Configuration.RESOURCE_SUFFIX == null ?
+                "Client" : Configuration.RESOURCE_SUFFIX + "Client";
+        String name = clientName.replace(replaceValue, "");
         MethodDeclaration referenceMethod = new MethodDeclaration();
         referenceMethod.setModifiers(EnumSet.of(Modifier.PUBLIC));
         referenceMethod.setName(name.toLowerCase());
@@ -231,6 +236,16 @@ public class ClientGenerator {
         genericClientClass.addMember(referenceMethod);
 
         ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
+        StringBuilder authentication = new StringBuilder();
+        authentication.append("if(config.getSignature() != null){");
+        authentication.append("builder.register(new " + Configuration.RESOURCE_PACKAGE + ".client.base.SignatureAuthenticator(config));");
+        authentication.append("}");
+        constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(authentication.toString()));
+        authentication = new StringBuilder();
+        authentication.append("if(config.getBasic() != null){");
+        authentication.append("builder.register(new " + Configuration.RESOURCE_PACKAGE + ".client.base.BasicAuthenticator(config));");
+        authentication.append("}");
+        constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(authentication.toString()));
         StringBuilder builder = new StringBuilder();
         builder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = builder.build(" + resourceClientClass.getNameAsString() + ".class);");
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(builder.toString()));

@@ -40,12 +40,12 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.ModelType;
-import org.tomitribe.cmd.base.TrapeaseTemplates;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Operation;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
+import org.tomitribe.common.TemplateUtil;
 import org.tomitribe.common.TrapeaseTypeSolver;
 import org.tomitribe.common.Utils;
 import org.tomitribe.util.Join;
@@ -84,8 +84,10 @@ public class CmdGenerator {
                 continue;
             }
             final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
+            final String replaceValue = Configuration.RESOURCE_SUFFIX == null ?
+                    "Client" : Configuration.RESOURCE_SUFFIX + "Client";
             final String clientGroup =
-                    clientClass.getNameAsString().replace("Client", "");
+                    clientClass.getNameAsString().replace(replaceValue, "");
 
             final List<MethodDeclaration> methods = clientClass.getMethods();
             final List<String> commands =
@@ -100,7 +102,7 @@ public class CmdGenerator {
     }
 
     private static void generateBaseCommand() throws IOException {
-        final CompilationUnit baseCommand = JavaParser.parse(TrapeaseTemplates.TRAPEASE_COMMAND);
+        final CompilationUnit baseCommand = JavaParser.parse(TemplateUtil.readTemplate("TrapeaseCommand.java"));
         baseCommand.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
         Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null);
         Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCommand.toString());
