@@ -65,7 +65,7 @@ public class MainGenerator extends AbstractMojo {
     @Parameter(property = "generate.client_name", defaultValue = "ResourceClient")
     private String clientName;
 
-    @Parameter(property = "generate.resource_suffix", defaultValue = "Resource")
+    @Parameter(property = "generate.resource_suffix")
     private String resourceSuffix;
 
     @Parameter(property = "generate.model_suffix", defaultValue = "Model")
