@@ -1,5 +1,3 @@
-package org.tomitribe.trapease.movie.rest.client.base;
-
 import java.io.IOException;
 import java.util.Base64;
 import javax.annotation.Generated;

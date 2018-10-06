@@ -1,5 +1,3 @@
-package org.tomitribe.trapease.movie.rest.client.base;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

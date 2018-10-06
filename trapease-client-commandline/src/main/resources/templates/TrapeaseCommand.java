@@ -1,5 +1,3 @@
-package org.tomitribe.trapease.movie.rest.cmd.base;
-
 import io.airlift.airline.Option;
 import io.airlift.airline.OptionType;
 import java.net.URL;

@@ -1,5 +1,3 @@
-package org.tomitribe.trapease.movie.rest.client.base;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

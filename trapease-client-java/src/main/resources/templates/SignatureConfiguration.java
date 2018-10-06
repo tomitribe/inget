@@ -1,5 +1,3 @@
-package org.tomitribe.trapease.movie.rest.client.base;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
