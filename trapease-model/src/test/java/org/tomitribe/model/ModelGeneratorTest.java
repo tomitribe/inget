@@ -67,4 +67,28 @@ public class ModelGeneratorTest {
         assertFiles(movies.expected(".*\\.java$"), movies.actual(".*\\.java$"));
     }
 
+    /**
+     * There appears to be a bug when changing the suffix
+     */
+    @Test
+    public void testCustomSuffix() throws Exception {
+        final Resources movies = Resources.name("custom-suffix");
+
+        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
+        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
+        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
+        Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
+        Configuration.RESOURCE_PACKAGE = null;
+        Configuration.CLIENT_NAME = "MovieClient";
+        Configuration.RESOURCE_SUFFIX = null;
+        Configuration.MODEL_SUFFIX = "Dao";
+        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+
+        // do the magic
+        ModelGenerator.execute();
+
+        // check the magic
+        assertFiles(movies.expected(".*\\.java$"), movies.actual(".*\\.java$"));
+    }
+
 }
