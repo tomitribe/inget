@@ -16,6 +16,11 @@
   <dependencies>
     <dependency>
       <groupId>org.tomitribe</groupId>
+      <artifactId>trapease-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tomitribe</groupId>
       <artifactId>trapease-common</artifactId>
       <version>${project.version}</version>
     </dependency>

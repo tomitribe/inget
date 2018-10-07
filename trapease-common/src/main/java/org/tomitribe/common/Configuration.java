@@ -44,4 +44,19 @@ public class Configuration {
     public static String getClientPackage() {
         return Configuration.RESOURCE_PACKAGE + ".client";
     }
+
+    public static void clean() {
+        TEMP_SOURCE = null;
+        MODEL_SUFFIX = null;
+        RESOURCE_SOURCES = null;
+        MODEL_SOURCES = null;
+        GENERATED_SOURCES = null;
+        MAIN_CLASS = null;
+        MODEL_PACKAGE = null;
+        RESOURCE_PACKAGE = null;
+        RESOURCE_SUFFIX = null;
+        CLIENT_NAME = null;
+        CLIENT_SOURCES = null;
+        CMD_PACKAGE = null;
+    }
 }
