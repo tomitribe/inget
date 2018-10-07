@@ -18,6 +18,7 @@ package org.tomitribe.model;
 
 import org.junit.Test;
 import org.tomitribe.common.Configuration;
+import org.tomitribe.trapease.test.Generation;
 import org.tomitribe.trapease.test.Resources;
 
 import static org.tomitribe.trapease.test.Scenarios.assertFiles;
@@ -32,7 +33,28 @@ public class ModelGeneratorTest {
         Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "org.tomitribe.trapease.movie.model";
-        Configuration.RESOURCE_PACKAGE = "org.tomitribe.trapease.movie.rest";
+        Configuration.RESOURCE_PACKAGE = null;
+        Configuration.CLIENT_NAME = "MovieClient";
+        Configuration.RESOURCE_SUFFIX = null;
+        Configuration.MODEL_SUFFIX = "Model";
+        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+
+        // do the magic
+        ModelGenerator.execute();
+
+        // check the magic
+        assertFiles(movies.expected(".*\\.java$"), movies.actual(".*\\.java$"));
+    }
+
+    @Test
+    public void testCustomPackage() throws Exception {
+        final Resources movies = Resources.name("custom-package");
+
+        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
+        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
+        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
+        Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
+        Configuration.RESOURCE_PACKAGE = null;
         Configuration.CLIENT_NAME = "MovieClient";
         Configuration.RESOURCE_SUFFIX = null;
         Configuration.MODEL_SUFFIX = "Model";
