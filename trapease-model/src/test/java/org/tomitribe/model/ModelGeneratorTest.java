@@ -18,7 +18,6 @@ package org.tomitribe.model;
 
 import org.junit.Test;
 import org.tomitribe.common.Configuration;
-import org.tomitribe.trapease.test.Generation;
 import org.tomitribe.trapease.test.Resources;
 
 import static org.tomitribe.trapease.test.Scenarios.assertFiles;
@@ -34,7 +33,7 @@ public class ModelGeneratorTest {
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "org.tomitribe.trapease.movie.model";
         Configuration.RESOURCE_PACKAGE = null;
-        Configuration.CLIENT_NAME = "MovieClient";
+        Configuration.CLIENT_NAME = null;
         Configuration.RESOURCE_SUFFIX = null;
         Configuration.MODEL_SUFFIX = "Model";
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
@@ -55,7 +54,7 @@ public class ModelGeneratorTest {
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
         Configuration.RESOURCE_PACKAGE = null;
-        Configuration.CLIENT_NAME = "MovieClient";
+        Configuration.CLIENT_NAME = null;
         Configuration.RESOURCE_SUFFIX = null;
         Configuration.MODEL_SUFFIX = "Model";
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
@@ -79,7 +78,7 @@ public class ModelGeneratorTest {
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
         Configuration.RESOURCE_PACKAGE = null;
-        Configuration.CLIENT_NAME = "MovieClient";
+        Configuration.CLIENT_NAME = null;
         Configuration.RESOURCE_SUFFIX = null;
         Configuration.MODEL_SUFFIX = "Dao";
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
