@@ -31,5 +31,5 @@ class MovieDao {
     private String genre;
     private int year;
     private int rating;
-    private CredentialModel credential;
+    private CredentialDao credential;
 }

@@ -66,9 +66,6 @@ public class ModelGeneratorTest {
         assertFiles(movies.expected(".*\\.java$"), movies.actual(".*\\.java$"));
     }
 
-    /**
-     * There appears to be a bug when changing the suffix
-     */
     @Test
     public void testCustomSuffix() throws Exception {
         final Resources movies = Resources.name("custom-suffix");
