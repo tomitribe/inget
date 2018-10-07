@@ -19,7 +19,6 @@ package org.tomitribe.model;
 import org.junit.Test;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.trapease.test.Resources;
-import org.tomitribe.trapease.test.Generation;
 
 import static org.tomitribe.trapease.test.Scenarios.assertFiles;
 
@@ -40,7 +39,7 @@ public class OperationCreateTest {
         // do the magic
         ModelGenerator.execute();
 
-        Generation.saveResults("OperationCreateTest/testOnClass", "expected", resources.actual(".*\\.java$"));
+        // Generation.saveResults("OperationCreateTest/testOnClass", "expected", resources.actual(".*\\.java$"));
 
         // check the magic
         assertFiles(resources.expected(".*\\.java$"), resources.actual(".*\\.java$"));
@@ -61,7 +60,7 @@ public class OperationCreateTest {
         // do the magic
         ModelGenerator.execute();
 
-        Generation.saveResults("OperationCreateTest/testOnField", "expected", resources.actual(".*\\.java$"));
+        // Generation.saveResults("OperationCreateTest/testOnField", "expected", resources.actual(".*\\.java$"));
 
         // check the magic
         assertFiles(resources.expected(".*\\.java$"), resources.actual(".*\\.java$"));
