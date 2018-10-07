@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface TypeInfo {
     String value() default "";
+
     boolean isEnum() default false;
 }

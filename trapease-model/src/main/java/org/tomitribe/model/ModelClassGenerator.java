@@ -139,7 +139,7 @@ public class ModelClassGenerator {
     static CompilationUnit createListClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
                                            String rootClassName, CompilationUnit filterClassUnit,
                                            CompilationUnit summaryClassUnit, String listClassName) throws IOException {
-        if(!rootClass.getAnnotationByName("Resource").isPresent()){
+        if (!rootClass.getAnnotationByName("Resource").isPresent()) {
             return null;
         }
         String summaryClassValue = rootClassName;
@@ -240,7 +240,7 @@ public class ModelClassGenerator {
     }
 
     static CompilationUnit createBulkClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass, String rootClassName, String bulkClassName) throws IOException {
-        if(!rootClass.getAnnotationByName("Resource").isPresent()){
+        if (!rootClass.getAnnotationByName("Resource").isPresent()) {
             return null;
         }
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(rootClassUnit.getPackageDeclaration().get().getName().toString());

@@ -1,36 +1,35 @@
 import io.airlift.airline.Option;
 import io.airlift.airline.OptionType;
-import java.net.URL;
-import javax.annotation.Generated;
-
 import org.tomitribe.trapease.movie.rest.client.base.BasicConfiguration;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
 import org.tomitribe.trapease.movie.rest.client.base.SignatureConfiguration;
 
+import java.net.URL;
+
 public abstract class TrapeaseCommand implements Runnable {
 
     @Option(name = {
-            "-l", "--url" }, type = OptionType.GLOBAL)
+            "-l", "--url"}, type = OptionType.GLOBAL)
     private URL url;
 
     @Option(name = {
-            "-v", "--verbose" }, type = OptionType.GLOBAL)
+            "-v", "--verbose"}, type = OptionType.GLOBAL)
     private boolean verbose;
 
     @Option(name = {
-            "-k", "--key-id" }, type = OptionType.GLOBAL)
+            "-k", "--key-id"}, type = OptionType.GLOBAL)
     private String keyId;
 
     @Option(name = {
-            "-n", "--key-location" }, type = OptionType.GLOBAL)
+            "-n", "--key-location"}, type = OptionType.GLOBAL)
     private String keyLocation;
 
     @Option(name = {
-            "-u", "--username" }, type = OptionType.GLOBAL)
+            "-u", "--username"}, type = OptionType.GLOBAL)
     private String username;
 
     @Option(name = {
-            "-p", "--password" }, type = OptionType.GLOBAL)
+            "-p", "--password"}, type = OptionType.GLOBAL)
     private String password;
 
     @Override
@@ -45,7 +44,7 @@ public abstract class TrapeaseCommand implements Runnable {
                     .prefix("Signature").build();
         }
 
-        if(username != null && password != null){
+        if (username != null && password != null) {
             basicConfiguration = BasicConfiguration.builder()
                     .header("Authorization")
                     .prefix("Basic")

@@ -1,9 +1,9 @@
-import java.io.IOException;
-import java.util.Base64;
 import javax.annotation.Generated;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
+import java.io.IOException;
+import java.util.Base64;
 
 @Generated(value = "org.tomitribe.model.ModelGenerator")
 public class BasicAuthenticator implements ClientRequestFilter {
@@ -30,7 +30,7 @@ public class BasicAuthenticator implements ClientRequestFilter {
             String password) {
         String value = "Basic " + new String(Base64.getEncoder().encode((username + ":" + password).getBytes()));
 
-        if(config.isVerbose()){
+        if (config.isVerbose()) {
             System.out.println(value);
         }
         return value;

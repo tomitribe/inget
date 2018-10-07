@@ -14,7 +14,7 @@ package org.tomitribe.exception;
 
 public class GeneratorException extends RuntimeException {
 
-    public GeneratorException(final String message){
+    public GeneratorException(final String message) {
         super(message);
     }
 }

@@ -455,10 +455,10 @@ public class Utils {
                 .distinct()
                 .collect(Collectors.toMap(File::getName, f -> f));
 
-        Map<String,String> resourcesMap = new HashMap<>();
+        Map<String, String> resourcesMap = new HashMap<>();
 
         Iterator<Map.Entry<String, File>> it = collect.entrySet().iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             Map.Entry<String, File> next = it.next();
             String content = null;
             try {
@@ -467,7 +467,7 @@ public class Utils {
                 e.printStackTrace();
             }
 
-            if(content != null && content.contains("javax.ws.rs") && content.contains("@Path")){
+            if (content != null && content.contains("javax.ws.rs") && content.contains("@Path")) {
                 resourcesMap.put(next.getKey(), content);
             }
         }

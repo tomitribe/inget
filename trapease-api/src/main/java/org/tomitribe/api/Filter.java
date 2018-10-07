@@ -21,5 +21,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Filter {
     String name() default "";
+
     boolean multiple() default true;
 }

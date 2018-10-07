@@ -112,8 +112,8 @@ public class MainGenerator extends AbstractMojo {
                     Configuration.CLIENT_SOURCES = Configuration.getClientPath();
                 } else {
                     List<Artifact> clientDependencies = artifacts.stream()
-                                                                 .filter(a -> hasClient(a.getFile()))
-                                                                 .collect(Collectors.toList());
+                            .filter(a -> hasClient(a.getFile()))
+                            .collect(Collectors.toList());
 
                     if (clientDependencies.size() == 0) {
                         throw new MojoExecutionException(
@@ -155,10 +155,10 @@ public class MainGenerator extends AbstractMojo {
         } else {
             if (resourcePackage != null) {
                 List<String> compileSourceRoots = project.getCompileSourceRoots();
-                if(compileSourceRoots != null){
-                    for(String source : compileSourceRoots){
+                if (compileSourceRoots != null) {
+                    for (String source : compileSourceRoots) {
                         File folder = new File(source, Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE));
-                        if(folder.exists()){
+                        if (folder.exists()) {
                             Configuration.RESOURCE_SOURCES = source;
                             return;
                         }
@@ -196,10 +196,10 @@ public class MainGenerator extends AbstractMojo {
         } else {
             if (modelPackage != null) {
                 List<String> compileSourceRoots = project.getCompileSourceRoots();
-                if(compileSourceRoots != null){
-                    for(String source : compileSourceRoots){
+                if (compileSourceRoots != null) {
+                    for (String source : compileSourceRoots) {
                         File folder = new File(source, Utils.transformPackageToPath(Configuration.MODEL_PACKAGE));
-                        if(folder.exists()){
+                        if (folder.exists()) {
                             Configuration.MODEL_SOURCES = source;
                             return;
                         }

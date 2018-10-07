@@ -1,7 +1,5 @@
 package org.tomitribe.model.base;
 
-import org.tomitribe.common.Configuration;
-
 public class ModelTemplates {
 
     public static String FAILURE =

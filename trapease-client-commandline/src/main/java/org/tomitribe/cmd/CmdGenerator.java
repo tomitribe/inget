@@ -263,7 +263,7 @@ public class CmdGenerator {
                 .stream().filter(f -> f.getVariables().get(0).getNameAsString().equals(name))
                 .findFirst()
                 .isPresent();
-        if(isPresent){
+        if (isPresent) {
             return;
         }
 

@@ -23,17 +23,17 @@ public class Configuration {
     public static String GENERATED_SOURCES;
     public static String MAIN_CLASS = "org.tomitribe.model.ModelGenerator";
     public static String MODEL_PACKAGE;
-    public static String RESOURCE_PACKAGE ;
+    public static String RESOURCE_PACKAGE;
     public static String RESOURCE_SUFFIX;
     public static String CLIENT_NAME;
     public static String CLIENT_SOURCES;
     public static String CMD_PACKAGE;
 
-    public static String getModelPath(){
+    public static String getModelPath() {
         return MODEL_SOURCES + File.separator + Utils.transformPackageToPath(MODEL_PACKAGE);
     }
 
-    public static String getResourcePath(){
+    public static String getResourcePath() {
         return RESOURCE_SOURCES + File.separator + Utils.transformPackageToPath(RESOURCE_PACKAGE);
     }
 
@@ -41,7 +41,7 @@ public class Configuration {
         return CLIENT_SOURCES + File.separator + Utils.transformPackageToPath(RESOURCE_PACKAGE) + File.separator + "client";
     }
 
-    public static String getClientPackage(){
+    public static String getClientPackage() {
         return Configuration.RESOURCE_PACKAGE + ".client";
     }
 }

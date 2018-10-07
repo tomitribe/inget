@@ -1,3 +1,15 @@
+import org.apache.commons.lang3.StringUtils;
+import org.tomitribe.auth.signatures.Algorithm;
+import org.tomitribe.auth.signatures.Signature;
+import org.tomitribe.auth.signatures.Signer;
+import org.tomitribe.churchkey.Key;
+import org.tomitribe.churchkey.Keys;
+import org.tomitribe.util.IO;
+
+import javax.annotation.Generated;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,18 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
-import javax.annotation.Generated;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.MultivaluedMap;
-
-import org.apache.commons.lang3.StringUtils;
-import org.tomitribe.auth.signatures.Algorithm;
-import org.tomitribe.auth.signatures.Signature;
-import org.tomitribe.auth.signatures.Signer;
-import org.tomitribe.churchkey.Key;
-import org.tomitribe.churchkey.Keys;
-import org.tomitribe.util.IO;
 
 @Generated(value = "org.tomitribe.model.ModelGenerator")
 public class SignatureAuthenticator implements ClientRequestFilter {
@@ -40,12 +40,12 @@ public class SignatureAuthenticator implements ClientRequestFilter {
         MultivaluedMap<String, Object> headers = requestContext.getHeaders();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         String date = sdf.format(new Date());
-        if(config.isVerbose()){
+        if (config.isVerbose()) {
             System.out.println("Signature date: " + date);
         }
         headers.add("date", date);
         final String authentication = getSignatureAuthentication(requestContext, headers);
-        if(authentication != null){
+        if (authentication != null) {
             headers.add(sigConfig.getHeader(), authentication);
         }
     }
@@ -56,7 +56,7 @@ public class SignatureAuthenticator implements ClientRequestFilter {
 
         String privateKey = findKey();
 
-        if(privateKey == null){
+        if (privateKey == null) {
             System.out.println("Private key could not be found.");
             return null;
         }
@@ -99,29 +99,29 @@ public class SignatureAuthenticator implements ClientRequestFilter {
     private String findKey() {
         String privateKey = null;
         try {
-            if(StringUtils.isEmpty(sigConfig.getKeyLocation())){
+            if (StringUtils.isEmpty(sigConfig.getKeyLocation())) {
                 if (sigConfig.getKeyId() != null) {
                     File keyLocation = new File(System.getProperty("user.home") + File.separator
                             + ".ssh" + File.separator + sigConfig.getKeyId());
-                    if(keyLocation.exists()){
+                    if (keyLocation.exists()) {
                         privateKey = IO.slurp(new FileInputStream(keyLocation));
-                        if(config.isVerbose()){
+                        if (config.isVerbose()) {
                             System.out.println("Using key: " + keyLocation.getAbsolutePath());
                         }
                     } else {
-                        throw new FileNotFoundException("counldn't find key on "+ keyLocation.getAbsolutePath());
+                        throw new FileNotFoundException("counldn't find key on " + keyLocation.getAbsolutePath());
                     }
                 }
-            }else {
+            } else {
                 String keyLocation = sigConfig.getKeyLocation();
                 File keyLocationFile = new File(keyLocation);
-                if(keyLocationFile.exists()){
+                if (keyLocationFile.exists()) {
                     privateKey = IO.slurp(new FileInputStream(keyLocationFile));
-                    if(config.isVerbose()){
+                    if (config.isVerbose()) {
                         System.out.println("Using key: " + keyLocationFile.getAbsolutePath());
                     }
-                }else{
-                    throw new FileNotFoundException("counldn't find key on "+ keyLocationFile.getAbsolutePath());
+                } else {
+                    throw new FileNotFoundException("counldn't find key on " + keyLocationFile.getAbsolutePath());
                 }
 
             }

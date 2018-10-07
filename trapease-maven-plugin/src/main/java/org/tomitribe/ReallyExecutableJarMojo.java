@@ -45,11 +45,10 @@ import java.util.List;
  *
  */
 @Mojo(name = "really-executable-jar",
-                requiresProject = true,
-                threadSafe = true,
-                defaultPhase = LifecyclePhase.PACKAGE)
-public class ReallyExecutableJarMojo extends AbstractMojo
-{
+        requiresProject = true,
+        threadSafe = true,
+        defaultPhase = LifecyclePhase.PACKAGE)
+public class ReallyExecutableJarMojo extends AbstractMojo {
     /**
      * The Maven project.
      */
@@ -86,13 +85,13 @@ public class ReallyExecutableJarMojo extends AbstractMojo
     /**
      * Attach the binary as an artifact to the deploy.
      */
-    @Parameter(defaultValue="false", property = "really-executable-jar.attachProgramFile")
+    @Parameter(defaultValue = "false", property = "really-executable-jar.attachProgramFile")
     private boolean attachProgramFile = false;
 
     /**
      * File ending of the program artifact.
      */
-    @Parameter(defaultValue="sh", property = "really-executable-jar.programFileType")
+    @Parameter(defaultValue = "sh", property = "really-executable-jar.programFileType")
     private String programFileType = "sh";
 
     /**
@@ -105,14 +104,13 @@ public class ReallyExecutableJarMojo extends AbstractMojo
     private String shadedJar = null;
 
     @Override
-    public void execute() throws MojoExecutionException
-    {
+    public void execute() throws MojoExecutionException {
         try {
 
             List<File> files = new ArrayList<File>();
-            if(!StringUtils.isEmpty(shadedJar)){
+            if (!StringUtils.isEmpty(shadedJar)) {
                 File f = new File(project.getBasedir() + "/target", shadedJar);
-                if(f.exists()){
+                if (f.exists()) {
                     files.add(f);
                 }
             } else {
@@ -126,8 +124,6 @@ public class ReallyExecutableJarMojo extends AbstractMojo
                     }
                 }
             }
-
-
 
 
             if (files.isEmpty()) {
@@ -150,15 +146,13 @@ public class ReallyExecutableJarMojo extends AbstractMojo
                 }
             }
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
     }
 
-    private boolean shouldProcess(Artifact artifact)
-    {
+    private boolean shouldProcess(Artifact artifact) {
         getLog().debug("Considering " + artifact);
         if (artifact == null) {
             return false;
@@ -172,8 +166,7 @@ public class ReallyExecutableJarMojo extends AbstractMojo
     }
 
     private void makeExecutable(File file)
-            throws IOException,MojoExecutionException
-    {
+            throws IOException, MojoExecutionException {
         getLog().debug("Making " + file.getAbsolutePath() + " executable");
 
         Path original = Paths.get(file.getAbsolutePath() + ".rx-orig");
@@ -183,15 +176,13 @@ public class ReallyExecutableJarMojo extends AbstractMojo
 
             if (scriptFile == null) {
                 out.write(("#!/bin/sh\n\nexec java " + flags + " -jar \"$0\" \"$@\"\n\n").getBytes("ASCII"));
-            }
-            else if (Files.exists(Paths.get(scriptFile))) {
+            } else if (Files.exists(Paths.get(scriptFile))) {
                 getLog().debug(String.format("Loading file[%s] from filesystem", scriptFile));
 
                 byte[] script = Files.readAllBytes(Paths.get(scriptFile));
                 out.write(script);
                 out.write(new byte[]{'\n', '\n'});
-            }
-            else {
+            } else {
                 getLog().debug(String.format("Loading file[%s] from jar[%s]", scriptFile, original));
 
                 try (final URLClassLoader loader = new URLClassLoader(new URL[]{original.toUri().toURL()}, null);
@@ -202,8 +193,7 @@ public class ReallyExecutableJarMojo extends AbstractMojo
                 }
             }
             IOUtil.copy(in, out);
-        }
-        finally {
+        } finally {
             Files.deleteIfExists(original);
         }
 
