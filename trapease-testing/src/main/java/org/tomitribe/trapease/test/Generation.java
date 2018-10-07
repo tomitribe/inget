@@ -126,7 +126,7 @@ public class Generation {
                     "\n" +
                     "    @Test\n" +
                     "    public void testOnClass() throws Exception {\n" +
-                    "        final Resources resources = Resources.name(\"" + testName + "-OnClass\");\n" +
+                    "        final Resources resources = Resources.name(\"" + testName + "/testOnClass\");\n" +
                     "\n" +
                     "        Configuration.clean();\n" +
                     "        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();\n" +
@@ -139,7 +139,7 @@ public class Generation {
                     "        // do the magic\n" +
                     "        ModelGenerator.execute();\n" +
                     "\n" +
-                    "        Generation.saveResults(\"" + testName + "-OnClass\", \"expected\", resources.actual(\".*\\\\.java$\"));`\n" +
+                    "        Generation.saveResults(\"" + testName + "/testOnClass\", \"expected\", resources.actual(\".*\\\\.java$\"));\n" +
                     "\n" +
                     "        // check the magic\n" +
                     "        assertFiles(resources.expected(\".*\\\\.java$\"), resources.actual(\".*\\\\.java$\"));\n" +
@@ -147,7 +147,7 @@ public class Generation {
                     "\n" +
                     "    @Test\n" +
                     "    public void testOnField() throws Exception {\n" +
-                    "        final Resources resources = Resources.name(\"" + testName + "-OnField\");\n" +
+                    "        final Resources resources = Resources.name(\"" + testName + "/testOnField\");\n" +
                     "\n" +
                     "        Configuration.clean();\n" +
                     "        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();\n" +
@@ -160,7 +160,7 @@ public class Generation {
                     "        // do the magic\n" +
                     "        ModelGenerator.execute();\n" +
                     "\n" +
-                    "        Generation.saveResults(\"" + testName + "-OnField\", \"expected\", resources.actual(\".*\\\\.java$\"));`\n" +
+                    "        Generation.saveResults(\"" + testName + "/testOnField\", \"expected\", resources.actual(\".*\\\\.java$\"));\n" +
                     "\n" +
                     "        // check the magic\n" +
                     "        assertFiles(resources.expected(\".*\\\\.java$\"), resources.actual(\".*\\\\.java$\"));\n" +
@@ -168,7 +168,7 @@ public class Generation {
                     "}\n");
 
 
-            tests.put("resources/" + testName + "-OnField/io/superbiz/video/model/MovieModel.java", "" +
+            tests.put("resources/" + testName + "/testOnField/input/io/superbiz/video/model/MovieModel.java", "" +
                     "/*\n" +
                     " * Licensed to the Apache Software Foundation (ASF) under one or more\n" +
                     " * contributor license agreements.  See the NOTICE file distributed with\n" +
@@ -185,7 +185,7 @@ public class Generation {
                     " * See the License for the specific language governing permissions and\n" +
                     " * limitations under the License.\n" +
                     " */\n" +
-                    "package io.superbiz.video.dao;\n" +
+                    "package io.superbiz.video.model;\n" +
                     "\n" +
                     "import org.tomitribe.api.Filter;\n" +
                     "import org.tomitribe.api.Model;\n" +
@@ -206,7 +206,7 @@ public class Generation {
                     "}\n");
 
 
-            tests.put("resources/" + testName + "-OnClass/io/superbiz/video/model/MovieModel.java", "" +
+            tests.put("resources/" + testName + "/testOnClass/input/io/superbiz/video/model/MovieModel.java", "" +
                     "/*\n" +
                     " * Licensed to the Apache Software Foundation (ASF) under one or more\n" +
                     " * contributor license agreements.  See the NOTICE file distributed with\n" +
@@ -223,7 +223,7 @@ public class Generation {
                     " * See the License for the specific language governing permissions and\n" +
                     " * limitations under the License.\n" +
                     " */\n" +
-                    "package io.superbiz.video.dao;\n" +
+                    "package io.superbiz.video.model;\n" +
                     "\n" +
                     "import org.tomitribe.api.Filter;\n" +
                     "import org.tomitribe.api.Model;\n" +
