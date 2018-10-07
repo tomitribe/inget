@@ -51,7 +51,6 @@ public class Configuration {
         RESOURCE_SOURCES = null;
         MODEL_SOURCES = null;
         GENERATED_SOURCES = null;
-        MAIN_CLASS = null;
         MODEL_PACKAGE = null;
         RESOURCE_PACKAGE = null;
         RESOURCE_SUFFIX = null;

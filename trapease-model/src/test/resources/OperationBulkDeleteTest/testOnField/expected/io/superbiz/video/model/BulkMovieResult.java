@@ -27,7 +27,7 @@ import lombok.Value;
 
 @Value
 @EqualsAndHashCode
-@Generated(value = "null")
+@Generated(value = "org.tomitribe.model.ModelGenerator")
 @Schema(description = "The result of the bulk operation.")
 public class BulkMovieResult {
 
