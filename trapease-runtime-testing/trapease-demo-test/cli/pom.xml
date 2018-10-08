@@ -84,6 +84,7 @@
                     <resourceSuffix>Resource</resourceSuffix>
                     <cmdLineName>cmdline</cmdLineName>
                     <programFile>cmdline</programFile>
+                    <authentication>basic</authentication>
                 </configuration>
                 <executions>
                     <execution>

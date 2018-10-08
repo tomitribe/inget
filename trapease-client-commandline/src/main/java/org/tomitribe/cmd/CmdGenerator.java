@@ -136,7 +136,7 @@ public class CmdGenerator {
             String basic = "if (username != null && password != null) {" +
                     "            basicConfiguration = BasicConfiguration.builder().header(\"Authorization\").prefix(\"Basic\").username(username)" +
                     "                    .password(password).build();" +
-                    "            clientConfiguration = clientConfiguration.builder().basic(basicConfiguration).build();" +
+                    "            builder.basic(basicConfiguration);" +
                     "        }";
             body.asBlockStmt().addStatement(JavaParser.parseStatement(basic));
         }
@@ -148,12 +148,12 @@ public class CmdGenerator {
                     "if (keyId != null || keyLocation != null) {\n" +
                             "signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)\n" +
                             ".header(\"Authorization\").prefix(\"Signature\").build();\n" +
-                            "clientConfiguration = clientConfiguration.builder().signature(signatureConfiguration).build();\n" +
+                            "builder.signature(signatureConfiguration);\n" +
                             "}";
             body.asBlockStmt().addStatement(JavaParser.parseStatement(signature));
         }
 
-        body.asBlockStmt().addStatement(JavaParser.parseStatement("return clientConfiguration;"));
+        body.asBlockStmt().addStatement(JavaParser.parseStatement("return builder.build();"));
     }
 
     private static void updateConfigWithNewValueMethod(ClassOrInterfaceDeclaration commandClass) {
@@ -166,7 +166,7 @@ public class CmdGenerator {
 
             String password =
                     "if (password != null) {" +
-                            "  conf.put(\"basic.password\", password);" +
+                            "conf.put(\"basic.password\", java.util.Base64.getEncoder().encodeToString(password.getBytes()));" +
                             "}";
 
             updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(username));
@@ -197,7 +197,7 @@ public class CmdGenerator {
 
             String password =
                     "if (password == null && conf.containsKey(\"basic.password\")) {\n" +
-                            "         password = conf.getProperty(\"basic.password\");\n" +
+                            "password = new String(java.util.Base64.getDecoder().decode(conf.getProperty(\"basic.password\").getBytes()));" +
                             "}";
             updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(username));
             updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(password));
@@ -221,14 +221,14 @@ public class CmdGenerator {
     private static void addCommandOptions(ClassOrInterfaceDeclaration commandClass) {
         FieldDeclaration f = null;
 
-        if(Configuration.AUTHENTICATION == Authentication.BASIC){
+        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
             f = commandClass.addField("String", "username", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-u\", \"--username\"}, type = OptionType.GLOBAL)"));
             f = commandClass.addField("String", "password", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-p\", \"--password\"}, type = OptionType.GLOBAL)"));
         }
 
-        if(Configuration.AUTHENTICATION == Authentication.SIGNATURE){
+        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
             f = commandClass.addField("String", "keyId", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-k\", \"--key-id\"}, type = OptionType.GLOBAL)"));
             f = commandClass.addField("String", "keyLocation", Modifier.PRIVATE);
