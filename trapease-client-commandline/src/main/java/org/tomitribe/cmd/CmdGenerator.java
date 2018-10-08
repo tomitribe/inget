@@ -40,6 +40,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.ModelType;
+import org.tomitribe.common.Authentication;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Operation;
@@ -105,8 +106,124 @@ public class CmdGenerator {
         final CompilationUnit baseCommand = JavaParser.parse(TemplateUtil.readTemplate("TrapeaseCommand.java"));
         baseCommand.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
         Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null);
-        String baseCmd = baseCommand.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
+        ClassOrInterfaceDeclaration commandClass = baseCommand.getClassByName("TrapeaseCommand").get();
+        addCommandOptions(commandClass);
+        buildConfiguration(commandClass);
+        updateConfigWithNewValueMethod(commandClass);
+        readValueConfigurationValueIfNotProvidedMethod(commandClass);
+        CompilationUnit modifiedClassUnit = commandClass.findCompilationUnit().get();
+        String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
         Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
+    }
+
+    private static void buildConfiguration(ClassOrInterfaceDeclaration commandClass) {
+        MethodDeclaration buildConfig = commandClass.getMethodsByName("buildConfiguration").stream().findFirst().get();
+        BlockStmt body = buildConfig.getBody().get();
+
+        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+            body.asBlockStmt().addStatement(JavaParser.parseStatement("BasicConfiguration basicConfiguration = null;"));
+
+            String basic = "if (username != null && password != null) {" +
+                    "            basicConfiguration = BasicConfiguration.builder().header(\"Authorization\").prefix(\"Basic\").username(username)" +
+                    "                    .password(password).build();" +
+                    "            clientConfiguration = clientConfiguration.builder().basic(basicConfiguration).build();" +
+                    "        }";
+            body.asBlockStmt().addStatement(JavaParser.parseStatement(basic));
+        }
+
+        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+            body.asBlockStmt().addStatement(JavaParser.parseStatement("SignatureConfiguration signatureConfiguration = null;"));
+
+            String signature =
+                    "if (keyId != null || keyLocation != null) {\n" +
+                            "signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)\n" +
+                            ".header(\"Authorization\").prefix(\"Signature\").build();\n" +
+                            "clientConfiguration = clientConfiguration.builder().signature(signatureConfiguration).build();\n" +
+                            "}";
+            body.asBlockStmt().addStatement(JavaParser.parseStatement(signature));
+        }
+
+        body.asBlockStmt().addStatement(JavaParser.parseStatement("return clientConfiguration;"));
+    }
+
+    private static void updateConfigWithNewValueMethod(ClassOrInterfaceDeclaration commandClass) {
+        MethodDeclaration updateConfig = commandClass.getMethodsByName("updateConfigWithNewValue").stream().findFirst().get();
+        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+            String username =
+                    "if (username != null) {" +
+                            "   conf.put(\"basic.username\", username);" +
+                            "}";
+
+            String password =
+                    "if (password != null) {" +
+                            "  conf.put(\"basic.password\", password);" +
+                            "}";
+
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(username));
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(password));
+        }
+
+        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+            String keyId =
+                    "if (keyId != null) {" +
+                            "    conf.put(\"signature.key-id\", keyId);" +
+                            "}";
+            String keyLocation =
+                    "if (keyLocation != null) {" +
+                            "    conf.put(\"signature.key-location\", keyLocation);" +
+                            "}";
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(keyId));
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(keyLocation));
+        }
+    }
+
+    private static void readValueConfigurationValueIfNotProvidedMethod(ClassOrInterfaceDeclaration commandClass) {
+        MethodDeclaration updateConfig = commandClass.getMethodsByName("readValueConfigurationValueIfNotProvided").stream().findFirst().get();
+        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+            String username =
+                    " if (username == null && conf.containsKey(\"basic.username\")) {\n" +
+                            "         username = conf.getProperty(\"basic.username\");\n" +
+                            "}";
+
+            String password =
+                    "if (password == null && conf.containsKey(\"basic.password\")) {\n" +
+                            "         password = conf.getProperty(\"basic.password\");\n" +
+                            "}";
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(username));
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(password));
+        }
+
+        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+            String keyId =
+                    "if (keyId == null && conf.containsKey(\"signature.key-id\")) {" +
+                            "         keyId = conf.getProperty(\"signature.key-id\");" +
+                            "}";
+
+            String keyLocation =
+                    " if (keyLocation == null && conf.containsKey(\"signature.key-location\")) {\n" +
+                            "         keyLocation = conf.getProperty(\"signature.key-location\");\n" +
+                            " }";
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(keyId));
+            updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(keyLocation));
+        }
+    }
+
+    private static void addCommandOptions(ClassOrInterfaceDeclaration commandClass) {
+        FieldDeclaration f = null;
+
+        if(Configuration.AUTHENTICATION == Authentication.BASIC){
+            f = commandClass.addField("String", "username", Modifier.PRIVATE);
+            f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-u\", \"--username\"}, type = OptionType.GLOBAL)"));
+            f = commandClass.addField("String", "password", Modifier.PRIVATE);
+            f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-p\", \"--password\"}, type = OptionType.GLOBAL)"));
+        }
+
+        if(Configuration.AUTHENTICATION == Authentication.SIGNATURE){
+            f = commandClass.addField("String", "keyId", Modifier.PRIVATE);
+            f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-k\", \"--key-id\"}, type = OptionType.GLOBAL)"));
+            f = commandClass.addField("String", "keyLocation", Modifier.PRIVATE);
+            f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-n\", \"--key-location\"}, type = OptionType.GLOBAL)"));
+        }
     }
 
     private static String generateCommandFromClientMethod(final MethodDeclaration clientMethod,

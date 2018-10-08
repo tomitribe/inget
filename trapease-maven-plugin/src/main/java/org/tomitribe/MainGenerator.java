@@ -21,6 +21,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.tomitribe.client.ClientGenerator;
 import org.tomitribe.cmd.CmdGenerator;
+import org.tomitribe.common.Authentication;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.TrapeaseTypeSolver;
 import org.tomitribe.common.Utils;
@@ -74,6 +75,9 @@ public class MainGenerator extends AbstractMojo {
     @Parameter(property = "generate.cmdline_name")
     private String cmdLineName;
 
+    @Parameter(property = "generate.authentication")
+    private String authentication;
+
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
@@ -92,10 +96,21 @@ public class MainGenerator extends AbstractMojo {
         Configuration.RESOURCE_SUFFIX = resourceSuffix;
         Configuration.MODEL_SUFFIX = modelSuffix;
         Configuration.TEMP_SOURCE = project.getBuild().getDirectory() + File.separator + "temp-source";
+
         if (cmdLineName != null) {
             Configuration.CMD_LINE_NAME = cmdLineName;
         } else {
             Configuration.CMD_LINE_NAME = project.getArtifactId();
+        }
+
+        if (authentication != null) {
+            if (authentication.equalsIgnoreCase(Authentication.BASIC.name())) {
+                Configuration.AUTHENTICATION = Authentication.BASIC;
+            }
+
+            if (authentication.equalsIgnoreCase(Authentication.SIGNATURE.name())) {
+                Configuration.AUTHENTICATION = Authentication.SIGNATURE;
+            }
         }
 
         try {

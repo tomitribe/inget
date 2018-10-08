@@ -25,22 +25,6 @@ public abstract class TrapeaseCommand implements Runnable {
             "-v", "--verbose"}, type = OptionType.GLOBAL)
     private boolean verbose;
 
-    @Option(name = {
-            "-k", "--key-id"}, type = OptionType.GLOBAL)
-    private String keyId;
-
-    @Option(name = {
-            "-n", "--key-location"}, type = OptionType.GLOBAL)
-    private String keyLocation;
-
-    @Option(name = {
-            "-u", "--username"}, type = OptionType.GLOBAL)
-    private String username;
-
-    @Option(name = {
-            "-p", "--password"}, type = OptionType.GLOBAL)
-    private String password;
-
     @Override
     public final void run() {
         try {
@@ -48,20 +32,13 @@ public abstract class TrapeaseCommand implements Runnable {
         } catch (Exception e) {
             System.out.println("Error to manage configuration file: " + e.getMessage());
         }
+        run(buildConfiguration());
+    }
 
-        SignatureConfiguration signatureConfiguration = null;
-        BasicConfiguration basicConfiguration = null;
-        if (keyId != null || keyLocation != null) {
-            signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)
-                    .header("Authorization").prefix("Signature").build();
-        }
-        if (username != null && password != null) {
-            basicConfiguration = BasicConfiguration.builder().header("Authorization").prefix("Basic").username(username)
-                    .password(password).build();
-        }
-        final ClientConfiguration clientConfiguration = ClientConfiguration.builder().url(url).verbose(verbose)
-                .signature(signatureConfiguration).basic(basicConfiguration).build();
-        run(clientConfiguration);
+    private ClientConfiguration buildConfiguration() {
+        ClientConfiguration clientConfiguration =
+                ClientConfiguration.builder().url(url).verbose(verbose).build();
+
     }
 
     private void manageConfiguration() throws Exception {
@@ -88,43 +65,11 @@ public abstract class TrapeaseCommand implements Runnable {
         if (url != null) {
             conf.put("general.url", url.toString());
         }
-
-        if (keyId != null) {
-            conf.put("signature.key-id", keyId);
-        }
-
-        if (keyLocation != null) {
-            conf.put("signature.key-location", keyLocation);
-        }
-
-        if (username != null) {
-            conf.put("basic.username", username);
-        }
-
-        if (password != null) {
-            conf.put("basic.password", password);
-        }
     }
 
     private void readValueConfigurationValueIfNotProvided(Properties conf) throws Exception {
         if (url == null && conf.containsKey("general.url")) {
             url = new URL(String.valueOf(conf.get("general.url")));
-        }
-
-        if (keyId == null && conf.containsKey("signature.key-id")) {
-            keyId = conf.getProperty("signature.key-id");
-        }
-
-        if (keyLocation == null && conf.containsKey("signature.key-location")) {
-            keyLocation = conf.getProperty("signature.key-location");
-        }
-
-        if (username == null && conf.containsKey("basic.username")) {
-            username = conf.getProperty("basic.username");
-        }
-
-        if (password == null && conf.containsKey("basic.password")) {
-            password = conf.getProperty("basic.password");
         }
     }
 
