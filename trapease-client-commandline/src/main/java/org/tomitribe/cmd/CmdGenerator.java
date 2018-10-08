@@ -112,8 +112,18 @@ public class CmdGenerator {
         updateConfigWithNewValueMethod(commandClass);
         readValueConfigurationValueIfNotProvidedMethod(commandClass);
         CompilationUnit modifiedClassUnit = commandClass.findCompilationUnit().get();
+        addAuthenticationImports(modifiedClassUnit);
         String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
         Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
+    }
+
+    private static void addAuthenticationImports(CompilationUnit modifiedClassUnit) {
+        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+            modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.BasicConfiguration");
+        }
+        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+            modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.SignatureConfiguration");
+        }
     }
 
     private static void buildConfiguration(ClassOrInterfaceDeclaration commandClass) {

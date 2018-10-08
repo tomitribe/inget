@@ -50,6 +50,7 @@
     <module>trapease-client-commandline</module>
     <module>trapease-model</module>
     <module>trapease-resources</module>
+    <module>trapease-runtime-testing</module>
   </modules>
 
   <dependencyManagement>
