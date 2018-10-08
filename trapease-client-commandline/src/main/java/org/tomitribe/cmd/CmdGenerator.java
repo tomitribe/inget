@@ -104,7 +104,7 @@ public class CmdGenerator {
     private static void generateBaseCommand() throws IOException {
         final CompilationUnit baseCommand = JavaParser.parse(TemplateUtil.readTemplate("TrapeaseCommand.java"));
         baseCommand.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
-        Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null);
+        Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null, CmdGenerator.class);
         Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCommand.toString());
     }
 

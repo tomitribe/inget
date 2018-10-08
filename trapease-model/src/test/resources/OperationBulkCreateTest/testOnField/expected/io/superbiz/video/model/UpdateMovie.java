@@ -24,7 +24,7 @@ import lombok.Value;
 
 @Value
 @Builder(builderClassName = "Update", toBuilder = true)
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated("org.tomitribe.model.ModelClassGenerator")
 public class UpdateMovie {
 
     private String director;

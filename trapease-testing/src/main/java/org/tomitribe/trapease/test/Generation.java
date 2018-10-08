@@ -51,6 +51,10 @@ public class Generation {
         final File dir = Files.file(module, "src", "test", "resources", name, location);
         Files.mkdirs(dir);
 
+        // Remove the old "expected" files
+        CleanOnExit.delete(dir);
+
+        // Add the new "expected" files
         for (final Map.Entry<String, File> entry : results.entrySet()) {
             final File dest = new File(dir, entry.getKey());
             Files.mkparent(dest);

@@ -58,7 +58,7 @@ public class ModelClassGenerator {
         newClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
 
         Utils.addLicense(rootClassUnit, newClassCompilationUnit);
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
+        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ModelClassGenerator.class);
 
         final Optional<AnnotationExpr> schema = rootClass.getAnnotationByName("Schema");
         if (schema.isPresent()) {
@@ -253,7 +253,7 @@ public class ModelClassGenerator {
         newClassCompilationUnit.addImport(ImportManager.getImport("EqualsAndHashCode"));
 
         Utils.addLicense(rootClassUnit, newClassCompilationUnit);
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
+        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ModelClassGenerator.class);
 
         NormalAnnotationExpr schema = new NormalAnnotationExpr();
         schema.setName("Schema");
@@ -334,7 +334,7 @@ public class ModelClassGenerator {
         String pkg = outputBasePackage + ".bulk";
         CompilationUnit content = JavaParser.parse(ModelTemplates.FAILURE);
         content.setPackageDeclaration(pkg);
-        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
+        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null, ModelClassGenerator.class);
         Utils.save("Failure.java", pkg, content.toString());
     }
 
@@ -342,7 +342,7 @@ public class ModelClassGenerator {
         String pkg = outputBasePackage + ".filter";
         CompilationUnit content = JavaParser.parse(ModelTemplates.DEFAULT_FILTER);
         content.setPackageDeclaration(pkg);
-        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null);
+        Utils.addGeneratedAnnotation(content, Utils.getClazz(content), null, ModelClassGenerator.class);
         Utils.save("DefaultFilter.java", pkg, content.toString());
     }
 }

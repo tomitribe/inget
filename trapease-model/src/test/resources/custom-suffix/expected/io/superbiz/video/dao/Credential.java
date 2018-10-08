@@ -25,7 +25,7 @@ import lombok.Value;
 
 @Value
 @Builder(builderClassName = "Read", toBuilder = true)
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated("org.tomitribe.model.ModelClassGenerator")
 @Schema(description = "The passwords and secrets that authorize the use of an account")
 public class Credential {
 

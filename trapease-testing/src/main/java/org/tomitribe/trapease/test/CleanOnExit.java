@@ -39,10 +39,10 @@ public class CleanOnExit {
     }
 
     private void clean() {
-        files.stream().forEach(this::delete);
+        files.stream().forEach(CleanOnExit::delete);
     }
 
-    private void delete(final File file) {
+    public static void delete(final File file) {
         try {
             java.nio.file.Files.walkFileTree(file.toPath(), new RecursiveDelete());
         } catch (IOException e) {
@@ -50,7 +50,7 @@ public class CleanOnExit {
         }
     }
 
-    private class RecursiveDelete implements FileVisitor<Path> {
+    private static class RecursiveDelete implements FileVisitor<Path> {
         @Override
         public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
             return FileVisitResult.CONTINUE;

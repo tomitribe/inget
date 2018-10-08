@@ -114,7 +114,7 @@ public class ResourcesGenerator {
         newClassCompilationUnit.addImport(ImportManager.getImport("Consumes"));
         newClassCompilationUnit.addImport(ImportManager.getImport("Produces"));
         newClassCompilationUnit.addImport(ImportManager.getImport("MediaType"));
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
+        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ResourcesGenerator.class);
         Utils.addLicense(modelClassUnit, newClassCompilationUnit);
         save(resourceClassPackage, resourceName, newClassCompilationUnit);
     }
