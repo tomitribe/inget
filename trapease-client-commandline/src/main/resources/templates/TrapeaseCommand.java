@@ -9,11 +9,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
-import javax.annotation.Generated;
 
-import org.tomitribe.trapease.movie.rest.client.base.BasicConfiguration;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.client.base.SignatureConfiguration;
 
 public abstract class TrapeaseCommand implements Runnable {
 

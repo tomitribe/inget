@@ -59,5 +59,6 @@ public class Configuration {
         CLIENT_NAME = null;
         CLIENT_SOURCES = null;
         CMD_PACKAGE = null;
+        AUTHENTICATION = null;
     }
 }

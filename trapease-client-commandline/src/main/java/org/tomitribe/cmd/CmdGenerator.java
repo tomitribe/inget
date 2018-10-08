@@ -449,7 +449,7 @@ public class CmdGenerator {
                             .getWrappedNode();
                     boolean wasGenerated = clazz.getAnnotationByName("Generated") != null;
                     if (wasGenerated) {
-                        return "java.util.Arrays.asList(" + p.getNameAsString() + ");\n";
+                        return "java.util.Arrays.asList(" + p.getNameAsString() + ")";
                     }
                     //TODO: What if the object was not generated and has a List?
                 }
