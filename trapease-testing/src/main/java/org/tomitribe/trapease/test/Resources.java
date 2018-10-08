@@ -16,7 +16,13 @@
  */
 package org.tomitribe.trapease.test;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import org.tomitribe.common.Utils;
 import org.tomitribe.util.Files;
+import org.tomitribe.util.IO;
 
 import java.io.File;
 import java.io.IOException;
@@ -112,5 +118,33 @@ public class Resources {
 
     public File input() {
         return input;
+    }
+
+    public Resources input(String sourceCode) {
+        final CompilationUnit classUnit = JavaParser.parse(sourceCode);
+        final PackageDeclaration packageDeclaration = classUnit.getPackageDeclaration().orElseThrow(IllegalStateException::new);
+        final String path = packageDeclaration.getName().asString().replace(".", "/");
+
+        final ClassOrInterfaceDeclaration clazz = Utils.getClazz(classUnit);
+        final String className = clazz.getNameAsString();
+
+        final File file = new File(input, path + "/" + className + ".java");
+        Files.mkparent(file);
+
+        try {
+            IO.copy(IO.read(sourceCode), file);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        return this;
+    }
+
+    public static Resources here() {
+        final StackTraceElement caller = new Exception().getStackTrace()[1];
+        final String className = caller.getClassName().replaceAll(".*\\.", "");
+        final String methodName = caller.getMethodName();
+
+        return new Resources(className + "/" + methodName);
     }
 }
