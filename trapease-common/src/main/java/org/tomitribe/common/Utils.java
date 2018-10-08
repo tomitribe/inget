@@ -27,8 +27,10 @@ import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import org.tomitribe.util.Files;
@@ -567,15 +569,16 @@ public class Utils {
         return plural;
     }
 
-    public static void addGeneratedAnnotation(CompilationUnit unit, ClassOrInterfaceDeclaration clazz, MethodDeclaration method) {
-        NormalAnnotationExpr generatedAnnotation = new NormalAnnotationExpr();
-        generatedAnnotation.setName("Generated");
-        generatedAnnotation.addPair("value", "\"" + Configuration.MAIN_CLASS + "\"");
+    public static void addGeneratedAnnotation(CompilationUnit unit, ClassOrInterfaceDeclaration clazz, MethodDeclaration method, final Class<?> generator) {
+        final Name name = new Name("Generated");
+        final Expression memberValue = new StringLiteralExpr(generator.getName());
+        final SingleMemberAnnotationExpr expr = new SingleMemberAnnotationExpr(name, memberValue);
+
         unit.addImport(ImportManager.getImport("Generated"));
         if (clazz != null) {
-            clazz.addAnnotation(generatedAnnotation);
+            clazz.addAnnotation(expr);
         } else if (method != null) {
-            method.addAnnotation(generatedAnnotation);
+            method.addAnnotation(expr);
         }
     }
 

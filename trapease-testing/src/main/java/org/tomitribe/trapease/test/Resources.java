@@ -21,6 +21,7 @@ import org.tomitribe.util.Files;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class Resources {
     private final File tempSource;
     private final File expected;
     private final File input;
+    private final List<Runnable> cleanup = new ArrayList<>();
 
     public Resources(final String name) {
         final URL resource = Resources.class.getClassLoader().getResource("root.txt");
@@ -45,10 +47,32 @@ public class Resources {
         final File file = Urls.toFile(resource);
         assertNotNull(file);
         this.base = new File(file.getParentFile(), name);
-        this.actual = tmpdir();
-        this.tempSource = tmpdir();
         this.expected = new File(base, "expected");
         this.input = new File(base, "input");
+        this.actual = Files.tmpdir();
+        this.tempSource = Files.tmpdir();
+
+        this.cleanup.add(() -> saveResultsOnExit(name));
+        this.cleanup.add(() -> CleanOnExit.delete(actual));
+        this.cleanup.add(() -> CleanOnExit.delete(tempSource));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::cleanup));
+    }
+
+    private void cleanup() {
+        cleanup.stream().forEach(Runnable::run);
+    }
+
+    /**
+     * Uncomment this cleanup step above as a quick way to update the
+     * expected results with the currently generated code.
+     */
+    private void saveResultsOnExit(final String name) {
+        if (!Boolean.getBoolean("saveResults")) return;
+        try {
+            Generation.saveResults(name, "expected", actual(".*"));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public static Resources name(final String name) {
@@ -88,11 +112,5 @@ public class Resources {
 
     public File input() {
         return input;
-    }
-
-    public static File tmpdir() {
-        final File file = Files.tmpdir();
-        new CleanOnExit().clean(file);
-        return file;
     }
 }

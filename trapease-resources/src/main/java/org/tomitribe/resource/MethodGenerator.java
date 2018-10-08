@@ -148,7 +148,7 @@ public class MethodGenerator {
             method.addAnnotation(pathAnnotation);
         }
 
-        Utils.addGeneratedAnnotation(unit, null, method);
+        Utils.addGeneratedAnnotation(unit, null, method, MethodGenerator.class);
 
         if (operation != null) {
             method.addAnnotation(operation);

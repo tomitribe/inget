@@ -98,7 +98,7 @@ public class ClientGenerator {
         newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
         newClassCompilationUnit.addImport(
                 Configuration.RESOURCE_PACKAGE + ".client.base." + Configuration.CLIENT_NAME + "ExceptionMapper");
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
+        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ClientGenerator.class);
 
         return newClassCompilationUnit;
     }
@@ -109,7 +109,7 @@ public class ClientGenerator {
         final ClassOrInterfaceDeclaration clientExceptionClass =
                 clientException.getClassByName(Configuration.CLIENT_NAME + "Exception").get();
         clientExceptionClass.addExtendedType(RuntimeException.class);
-        Utils.addGeneratedAnnotation(clientException, Utils.getClazz(clientException), null);
+        Utils.addGeneratedAnnotation(clientException, Utils.getClazz(clientException), null, ClientGenerator.class);
         save(outputBasePackage, Configuration.CLIENT_NAME + "Exception", clientException);
 
         final CompilationUnit entityNotFoundException = new CompilationUnit(outputBasePackage);
@@ -117,7 +117,7 @@ public class ClientGenerator {
         final ClassOrInterfaceDeclaration entityNotFoundExceptionClass =
                 entityNotFoundException.getClassByName("EntityNotFoundException").get();
         entityNotFoundExceptionClass.addExtendedType(clientExceptionClass.getNameAsString());
-        Utils.addGeneratedAnnotation(entityNotFoundException, Utils.getClazz(entityNotFoundException), null);
+        Utils.addGeneratedAnnotation(entityNotFoundException, Utils.getClazz(entityNotFoundException), null, ClientGenerator.class);
         save(outputBasePackage, "EntityNotFoundException", entityNotFoundException);
 
         final CompilationUnit exceptionMapper = new CompilationUnit(outputBasePackage);
@@ -153,7 +153,7 @@ public class ClientGenerator {
         toThrowableBody.addStatement(new ReturnStmt(new NullLiteralExpr()));
         toThrowable.setBody(toThrowableBody);
 
-        Utils.addGeneratedAnnotation(exceptionMapper, Utils.getClazz(exceptionMapper), null);
+        Utils.addGeneratedAnnotation(exceptionMapper, Utils.getClazz(exceptionMapper), null, ClientGenerator.class);
         save(outputBasePackage, Configuration.CLIENT_NAME + "ExceptionMapper", exceptionMapper);
     }
 
@@ -213,7 +213,7 @@ public class ClientGenerator {
             newClass.addMember(newMethod);
         });
 
-        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null);
+        Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ClientGenerator.class);
         Utils.addImports(resourceClientUnit, newClassCompilationUnit);
         Utils.addImports(newClassCompilationUnit, genericResourceClientClass.findCompilationUnit().get());
         Utils.addLicense(resourceClientUnit, newClassCompilationUnit);
