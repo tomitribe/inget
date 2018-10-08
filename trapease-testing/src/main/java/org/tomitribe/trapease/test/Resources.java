@@ -56,9 +56,7 @@ public class Resources {
         this.expected = new File(base, "expected");
         this.input = new File(base, "input");
         this.actual = Files.tmpdir();
-        System.out.println("Act: " + actual);
         this.tempSource = Files.tmpdir();
-        System.out.println("Exp: " + tempSource);
 
         this.cleanup.add(() -> saveResultsOnExit(name));
         this.cleanup.add(() -> CleanOnExit.delete(actual));

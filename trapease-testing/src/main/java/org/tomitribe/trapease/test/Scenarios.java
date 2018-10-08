@@ -35,8 +35,6 @@ public class Scenarios {
             final File expectedFile = expected.get(name);
             final File actualFile = actual.remove(name);
 
-            System.out.println("Exp: " + expectedFile.getAbsolutePath());
-            System.out.println("Act: " + actualFile.getAbsolutePath());
             assertNotNull(expectedFile);
             assertNotNull("Missing " + name, actualFile);
             assertEquals("Incorrect Contents: " + name, IO.slurp(expectedFile), IO.slurp(actualFile));
