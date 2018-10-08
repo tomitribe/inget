@@ -34,14 +34,15 @@ public abstract class TrapeaseCommand implements Runnable {
     }
 
     private ClientConfiguration buildConfiguration() {
-        ClientConfiguration clientConfiguration = ClientConfiguration.builder().url(url).verbose(verbose).build();
+        ClientConfiguration.ClientConfigurationBuilder builder = ClientConfiguration.builder().url(url)
+                .verbose(verbose);
         SignatureConfiguration signatureConfiguration = null;
         if (keyId != null || keyLocation != null) {
             signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)
                     .header("Authorization").prefix("Signature").build();
-            clientConfiguration = clientConfiguration.builder().signature(signatureConfiguration).build();
+            builder.signature(signatureConfiguration);
         }
-        return clientConfiguration;
+        return builder.build();
     }
 
     private void manageConfiguration() throws Exception {

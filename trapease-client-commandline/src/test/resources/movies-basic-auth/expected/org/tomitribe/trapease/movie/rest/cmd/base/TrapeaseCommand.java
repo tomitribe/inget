@@ -34,14 +34,15 @@ public abstract class TrapeaseCommand implements Runnable {
     }
 
     private ClientConfiguration buildConfiguration() {
-        ClientConfiguration clientConfiguration = ClientConfiguration.builder().url(url).verbose(verbose).build();
+        ClientConfiguration.ClientConfigurationBuilder builder = ClientConfiguration.builder().url(url)
+                .verbose(verbose);
         BasicConfiguration basicConfiguration = null;
         if (username != null && password != null) {
             basicConfiguration = BasicConfiguration.builder().header("Authorization").prefix("Basic").username(username)
                     .password(password).build();
-            clientConfiguration = clientConfiguration.builder().basic(basicConfiguration).build();
+            builder.basic(basicConfiguration);
         }
-        return clientConfiguration;
+        return builder.build();
     }
 
     private void manageConfiguration() throws Exception {
@@ -70,7 +71,7 @@ public abstract class TrapeaseCommand implements Runnable {
             conf.put("basic.username", username);
         }
         if (password != null) {
-            conf.put("basic.password", password);
+            conf.put("basic.password", java.util.Base64.getEncoder().encodeToString(password.getBytes()));
         }
     }
 
@@ -83,7 +84,7 @@ public abstract class TrapeaseCommand implements Runnable {
             username = conf.getProperty("basic.username");
         }
         if (password == null && conf.containsKey("basic.password")) {
-            password = conf.getProperty("basic.password");
+            password = new String(java.util.Base64.getDecoder().decode(conf.getProperty("basic.password").getBytes()));
         }
     }
 

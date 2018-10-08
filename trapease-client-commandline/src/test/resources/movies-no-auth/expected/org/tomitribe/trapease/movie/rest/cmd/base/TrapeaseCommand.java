@@ -33,8 +33,9 @@ public abstract class TrapeaseCommand implements Runnable {
     }
 
     private ClientConfiguration buildConfiguration() {
-        ClientConfiguration clientConfiguration = ClientConfiguration.builder().url(url).verbose(verbose).build();
-        return clientConfiguration;
+        ClientConfiguration.ClientConfigurationBuilder builder = ClientConfiguration.builder().url(url)
+                .verbose(verbose);
+        return builder.build();
     }
 
     private void manageConfiguration() throws Exception {
