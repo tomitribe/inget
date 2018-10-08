@@ -39,8 +39,6 @@ public abstract class Command {
     }
 
     protected static void cmd(final String cmd) {
-        List<String> params = new ArrayList<>(Arrays.asList(cmd.split(" (?=(([^'\"]*['\"]){2})*[^'\"]*$)")));
-        params = params.stream().map(p -> p.replaceAll("\"", "")).collect(Collectors.toList());
-        TrapeaseCli.main(params.toArray(new String[]{}));
+        cmd(cmd, null);
     }
 }
