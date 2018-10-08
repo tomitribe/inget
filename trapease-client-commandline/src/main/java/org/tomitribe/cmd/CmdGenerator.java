@@ -40,6 +40,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import com.google.googlejavaformat.java.RemoveUnusedImports;
 import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.cmd.base.ModelType;
+import org.tomitribe.common.Authentication;
 import org.tomitribe.common.Configuration;
 import org.tomitribe.common.ImportManager;
 import org.tomitribe.common.Operation;
