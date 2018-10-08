@@ -83,5 +83,6 @@ public class ConfigFileTest extends Command{
         assertEquals("Kelly Slater", movie.getDirector());
         assertEquals(2004, movie.getYear());
         assertEquals(9, movie.getRating());
+        file.deleteOnExit();
     }
 }
