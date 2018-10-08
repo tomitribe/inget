@@ -686,7 +686,7 @@ public class Utils {
         if (type.isReferenceType()) {
             final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
 
-            if (typeDeclaration.canBeAssignedTo(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
+            if (typeDeclaration.isAssignableBy(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
                 return true;
             }
         }
