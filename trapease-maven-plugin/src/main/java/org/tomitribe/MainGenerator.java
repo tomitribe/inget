@@ -71,6 +71,9 @@ public class MainGenerator extends AbstractMojo {
     @Parameter(property = "generate.model_suffix", defaultValue = "Model")
     private String modelSuffix;
 
+    @Parameter(property = "generate.cmdline_name")
+    private String cmdLineName;
+
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
@@ -89,6 +92,11 @@ public class MainGenerator extends AbstractMojo {
         Configuration.RESOURCE_SUFFIX = resourceSuffix;
         Configuration.MODEL_SUFFIX = modelSuffix;
         Configuration.TEMP_SOURCE = project.getBuild().getDirectory() + File.separator + "temp-source";
+        if (cmdLineName != null) {
+            Configuration.CMD_LINE_NAME = cmdLineName;
+        } else {
+            Configuration.CMD_LINE_NAME = project.getArtifactId();
+        }
 
         try {
             generateModel(artifacts);

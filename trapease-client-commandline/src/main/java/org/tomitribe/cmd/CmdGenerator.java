@@ -105,7 +105,8 @@ public class CmdGenerator {
         final CompilationUnit baseCommand = JavaParser.parse(TemplateUtil.readTemplate("TrapeaseCommand.java"));
         baseCommand.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
         Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null);
-        Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCommand.toString());
+        String baseCmd = baseCommand.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
+        Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
     }
 
     private static String generateCommandFromClientMethod(final MethodDeclaration clientMethod,
@@ -414,7 +415,7 @@ public class CmdGenerator {
 
         final BlockStmt block = new BlockStmt();
         cli.addImport(ImportManager.getImport("Cli"));
-        block.addStatement("final Cli.CliBuilder<Runnable> cliBuilder = Cli.builder(\"trapease\");");
+        block.addStatement("final Cli.CliBuilder<Runnable> cliBuilder = Cli.builder(\"" + Configuration.CMD_LINE_NAME + "\");");
         cli.addImport(ImportManager.getImport("Help"));
         block.addStatement("cliBuilder.withDefaultCommand(Help.class);");
         block.addStatement("cliBuilder.withCommand(Help.class);");
