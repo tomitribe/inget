@@ -52,7 +52,7 @@ public class Resources {
         this.actual = Files.tmpdir();
         this.tempSource = Files.tmpdir();
 
-//        this.cleanup.add(() -> saveResultsOnExit(name));
+        this.cleanup.add(() -> saveResultsOnExit(name));
         this.cleanup.add(() -> CleanOnExit.delete(actual));
         this.cleanup.add(() -> CleanOnExit.delete(tempSource));
         Runtime.getRuntime().addShutdownHook(new Thread(this::cleanup));
@@ -67,6 +67,7 @@ public class Resources {
      * expected results with the currently generated code.
      */
     private void saveResultsOnExit(final String name) {
+        if (!Boolean.getBoolean("saveResults")) return;
         try {
             Generation.saveResults(name, "expected", actual(".*"));
         } catch (IOException e) {
