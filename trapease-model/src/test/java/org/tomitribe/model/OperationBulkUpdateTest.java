@@ -26,7 +26,40 @@ public class OperationBulkUpdateTest {
 
     @Test
     public void testOnClass() throws Exception {
-        final Resources resources = Resources.name("OperationBulkUpdateTest/testOnClass");
+        final Resources resources = Resources.here()
+                .input("/*\n" +
+                        " * Licensed to the Apache Software Foundation (ASF) under one or more\n" +
+                        " * contributor license agreements.  See the NOTICE file distributed with\n" +
+                        " * this work for additional information regarding copyright ownership.\n" +
+                        " * The ASF licenses this file to You under the Apache License, Version 2.0\n" +
+                        " * (the \"License\"); you may not use this file except in compliance with\n" +
+                        " * the License.  You may obtain a copy of the License at\n" +
+                        " *\n" +
+                        " *      http://www.apache.org/licenses/LICENSE-2.0\n" +
+                        " *\n" +
+                        " * Unless required by applicable law or agreed to in writing, software\n" +
+                        " * distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                        " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                        " * See the License for the specific language governing permissions and\n" +
+                        " * limitations under the License.\n" +
+                        " */\n" +
+                        "package io.superbiz.video.model;\n" +
+                        "\n" +
+                        "import org.tomitribe.api.Filter;\n" +
+                        "import org.tomitribe.api.Model;\n" +
+                        "import org.tomitribe.api.Resource;\n" +
+                        "\n" +
+                        "@Model(operation = Model.Operation.BULK_UPDATE)\n" +
+                        "@Resource\n" +
+                        "class MovieModel {\n" +
+                        "    @Model(id = true, operation = Model.Operation.READ)\n" +
+                        "    private String id;\n" +
+                        "    private String title;\n" +
+                        "    private String director;\n" +
+                        "    private String genre;\n" +
+                        "    private int year;\n" +
+                        "    private int rating;\n" +
+                        "}\n");
 
         Configuration.clean();
         Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();
@@ -47,7 +80,42 @@ public class OperationBulkUpdateTest {
 
     @Test
     public void testOnField() throws Exception {
-        final Resources resources = Resources.name("OperationBulkUpdateTest/testOnField");
+        final Resources resources = Resources.here()
+                .input("/*\n" +
+                        " * Licensed to the Apache Software Foundation (ASF) under one or more\n" +
+                        " * contributor license agreements.  See the NOTICE file distributed with\n" +
+                        " * this work for additional information regarding copyright ownership.\n" +
+                        " * The ASF licenses this file to You under the Apache License, Version 2.0\n" +
+                        " * (the \"License\"); you may not use this file except in compliance with\n" +
+                        " * the License.  You may obtain a copy of the License at\n" +
+                        " *\n" +
+                        " *      http://www.apache.org/licenses/LICENSE-2.0\n" +
+                        " *\n" +
+                        " * Unless required by applicable law or agreed to in writing, software\n" +
+                        " * distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                        " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                        " * See the License for the specific language governing permissions and\n" +
+                        " * limitations under the License.\n" +
+                        " */\n" +
+                        "package io.superbiz.video.model;\n" +
+                        "\n" +
+                        "import org.tomitribe.api.Filter;\n" +
+                        "import org.tomitribe.api.Model;\n" +
+                        "import org.tomitribe.api.Resource;\n" +
+                        "\n" +
+                        "@Model\n" +
+                        "@Resource\n" +
+                        "class MovieModel {\n" +
+                        "    @Model(id = true, operation = Model.Operation.READ)\n" +
+                        "    private String id;\n" +
+                        "    @Model(operation = Model.Operation.BULK_UPDATE)\n" +
+                        "    private String title;\n" +
+                        "    private String director;\n" +
+                        "    private String genre;\n" +
+                        "    @Model(operation = Model.Operation.BULK_UPDATE)\n" +
+                        "    private int year;\n" +
+                        "    private int rating;\n" +
+                        "}\n");
 
         Configuration.clean();
         Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();
