@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.tomitribe.inget.common.Configuration;
 import org.tomitribe.inget.common.CustomTypeSolver;
 import org.tomitribe.inget.resource.ResourcesGenerator;
-import org.tomitribe.trapease.test.Resources;
+import org.tomitribe.inget.test.Resources;
 
-import static org.tomitribe.trapease.test.Scenarios.assertFiles;
+import static org.tomitribe.inget.test.Scenarios.assertFiles;
 
 public class ResourceGeneratorTest {
 
