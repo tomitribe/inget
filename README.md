@@ -1,11 +1,11 @@
-# Trapease Project
+# Inget Project
 
-Trapease is a code generator tool that helps you generate model classes, rest resources, client code, documentation and 
+Inget is a code generator tool that helps you generate model classes, rest resources, client code, documentation and 
 even a command line client for your REST API.
 
-## Trapease API
+## Inget API
 
-The Trapease API has the annotations that you will use to configure your model.
+The Inget API has the annotations that you will use to configure your model.
 Main annotations are:
 
 ```@Model```  - Add model configuration
@@ -16,20 +16,20 @@ Maven depedency
 ```xml
 <dependency>
   <groupId>org.tomitribe</groupId>
-  <artifactId>trapease-api</artifactId>
+  <artifactId>inget-api</artifactId>
   <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
 
-## Trapease Maven Plugin
-The Trapease Maven Plugin is used to generate all the code looking into your configured model. See below how each part of the generation work:
+## Inget Maven Plugin
+The Inget Maven Plugin is used to generate all the code looking into your configured model. See below how each part of the generation work:
 
 ### Model
 
-Trapease uses Java code to generate more Java code. For a REST API Model, Trapease generates different objects for each 
+Inget uses Java code to generate more Java code. For a REST API Model, Inget generates different objects for each 
 REST operation, Read, Create and Update.
 
-Create a simple class to use as template for Trapease. This class is not required to be used in the API. Trapease will 
+Create a simple class to use as template for Inget. This class is not required to be used in the API. Inget will 
 generate specific objects with the information gathered from this class: 
 
 ```java
@@ -65,7 +65,7 @@ class AccountModel {
 }
 ``` 
 
-The ```Model``` suffix in AccountModel tells Trapease that it should look into this Java source and generate a Model from it. By default the following classes are generated:
+The ```Model``` suffix in AccountModel tells Inget that it should look into this Java source and generate a Model from it. By default the following classes are generated:
 
 * Account - This is used for reading an Account.
 * CreateAccount - This is used for creating an Account.
@@ -79,7 +79,7 @@ A field or a class without ```operation``` specified in the @Model will enable a
 
 ### Resources
 
-To generate REST endpoints Trapease looks for the ```@Resource``` annotation in the Model classes. Also it relies in the operations of ```@Model``` to generated the methods based on the enabled operations.
+To generate REST endpoints Inget looks for the ```@Resource``` annotation in the Model classes. Also it relies in the operations of ```@Model``` to generated the methods based on the enabled operations.
 ```java
 @Model(operation = {
         Model.Operation.CREATE,
@@ -142,13 +142,13 @@ This is not ready.
 
 ### Setup
 
-To setup Trapease, you just need to add the trapease maven plugin as following :
+To setup Inget, you just need to add the inget maven plugin as following :
 
 ```xml
 <plugin>
 <groupId>org.tomitribe</groupId>
-<artifactId>trapease-maven-plugin</artifactId>
-<version>${version.trapease}</version>
+<artifactId>inget-maven-plugin</artifactId>
+<version>${version.inget}</version>
 <configuration>
   <modelPackage>yourpackage.model</modelPackage>
   <resourcePackage>yourpackage.rest</resourcePackage>
@@ -171,7 +171,7 @@ To setup Trapease, you just need to add the trapease maven plugin as following :
 ``` 
 
 And point the plugin property ```modelPackage``` to the package where the model classes reside. The 
-```resourcePackage``` is the package used by Trapease to generate the REST Resources.
+```resourcePackage``` is the package used by inget to generate the REST Resources.
 
 The ```modelSuffix``` is "<class-name>Model" by default, but you can change it for "<class-name>Entity" for example.
 The ```resourceSuffix``` is "<class-name>Resource" by default, but you can change it for "<class-name>Service" for example.
