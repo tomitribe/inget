@@ -5,11 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.tomitribe</groupId>
-  <artifactId>trapease</artifactId>
+  <artifactId>inget</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>Trapease</name>
-  <description>Translate Rest APIs with Ease</description>
+  <name>Inget</name>
   <packaging>pom</packaging>
 
   <properties>
@@ -42,15 +41,15 @@
   </distributionManagement>
 
   <modules>
-    <module>trapease-testing</module>
-    <module>trapease-maven-plugin</module>
-    <module>trapease-api</module>
-    <module>trapease-common</module>
-    <module>trapease-client-java</module>
-    <module>trapease-client-commandline</module>
-    <module>trapease-model</module>
-    <module>trapease-resources</module>
-    <module>trapease-runtime-testing</module>
+    <module>inget-testing</module>
+    <module>inget-maven-plugin</module>
+    <module>inget-api</module>
+    <module>inget-common</module>
+    <module>inget-client-java</module>
+    <module>inget-client-commandline</module>
+    <module>inget-model</module>
+    <module>inget-resources</module>
+    <module>inget-runtime-testing</module>
   </modules>
 
   <dependencyManagement>
