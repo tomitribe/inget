@@ -21,21 +21,18 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.tomitribe.trapease.movie.model.Movie;
-import org.tomitribe.trapease.movie.rest.MoviesResource;
-import org.tomitribe.trapease.movie.rest.client.MovieClient;
-import org.tomitribe.trapease.movie.rest.client.base.BasicConfiguration;
-import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.client.base.SignatureAuthenticator;
-import org.tomitribe.trapease.movie.rest.client.base.SignatureConfiguration;
-import org.tomitribe.trapease.movie.services.MoviesService;
+import org.tomitribe.inget.movie.model.Movie;
+import org.tomitribe.inget.movie.rest.MoviesResource;
+import org.tomitribe.inget.movie.rest.client.MovieClient;
+import org.tomitribe.inget.movie.rest.client.base.ClientConfiguration;
+import org.tomitribe.inget.movie.rest.client.base.SignatureAuthenticator;
+import org.tomitribe.inget.movie.rest.client.base.SignatureConfiguration;
+import org.tomitribe.inget.movie.services.MoviesService;
 
 import javax.ws.rs.client.ClientRequestFilter;
 import java.net.URL;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

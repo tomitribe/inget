@@ -112,12 +112,13 @@ public class CmdGenerator {
         updateConfigWithNewValueMethod(commandClass);
         readValueConfigurationValueIfNotProvidedMethod(commandClass);
         CompilationUnit modifiedClassUnit = commandClass.findCompilationUnit().get();
-        addAuthenticationImports(modifiedClassUnit);
+        addImports(modifiedClassUnit);
         String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
         Utils.save("DefaultCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
     }
 
-    private static void addAuthenticationImports(CompilationUnit modifiedClassUnit) {
+    private static void addImports(CompilationUnit modifiedClassUnit) {
+        modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
         if (Configuration.AUTHENTICATION == Authentication.BASIC) {
             modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.BasicConfiguration");
         }

@@ -1,6 +1,6 @@
 import org.junit.After;
 import org.junit.Before;
-import org.tomitribe.trapease.movie.rest.cmd.base.MainCli;
+import org.tomitribe.inget.movie.rest.cmd.base.MainCli;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

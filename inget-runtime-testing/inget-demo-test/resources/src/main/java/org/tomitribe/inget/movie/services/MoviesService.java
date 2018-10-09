@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.tomitribe.trapease.movie.services;
+package org.tomitribe.inget.movie.services;
 
 import com.github.javafaker.Faker;
-import org.tomitribe.trapease.movie.model.Movie;
+import org.tomitribe.inget.movie.model.Movie;
 
 import javax.ejb.Lock;
 import javax.ejb.LockType;

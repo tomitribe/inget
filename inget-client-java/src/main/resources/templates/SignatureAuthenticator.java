@@ -21,12 +21,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class SignatureAuthenticator implements ClientRequestFilter {
 
     private final ClientConfiguration config;
 
-    private final org.tomitribe.trapease.movie.rest.client.base.SignatureConfiguration sigConfig;
+    private final SignatureConfiguration sigConfig;
 
     public SignatureAuthenticator(
             ClientConfiguration config) {

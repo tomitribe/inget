@@ -10,8 +10,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-
 public abstract class DefaultCommand implements Runnable {
 
     @Option(name = {

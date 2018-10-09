@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.tomitribe.trapease</groupId>
-        <artifactId>trapease-demo-test</artifactId>
+        <groupId>org.tomitribe.inget</groupId>
+        <artifactId>inget-demo-test</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.tomitribe.trapease</groupId>
+    <groupId>org.tomitribe.inget</groupId>
     <artifactId>model</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -36,7 +36,7 @@
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <generateModel>true</generateModel>
-                    <modelPackage>org.tomitribe.trapease.movie.model</modelPackage>
+                    <modelPackage>org.tomitribe.inget.movie.model</modelPackage>
                 </configuration>
                 <executions>
                     <execution>
