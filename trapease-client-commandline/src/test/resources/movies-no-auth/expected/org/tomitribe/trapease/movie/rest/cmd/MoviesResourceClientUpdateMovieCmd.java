@@ -5,10 +5,10 @@ import io.airlift.airline.Command;
 import io.airlift.airline.Option;
 import org.tomitribe.trapease.movie.rest.client.MovieClient;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.cmd.base.TrapeaseCommand;
+import org.tomitribe.trapease.movie.rest.cmd.base.DefaultCommand;
 
 @Command(name = "update-movie")
-public class MoviesResourceClientUpdateMovieCmd extends TrapeaseCommand {
+public class MoviesResourceClientUpdateMovieCmd extends DefaultCommand {
 
     @Override
     public void run(

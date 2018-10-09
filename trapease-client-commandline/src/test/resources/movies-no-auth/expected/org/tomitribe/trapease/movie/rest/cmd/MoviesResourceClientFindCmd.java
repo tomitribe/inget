@@ -4,10 +4,10 @@ import io.airlift.airline.Arguments;
 import io.airlift.airline.Command;
 import org.tomitribe.trapease.movie.rest.client.MovieClient;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.cmd.base.TrapeaseCommand;
+import org.tomitribe.trapease.movie.rest.cmd.base.DefaultCommand;
 
 @Command(name = "find")
-public class MoviesResourceClientFindCmd extends TrapeaseCommand {
+public class MoviesResourceClientFindCmd extends DefaultCommand {
 
     @Override
     public void run(

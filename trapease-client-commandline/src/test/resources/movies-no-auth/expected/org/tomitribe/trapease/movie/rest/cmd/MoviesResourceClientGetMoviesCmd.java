@@ -3,10 +3,10 @@ package org.tomitribe.trapease.movie.rest.cmd;
 import io.airlift.airline.Command;
 import org.tomitribe.trapease.movie.rest.client.MovieClient;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.cmd.base.TrapeaseCommand;
+import org.tomitribe.trapease.movie.rest.cmd.base.DefaultCommand;
 
 @Command(name = "get-movies")
-public class MoviesResourceClientGetMoviesCmd extends TrapeaseCommand {
+public class MoviesResourceClientGetMoviesCmd extends DefaultCommand {
 
     @Override
     public void run(

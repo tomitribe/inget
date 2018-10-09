@@ -4,10 +4,10 @@ import io.airlift.airline.Arguments;
 import io.airlift.airline.Command;
 import org.tomitribe.trapease.movie.rest.client.MovieClient;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.cmd.base.TrapeaseCommand;
+import org.tomitribe.trapease.movie.rest.cmd.base.DefaultCommand;
 
 @Command(name = "delete-movie")
-public class MoviesResourceClientDeleteMovieCmd extends TrapeaseCommand {
+public class MoviesResourceClientDeleteMovieCmd extends DefaultCommand {
 
     @Override
     public void run(

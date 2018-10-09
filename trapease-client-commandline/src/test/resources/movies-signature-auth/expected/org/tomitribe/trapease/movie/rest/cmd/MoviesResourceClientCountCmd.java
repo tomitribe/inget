@@ -4,10 +4,10 @@ import io.airlift.airline.Command;
 import io.airlift.airline.Option;
 import org.tomitribe.trapease.movie.rest.client.MovieClient;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.cmd.base.TrapeaseCommand;
+import org.tomitribe.trapease.movie.rest.cmd.base.DefaultCommand;
 
 @Command(name = "count")
-public class MoviesResourceClientCountCmd extends TrapeaseCommand {
+public class MoviesResourceClientCountCmd extends DefaultCommand {
 
     @Override
     public void run(

@@ -103,10 +103,10 @@ public class CmdGenerator {
     }
 
     private static void generateBaseCommand() throws IOException {
-        final CompilationUnit baseCommand = JavaParser.parse(TemplateUtil.readTemplate("TrapeaseCommand.java"));
+        final CompilationUnit baseCommand = JavaParser.parse(TemplateUtil.readTemplate("DefaultCommand.java"));
         baseCommand.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
         Utils.addGeneratedAnnotation(baseCommand, Utils.getClazz(baseCommand), null, CmdGenerator.class);
-        ClassOrInterfaceDeclaration commandClass = baseCommand.getClassByName("TrapeaseCommand").get();
+        ClassOrInterfaceDeclaration commandClass = baseCommand.getClassByName("DefaultCommand").get();
         addCommandOptions(commandClass);
         buildConfiguration(commandClass);
         updateConfigWithNewValueMethod(commandClass);
@@ -114,7 +114,7 @@ public class CmdGenerator {
         CompilationUnit modifiedClassUnit = commandClass.findCompilationUnit().get();
         addAuthenticationImports(modifiedClassUnit);
         String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
-        Utils.save("TrapeaseCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
+        Utils.save("DefaultCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
     }
 
     private static void addAuthenticationImports(CompilationUnit modifiedClassUnit) {
@@ -266,8 +266,8 @@ public class CmdGenerator {
 
     private static void extendCommandBaseClass(final CompilationUnit command,
                                                final ClassOrInterfaceDeclaration commandClass) {
-        commandClass.addExtendedType("TrapeaseCommand");
-        command.addImport(BASE_OUTPUT_PACKAGE + ".TrapeaseCommand");
+        commandClass.addExtendedType("DefaultCommand");
+        command.addImport(BASE_OUTPUT_PACKAGE + ".DefaultCommand");
 
         final MethodDeclaration method = new MethodDeclaration();
         method.setName("run");

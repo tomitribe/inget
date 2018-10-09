@@ -12,7 +12,7 @@ import java.util.Properties;
 
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
 
-public abstract class TrapeaseCommand implements Runnable {
+public abstract class DefaultCommand implements Runnable {
 
     @Option(name = {
             "-l", "--url"}, type = OptionType.GLOBAL)
