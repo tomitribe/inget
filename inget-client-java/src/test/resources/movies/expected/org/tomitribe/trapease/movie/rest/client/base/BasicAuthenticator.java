@@ -7,15 +7,15 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class BasicAuthenticator implements ClientRequestFilter {
 
-    private final org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration config;
+    private final ClientConfiguration config;
 
-    private final org.tomitribe.trapease.movie.rest.client.base.BasicConfiguration basicConfig;
+    private final BasicConfiguration basicConfig;
 
     public BasicAuthenticator(
-            org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration config) {
+            ClientConfiguration config) {
         this.config = config;
         this.basicConfig = config.getBasic();
     }
