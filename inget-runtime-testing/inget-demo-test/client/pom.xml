@@ -21,7 +21,7 @@
 
     <parent>
         <groupId>org.tomitribe.trapease</groupId>
-        <artifactId>trapease-demo-test</artifactId>
+        <artifactId>inget-demo-test</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -50,8 +50,8 @@
         <plugins>
             <plugin>
                 <groupId>org.tomitribe</groupId>
-                <artifactId>trapease-maven-plugin</artifactId>
-                <version>${version.trapease}</version>
+                <artifactId>inget-maven-plugin</artifactId>
+                <version>${version.inget}</version>
                 <configuration>
                     <modelPackage>org.tomitribe.trapease.movie.model</modelPackage>
                     <resourcePackage>org.tomitribe.trapease.movie.rest</resourcePackage>
@@ -75,13 +75,13 @@
     <dependencies>
         <dependency>
             <groupId>org.tomitribe</groupId>
-            <artifactId>trapease-api</artifactId>
-            <version>${version.trapease}</version>
+            <artifactId>inget-api</artifactId>
+            <version>${version.inget}</version>
         </dependency>
         <dependency>
             <groupId>org.tomitribe.trapease</groupId>
             <artifactId>resources</artifactId>
-            <version>${version.trapease}</version>
+            <version>${version.inget}</version>
         </dependency>
 
         <!-- TEST ONLY-->

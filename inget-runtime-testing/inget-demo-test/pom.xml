@@ -12,17 +12,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.tomitribe.trapease</groupId>
-    <artifactId>trapease-demo-test</artifactId>
+    <artifactId>inget-demo-test</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Trapease Demo Test</name>
+    <name>Inget Demo Test</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <version.tomee>7.0.4</version.tomee>
-        <version.trapease>1.0-SNAPSHOT</version.trapease>
+        <version.inget>1.0-SNAPSHOT</version.inget>
     </properties>
 
     <modules>
