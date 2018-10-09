@@ -23,7 +23,7 @@ import org.tomitribe.client.ClientGenerator;
 import org.tomitribe.cmd.CmdGenerator;
 import org.tomitribe.common.Authentication;
 import org.tomitribe.common.Configuration;
-import org.tomitribe.common.TrapeaseTypeSolver;
+import org.tomitribe.common.CustomTypeSolver;
 import org.tomitribe.common.Utils;
 import org.tomitribe.model.ModelGenerator;
 import org.tomitribe.resource.ResourcesGenerator;
@@ -119,7 +119,7 @@ public class MainGenerator extends AbstractMojo {
 
             FileUtils.mkdir(generatedSources);
             // Only after resolving the model and resource paths
-            TrapeaseTypeSolver.init();
+            CustomTypeSolver.init();
 
             if (generateClient) {
                 requireResourcePackage();

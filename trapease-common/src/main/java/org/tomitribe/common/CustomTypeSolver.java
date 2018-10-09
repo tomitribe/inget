@@ -7,7 +7,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 
 import java.io.File;
 
-public class TrapeaseTypeSolver {
+public class CustomTypeSolver {
 
     private static CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
 

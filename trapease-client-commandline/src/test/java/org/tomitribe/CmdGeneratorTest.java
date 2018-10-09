@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.tomitribe.cmd.CmdGenerator;
 import org.tomitribe.common.Authentication;
 import org.tomitribe.common.Configuration;
-import org.tomitribe.common.TrapeaseTypeSolver;
+import org.tomitribe.common.CustomTypeSolver;
 import org.tomitribe.trapease.test.Resources;
 
 import static org.tomitribe.trapease.test.Scenarios.assertFiles;
@@ -51,7 +51,7 @@ public class CmdGeneratorTest {
         Configuration.CMD_LINE_NAME = "cmdline";
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
 
-        TrapeaseTypeSolver.init();
+        CustomTypeSolver.init();
 
         CmdGenerator.execute();
 
@@ -75,7 +75,7 @@ public class CmdGeneratorTest {
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
         Configuration.AUTHENTICATION = Authentication.BASIC;
 
-        TrapeaseTypeSolver.init();
+        CustomTypeSolver.init();
 
         CmdGenerator.execute();
 
@@ -99,7 +99,7 @@ public class CmdGeneratorTest {
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
         Configuration.AUTHENTICATION = Authentication.SIGNATURE;
 
-        TrapeaseTypeSolver.init();
+        CustomTypeSolver.init();
 
         CmdGenerator.execute();
 

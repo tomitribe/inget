@@ -47,7 +47,7 @@ import org.tomitribe.common.Operation;
 import org.tomitribe.common.Reformat;
 import org.tomitribe.common.RemoveDuplicateImports;
 import org.tomitribe.common.TemplateUtil;
-import org.tomitribe.common.TrapeaseTypeSolver;
+import org.tomitribe.common.CustomTypeSolver;
 import org.tomitribe.common.Utils;
 import org.tomitribe.util.Join;
 
@@ -76,7 +76,7 @@ public class CmdGenerator {
 
         generateBaseCommand();
         JavaParser.setStaticConfiguration(
-                new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(TrapeaseTypeSolver.get())));
+                new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(CustomTypeSolver.get())));
 
         final Map<String, List<String>> groups = new HashMap<>();
         for (final File sourceClient : sourceClients) {
@@ -312,13 +312,13 @@ public class CmdGenerator {
                 ResolvedReferenceTypeDeclaration typeDeclaration = null;
                 boolean isGeneric = option.toString().contains("<");
                 if (isGeneric) {
-                    typeDeclaration = JavaParserFacade.get(TrapeaseTypeSolver.get())
+                    typeDeclaration = JavaParserFacade.get(CustomTypeSolver.get())
                             .convertToUsage(option.getType().asClassOrInterfaceType().getTypeArguments().get().iterator().next())
                             .asReferenceType()
                             .getTypeDeclaration();
                 } else {
                     typeDeclaration =
-                            JavaParserFacade.get(TrapeaseTypeSolver.get())
+                            JavaParserFacade.get(CustomTypeSolver.get())
                                     .getType(option)
                                     .asReferenceType()
                                     .getTypeDeclaration();
@@ -453,7 +453,7 @@ public class CmdGenerator {
                 if (isPrimitiveOrValueOf(type.resolve())) {
                     return p.getNameAsString();
                 } else {
-                    ClassOrInterfaceDeclaration clazz = ((JavaParserClassDeclaration) JavaParserFacade.get(TrapeaseTypeSolver.get())
+                    ClassOrInterfaceDeclaration clazz = ((JavaParserClassDeclaration) JavaParserFacade.get(CustomTypeSolver.get())
                             .convertToUsage(type)
                             .asReferenceType().getTypeDeclaration())
                             .getWrappedNode();
@@ -513,7 +513,7 @@ public class CmdGenerator {
         if (type.isReferenceType()) {
             final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
 
-            if (typeDeclaration.canBeAssignedTo(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
+            if (typeDeclaration.canBeAssignedTo(CustomTypeSolver.get().solveType("java.util.Collection"))) {
                 final List<ResolvedType> collectionParameters = type.asReferenceType().typeParametersValues();
                 if (collectionParameters.size() == 1) {
                     return isPrimitiveOrValueOf(collectionParameters.get(0));
@@ -617,7 +617,7 @@ public class CmdGenerator {
                     .asReferenceType()
                     .getTypeDeclaration();
         } else {
-            resolvedType = JavaParserFacade.get(TrapeaseTypeSolver.get())
+            resolvedType = JavaParserFacade.get(CustomTypeSolver.get())
                     .getType(field.getVariables().get(0))
                     .asReferenceType()
                     .getTypeDeclaration();
@@ -711,7 +711,7 @@ public class CmdGenerator {
         VariableDeclarator type = f.getVariables().stream().findFirst().get();
         ResolvedReferenceTypeDeclaration solvedType;
         try {
-            solvedType = JavaParserFacade.get(TrapeaseTypeSolver.get())
+            solvedType = JavaParserFacade.get(CustomTypeSolver.get())
                     .getType(type)
                     .asReferenceType()
                     .getTypeDeclaration();

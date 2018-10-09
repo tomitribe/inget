@@ -665,14 +665,14 @@ public class Utils {
 
         try {
             type = (type.startsWith("java.lang")) ? type : "java.lang." + type;
-            TrapeaseTypeSolver.get().solveType(type);
+            CustomTypeSolver.get().solveType(type);
             isWrapper = true;
         } catch (RuntimeException e) {
         }
 
         boolean isDate = false;
         try {
-            TrapeaseTypeSolver.get().solveType(type);
+            CustomTypeSolver.get().solveType(type);
             if (type.startsWith("java.util")) {
                 isDate = true;
             }
@@ -686,7 +686,7 @@ public class Utils {
         if (type.isReferenceType()) {
             final ResolvedReferenceTypeDeclaration typeDeclaration = type.asReferenceType().getTypeDeclaration();
 
-            if (typeDeclaration.isAssignableBy(TrapeaseTypeSolver.get().solveType("java.util.Collection"))) {
+            if (typeDeclaration.isAssignableBy(CustomTypeSolver.get().solveType("java.util.Collection"))) {
                 return true;
             }
         }
