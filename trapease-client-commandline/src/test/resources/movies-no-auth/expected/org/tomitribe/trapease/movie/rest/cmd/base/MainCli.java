@@ -9,9 +9,9 @@ import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientFindCmd;
 import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientGetMoviesCmd;
 import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientUpdateMovieCmd;
 
-public class TrapeaseCli {
+public class MainCli {
 
-    private TrapeaseCli() {
+    private MainCli() {
     }
 
     public static void main(

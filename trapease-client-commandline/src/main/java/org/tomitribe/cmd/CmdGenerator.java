@@ -527,10 +527,10 @@ public class CmdGenerator {
     private static void generateCli(final Map<String, List<String>> groups) throws IOException {
         final CompilationUnit cli = new CompilationUnit(BASE_OUTPUT_PACKAGE);
         cli.setPackageDeclaration(BASE_OUTPUT_PACKAGE);
-        cli.addClass("TrapeaseCli");
+        cli.addClass("MainCli");
 
         final ClassOrInterfaceDeclaration cliClass =
-                cli.getClassByName("TrapeaseCli").orElseThrow(IllegalArgumentException::new);
+                cli.getClassByName("MainCli").orElseThrow(IllegalArgumentException::new);
         cliClass.addConstructor(Modifier.PRIVATE);
 
         final MethodDeclaration main = new MethodDeclaration();
@@ -566,7 +566,7 @@ public class CmdGenerator {
         block.addStatement("final Cli<Runnable> cli = cliBuilder.build();");
         block.addStatement("cli.parse(args).run();");
 
-        Utils.save("TrapeaseCli.java", BASE_OUTPUT_PACKAGE, cli.toString());
+        Utils.save("MainCli.java", BASE_OUTPUT_PACKAGE, cli.toString());
     }
 
     private static void save(final String className, final CompilationUnit classToBeSaved) {

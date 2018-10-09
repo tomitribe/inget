@@ -1,6 +1,6 @@
 import org.junit.After;
 import org.junit.Before;
-import org.tomitribe.trapease.movie.rest.cmd.base.TrapeaseCli;
+import org.tomitribe.trapease.movie.rest.cmd.base.MainCli;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -35,7 +35,7 @@ public abstract class Command {
             params.add(0, "--url");
             params.add(1, url.toString());
         }
-        TrapeaseCli.main(params.toArray(new String[]{}));
+        MainCli.main(params.toArray(new String[]{}));
     }
 
     protected static void cmd(final String cmd) {
