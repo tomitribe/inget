@@ -15,7 +15,7 @@ Main annotations are:
 Maven depedency
 ```xml
 <dependency>
-  <groupId>org.tomitribe</groupId>
+  <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget-api</artifactId>
   <version>1.0-SNAPSHOT</version>
 </dependency>
@@ -146,7 +146,7 @@ To setup Inget, you just need to add the inget maven plugin as following :
 
 ```xml
 <plugin>
-<groupId>org.tomitribe</groupId>
+<groupId>org.tomitribe.inget</groupId>
 <artifactId>inget-maven-plugin</artifactId>
 <version>${version.inget}</version>
 <configuration>

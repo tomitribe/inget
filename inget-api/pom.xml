@@ -6,12 +6,13 @@
 
   <parent>
     <artifactId>inget</artifactId>
-    <groupId>org.tomitribe</groupId>
+    <groupId>org.tomitribe.inget</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <name>Inget API</name>
+  <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget-api</artifactId>
+  <name>Inget API</name>
 
   <dependencies>
     <dependency>

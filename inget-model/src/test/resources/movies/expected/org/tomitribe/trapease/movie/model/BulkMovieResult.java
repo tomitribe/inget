@@ -27,7 +27,7 @@ import org.tomitribe.trapease.movie.model.base.bulk.Failure;
 
 @Value
 @EqualsAndHashCode
-@Generated("org.tomitribe.model.ModelClassGenerator")
+@Generated("org.tomitribe.inget.model.ModelClassGenerator")
 @Schema(description = "The result of the bulk operation.")
 public class BulkMovieResult {
 

@@ -8,7 +8,7 @@ import lombok.Value;
 @Value
 @AllArgsConstructor
 @Schema(description = "Failure details")
-@Generated("org.tomitribe.model.ModelClassGenerator")
+@Generated("org.tomitribe.inget.model.ModelClassGenerator")
 public class Failure {
 
     @Schema(description = "name of the entity that failed to be updated.", required = true)

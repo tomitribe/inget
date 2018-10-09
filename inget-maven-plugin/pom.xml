@@ -6,10 +6,11 @@
 
   <parent>
     <artifactId>inget</artifactId>
-    <groupId>org.tomitribe</groupId>
+    <groupId>org.tomitribe.inget</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
+  <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget-maven-plugin</artifactId>
   <name>Inget Maven Plugin</name>
   <packaging>maven-plugin</packaging>
@@ -57,27 +58,27 @@
       <version>3.4</version>
     </dependency>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-common</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-model</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-client-java</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-client-commandline</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-resources</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>

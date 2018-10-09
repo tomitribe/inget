@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 @Builder(builderClassName = "Create", toBuilder = true)
-@Generated("org.tomitribe.model.ModelClassGenerator")
+@Generated("org.tomitribe.inget.model.ModelClassGenerator")
 public class CreateMovie {
 
     private String director;

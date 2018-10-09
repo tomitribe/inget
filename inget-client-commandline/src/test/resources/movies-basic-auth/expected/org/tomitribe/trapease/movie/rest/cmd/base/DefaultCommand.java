@@ -12,7 +12,7 @@ import javax.annotation.Generated;
 import org.tomitribe.trapease.movie.rest.client.base.BasicConfiguration;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
 
-@Generated("org.tomitribe.cmd.CmdGenerator")
+@Generated("org.tomitribe.inget.cmd.CmdGenerator")
 public abstract class DefaultCommand implements Runnable {
 
     @Option(name = {

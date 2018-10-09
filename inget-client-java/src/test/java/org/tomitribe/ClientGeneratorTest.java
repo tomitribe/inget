@@ -20,9 +20,9 @@ package org.tomitribe;
 
 import org.junit.After;
 import org.junit.Test;
-import org.tomitribe.client.ClientGenerator;
-import org.tomitribe.common.Configuration;
-import org.tomitribe.common.CustomTypeSolver;
+import org.tomitribe.inget.client.ClientGenerator;
+import org.tomitribe.inget.common.Configuration;
+import org.tomitribe.inget.common.CustomTypeSolver;
 import org.tomitribe.trapease.test.Resources;
 
 import static org.tomitribe.trapease.test.Scenarios.assertFiles;

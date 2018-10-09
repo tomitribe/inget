@@ -20,7 +20,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import org.tomitribe.common.Utils;
+import org.tomitribe.inget.common.Utils;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 

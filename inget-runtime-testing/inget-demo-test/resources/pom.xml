@@ -28,7 +28,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.tomitribe</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>inget-api</artifactId>
             <version>${version.inget}</version>
         </dependency>

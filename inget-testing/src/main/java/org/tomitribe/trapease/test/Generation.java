@@ -16,7 +16,7 @@
  */
 package org.tomitribe.trapease.test;
 
-import org.tomitribe.api.Model;
+import org.tomitribe.inget.api.Model;
 import org.tomitribe.util.Files;
 import org.tomitribe.util.IO;
 import org.tomitribe.util.JarLocation;

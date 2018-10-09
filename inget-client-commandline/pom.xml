@@ -4,17 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>inget</artifactId>
-    <groupId>org.tomitribe</groupId>
+    <groupId>org.tomitribe.inget</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget-client-commandline</artifactId>
   <name>Inget Client Commandline</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-common</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
@@ -33,7 +34,7 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.tomitribe</groupId>
+      <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-testing</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

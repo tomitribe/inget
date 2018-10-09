@@ -31,7 +31,7 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.tomitribe</groupId>
+                <groupId>org.tomitribe.inget</groupId>
                 <artifactId>inget-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
@@ -52,7 +52,7 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.tomitribe</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>inget-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
