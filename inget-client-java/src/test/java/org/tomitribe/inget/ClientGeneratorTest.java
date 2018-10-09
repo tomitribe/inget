@@ -16,18 +16,18 @@
  */
 
 
-package org.tomitribe;
+package org.tomitribe.inget;
 
 import org.junit.After;
 import org.junit.Test;
+import org.tomitribe.inget.client.ClientGenerator;
 import org.tomitribe.inget.common.Configuration;
 import org.tomitribe.inget.common.CustomTypeSolver;
-import org.tomitribe.inget.resource.ResourcesGenerator;
 import org.tomitribe.inget.test.Resources;
 
 import static org.tomitribe.inget.test.Scenarios.assertFiles;
 
-public class ResourceGeneratorTest {
+public class ClientGeneratorTest {
 
     @After
     public void after(){
@@ -41,15 +41,17 @@ public class ResourceGeneratorTest {
         Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
         Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
+        Configuration.CLIENT_SOURCES = movies.input().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
         Configuration.RESOURCE_PACKAGE = "io.superbiz.video.rest";
+        Configuration.CLIENT_NAME = "MovieClient";
         Configuration.RESOURCE_SUFFIX = "ResourceBean";
         Configuration.MODEL_SUFFIX = "Model";
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
 
         CustomTypeSolver.init();
 
-        ResourcesGenerator.execute();
+        ClientGenerator.execute();
 
         assertFiles(movies.expected(".*\\.java$"), movies.actual(".*\\.java$"));
     }
