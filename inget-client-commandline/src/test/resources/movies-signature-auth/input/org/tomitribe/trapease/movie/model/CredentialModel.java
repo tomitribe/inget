@@ -17,7 +17,7 @@
 package org.tomitribe.trapease.movie.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.tomitribe.api.Model;
+import org.tomitribe.inget.api.Model;
 
 @Schema(description = "The passwords and secrets that authorize the use of an account")
 public class CredentialModel {

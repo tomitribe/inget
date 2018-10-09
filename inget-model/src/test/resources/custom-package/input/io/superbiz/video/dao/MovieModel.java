@@ -16,9 +16,9 @@
  */
 package io.superbiz.video.dao;
 
-import org.tomitribe.api.Filter;
-import org.tomitribe.api.Model;
-import org.tomitribe.api.Resource;
+import org.tomitribe.inget.api.Filter;
+import org.tomitribe.inget.api.Model;
+import org.tomitribe.inget.api.Resource;
 
 @Model
 @Resource

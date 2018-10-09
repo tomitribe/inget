@@ -22,12 +22,12 @@ import org.tomitribe.churchkey.Key;
 import org.tomitribe.churchkey.Keys;
 import org.tomitribe.util.IO;
 
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class SignatureAuthenticator implements ClientRequestFilter {
 
     private final ClientConfiguration config;
 
-    private final org.tomitribe.trapease.movie.rest.client.base.SignatureConfiguration sigConfig;
+    private final SignatureConfiguration sigConfig;
 
     public SignatureAuthenticator(
             ClientConfiguration config) {

@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.tomitribe.trapease</groupId>
+        <groupId>org.tomitribe.inget</groupId>
         <artifactId>inget-demo-test</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.tomitribe.trapease</groupId>
+    <groupId>org.tomitribe.inget</groupId>
     <artifactId>resources</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -28,7 +28,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.tomitribe</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>inget-api</artifactId>
             <version>${version.inget}</version>
         </dependency>
@@ -39,7 +39,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.tomitribe.trapease</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>model</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>inget-demo-test</artifactId>
-        <groupId>org.tomitribe.trapease</groupId>
+        <groupId>org.tomitribe.inget</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -23,7 +23,7 @@
                 <version>2.0.0</version>
                 <configuration>
                     <outputDirectory>${openapi.directory}</outputDirectory>
-                    <resourcePackages>org.tomitribe.trapease.movie.rest</resourcePackages>
+                    <resourcePackages>org.tomitribe.inget.movie.rest</resourcePackages>
                     <config>
                         <swagger2markup.markupLanguage>ASCIIDOC</swagger2markup.markupLanguage>
                         <swagger2markup.swaggerMarkupLanguage>ASCIIDOC</swagger2markup.swaggerMarkupLanguage>
@@ -45,7 +45,7 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.tomitribe.trapease</groupId>
+                        <groupId>org.tomitribe.inget</groupId>
                         <artifactId>resources</artifactId>
                         <version>1.0-SNAPSHOT</version>
                     </dependency>
@@ -91,7 +91,7 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.tomitribe.trapease</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>resources</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

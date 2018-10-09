@@ -20,12 +20,12 @@ package org.tomitribe;
 
 import org.junit.After;
 import org.junit.Test;
-import org.tomitribe.common.Configuration;
-import org.tomitribe.common.CustomTypeSolver;
-import org.tomitribe.resource.ResourcesGenerator;
-import org.tomitribe.trapease.test.Resources;
+import org.tomitribe.inget.common.Configuration;
+import org.tomitribe.inget.common.CustomTypeSolver;
+import org.tomitribe.inget.resource.ResourcesGenerator;
+import org.tomitribe.inget.test.Resources;
 
-import static org.tomitribe.trapease.test.Scenarios.assertFiles;
+import static org.tomitribe.inget.test.Scenarios.assertFiles;
 
 public class ResourceGeneratorTest {
 

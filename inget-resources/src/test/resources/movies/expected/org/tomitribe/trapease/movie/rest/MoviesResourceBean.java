@@ -46,7 +46,7 @@ import org.tomitribe.trapease.movie.model.UpdateMovie;
 @Path("movies/bean")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Generated("org.tomitribe.resource.ResourcesGenerator")
+@Generated("org.tomitribe.inget.resource.ResourcesGenerator")
 @Tag(name = "Movies", description = "This endpoint manages multiple movies.")
 public interface MoviesResourceBean {
 
@@ -57,7 +57,7 @@ public interface MoviesResourceBean {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = BulkMovieResult.class))),
             @ApiResponse(responseCode = "409", description = "Conflict") })
-    @Generated("org.tomitribe.resource.MethodGenerator")
+    @Generated("org.tomitribe.inget.resource.MethodGenerator")
     Response bulkCreate(
             @Parameter(description = "Set of CreateMovie to create", required = true)
             final List<CreateMovie> movies);
@@ -68,7 +68,7 @@ public interface MoviesResourceBean {
     @Operation(summary = "Bulk update movies.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = BulkMovieResult.class))) })
-    @Generated("org.tomitribe.resource.MethodGenerator")
+    @Generated("org.tomitribe.inget.resource.MethodGenerator")
     Response bulkUpdate(
             @Parameter(description = "Set of UpdateMovie to update", required = true)
             final List<UpdateMovie> movies);
@@ -79,7 +79,7 @@ public interface MoviesResourceBean {
     @Operation(summary = "Bulk delete movies.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = BulkMovieResult.class))) })
-    @Generated("org.tomitribe.resource.MethodGenerator")
+    @Generated("org.tomitribe.inget.resource.MethodGenerator")
     Response bulkDelete(
             @Parameter(description = "Set of Movie ids to delete", required = true)
             final List<String> ids);
@@ -90,7 +90,7 @@ public interface MoviesResourceBean {
     @Operation(summary = "Read all Movies.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MovieResult.class))) })
-    @Generated("org.tomitribe.resource.MethodGenerator")
+    @Generated("org.tomitribe.inget.resource.MethodGenerator")
     Response readAll(
             @QueryParam("title")
             final String title);

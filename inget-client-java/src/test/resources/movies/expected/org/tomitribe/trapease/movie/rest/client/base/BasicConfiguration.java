@@ -8,7 +8,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class BasicConfiguration {
 
     private String username;

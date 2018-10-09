@@ -10,14 +10,14 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-@Generated(value = "org.tomitribe.model.ModelGenerator")
+@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class ClientConfiguration {
 
     private URL url;
 
     private boolean verbose;
 
-    private org.tomitribe.trapease.movie.rest.client.base.SignatureConfiguration signature;
+    private SignatureConfiguration signature;
 
-    private org.tomitribe.trapease.movie.rest.client.base.BasicConfiguration basic;
+    private BasicConfiguration basic;
 }

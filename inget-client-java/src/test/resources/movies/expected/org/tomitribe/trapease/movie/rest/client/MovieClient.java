@@ -6,7 +6,7 @@ import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
 import org.tomitribe.trapease.movie.rest.client.base.MovieClientExceptionMapper;
 
-@Generated("org.tomitribe.client.ClientGenerator")
+@Generated("org.tomitribe.inget.client.ClientGenerator")
 public class MovieClient {
 
     public MovieClient(

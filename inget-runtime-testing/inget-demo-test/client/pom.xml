@@ -20,12 +20,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.tomitribe.trapease</groupId>
+        <groupId>org.tomitribe.inget</groupId>
         <artifactId>inget-demo-test</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.tomitribe.trapease</groupId>
+    <groupId>org.tomitribe.inget</groupId>
     <artifactId>client</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -49,12 +49,12 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.tomitribe</groupId>
+                <groupId>org.tomitribe.inget</groupId>
                 <artifactId>inget-maven-plugin</artifactId>
                 <version>${version.inget}</version>
                 <configuration>
-                    <modelPackage>org.tomitribe.trapease.movie.model</modelPackage>
-                    <resourcePackage>org.tomitribe.trapease.movie.rest</resourcePackage>
+                    <modelPackage>org.tomitribe.inget.movie.model</modelPackage>
+                    <resourcePackage>org.tomitribe.inget.movie.rest</resourcePackage>
                     <resourceSuffix>Resource</resourceSuffix>
                     <generateClient>true</generateClient>
                     <clientName>MovieClient</clientName>
@@ -74,12 +74,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.tomitribe</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>inget-api</artifactId>
             <version>${version.inget}</version>
         </dependency>
         <dependency>
-            <groupId>org.tomitribe.trapease</groupId>
+            <groupId>org.tomitribe.inget</groupId>
             <artifactId>resources</artifactId>
             <version>${version.inget}</version>
         </dependency>
