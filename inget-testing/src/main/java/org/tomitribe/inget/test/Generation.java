@@ -91,9 +91,9 @@ public class Generation {
 
     public static void main(String[] args) throws IOException {
         final File thisClazz = JarLocation.jarLocation(Generation.class);
-        final File project = parentOf("trapease-testing", thisClazz);
+        final File project = parentOf("inget-testing", thisClazz);
 
-        final File srcTest = Files.file(project, "trapease-model", "src", "test");
+        final File srcTest = Files.file(project, "inget-model", "src", "test");
 
         for (final Model.Operation operation : Model.Operation.values()) {
             final String read = Strings.camelCase(operation.name().toLowerCase(), "_");
@@ -120,11 +120,11 @@ public class Generation {
                     "package org.tomitribe.model;\n" +
                     "\n" +
                     "import org.junit.Test;\n" +
-                    "import org.tomitribe.common.Configuration;\n" +
-                    "import org.tomitribe.trapease.test.Resources;\n" +
-                    "import org.tomitribe.trapease.test.Generation;\n" +
+                    "import org.tomitribe.inget.common.Configuration;\n" +
+                    "import org.tomitribe.inget.test.Resources;\n" +
+                    "import org.tomitribe.inget.test.Generation;\n" +
                     "\n" +
-                    "import static org.tomitribe.trapease.test.Scenarios.assertFiles;\n" +
+                    "import static org.tomitribe.inget.test.Scenarios.assertFiles;\n" +
                     "\n" +
                     "public class " + testName + " {\n" +
                     "\n" +

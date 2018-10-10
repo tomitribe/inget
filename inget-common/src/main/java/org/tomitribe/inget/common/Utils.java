@@ -398,7 +398,7 @@ public class Utils {
     }
 
     public static boolean isRootResource(final String rootClassName, final String resourceName) {
-        final String expectedSingularResource = rootClassName + "Resource";
+        final String expectedSingularResource = rootClassName + Configuration.RESOURCE_SUFFIX;
         return expectedSingularResource.equals(resourceName);
     }
 

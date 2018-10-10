@@ -41,8 +41,8 @@ public class ResourceGeneratorTest {
         Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
         Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "org.tomitribe.trapease.movie.model";
-        Configuration.RESOURCE_PACKAGE = "org.tomitribe.trapease.movie.rest";
+        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
+        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.rest";
         Configuration.RESOURCE_SUFFIX = "ResourceBean";
         Configuration.MODEL_SUFFIX = "Model";
         Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();

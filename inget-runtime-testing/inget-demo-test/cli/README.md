@@ -1,12 +1,12 @@
-# Trapease Demo
+# Inget Demo
 
-Build the trapease-demo project with all modules.
+Build the project with all modules.
 
 Before running this make sure to go to the *war* module readme and run the web app.
 
 ## CLI
 ```
 cd cli/target
-./cli --url http://localhost:8080/trapease movie create --director "James Cameron" --title "The Terminator"
-./cli --url http://localhost:8080/trapease movie read 1
+./cmdline --url http://localhost:8080/inget movie create --director "James Cameron" --title "The Terminator"
+./cmdline --url http://localhost:8080/inget movie read 1
 ```
