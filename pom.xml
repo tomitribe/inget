@@ -45,10 +45,10 @@
     <module>inget-maven-plugin</module>
     <module>inget-api</module>
     <module>inget-common</module>
-    <module>inget-client-java</module>
-    <module>inget-client-commandline</module>
-    <module>inget-model</module>
-    <module>inget-resources</module>
+    <module>inget-client-java-generator</module>
+    <module>inget-client-commandline-generator</module>
+    <module>inget-model-generator</module>
+    <module>inget-resources-generator</module>
     <module>inget-runtime-testing</module>
   </modules>
 

@@ -10,19 +10,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.tomitribe.inget</groupId>
-  <artifactId>inget-client-commandline</artifactId>
-  <name>Inget Client Commandline</name>
+  <artifactId>inget-model-generator</artifactId>
+  <name>Inget Model Generator</name>
 
   <dependencies>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-common</artifactId>
       <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.4</version>
     </dependency>
     <dependency>
       <groupId>com.google.googlejavaformat</groupId>

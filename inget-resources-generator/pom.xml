@@ -10,8 +10,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.tomitribe.inget</groupId>
-  <artifactId>inget-resources</artifactId>
-  <name>Inget Resources</name>
+  <artifactId>inget-resources-generator</artifactId>
+  <name>Inget Resources Generator</name>
 
   <dependencies>
     <dependency>

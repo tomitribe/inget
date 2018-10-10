@@ -10,14 +10,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.tomitribe.inget</groupId>
-  <artifactId>inget-model</artifactId>
-  <name>Inget Model</name>
+  <artifactId>inget-client-java-generator</artifactId>
+  <name>Inget Client Java Generator</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.tomitribe.inget</groupId>
+      <groupId>com.github.javaparser</groupId>
+      <artifactId>javaparser-core</artifactId>
+      <version>3.5.15</version>
+    </dependency>
+    <dependency>
       <artifactId>inget-common</artifactId>
+      <groupId>org.tomitribe.inget</groupId>
       <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.4</version>
     </dependency>
     <dependency>
       <groupId>com.google.googlejavaformat</groupId>
