@@ -58,7 +58,7 @@ public class CommandsTest extends Command{
     public void testCreate(final @ArquillianResource URL base) throws Exception {
         cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base);
 
-        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base).verbose(true).build());
+        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base.toString()).verbose(true).build());
         List<Movie> movies = movieClient.movies().getMovies();
         Movie movie = movies.stream().filter(m -> m.getTitle().equalsIgnoreCase("The Terminator")).findFirst().get();
 
@@ -75,7 +75,7 @@ public class CommandsTest extends Command{
         assertTrue(outLogs.toString().contains("\"director\":\"James Cameron\""));
         resetLogs();
 
-        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base).verbose(true).build());
+        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base.toString()).verbose(true).build());
         List<Movie> movies = movieClient.movies().getMovies();
         Movie movie = movies.stream().filter(m -> m.getTitle().equalsIgnoreCase("The Terminator")).findFirst().get();
 

@@ -14,8 +14,13 @@ public class MovieClient {
 
     public MovieClient(
             ClientConfiguration config) {
-        RestClientBuilder builder = RestClientBuilder.newBuilder().baseUrl(config.getUrl())
-                .register(JohnzonProvider.class).register(MovieClientExceptionMapper.class);
+        RestClientBuilder builder = null;
+        try {
+            builder = RestClientBuilder.newBuilder().baseUrl(new java.net.URL(config.getUrl()))
+                    .register(JohnzonProvider.class).register(MovieClientExceptionMapper.class);
+        } catch (java.net.MalformedURLException e) {
+            throw new javax.ws.rs.WebApplicationException("URL is not valid " + e.getMessage());
+        }
         if (config.getSignature() != null) {
             builder.register(new io.superbiz.video.rest.client.base.SignatureAuthenticator(config));
         }

@@ -58,7 +58,7 @@ public class CrudTest {
         Movie movie = new Movie("abc", "cde", "Action", 9, 1984);
 
         ClientConfiguration config = ClientConfiguration.builder()
-                .url(base)
+                .url(base.toString())
                 .verbose(true)
                 .build();
 
@@ -75,7 +75,7 @@ public class CrudTest {
         Movie movie = new Movie("abc", "cde", "Action", 9, 1984);
 
         ClientConfiguration config = ClientConfiguration.builder()
-                .url(base)
+                .url(base.toString())
                 .verbose(true)
                 .build();
 
@@ -97,7 +97,7 @@ public class CrudTest {
         Movie movie = new Movie("abc", "cde", "Action", 9, 1984);
 
         ClientConfiguration config = ClientConfiguration.builder()
-                .url(base)
+                .url(base.toString())
                 .verbose(true)
                 .build();
 
