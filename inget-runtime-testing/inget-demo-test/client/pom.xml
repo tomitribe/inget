@@ -75,7 +75,7 @@
     <dependencies>
         <dependency>
             <groupId>org.tomitribe.inget</groupId>
-            <artifactId>inget-api</artifactId>
+            <artifactId>inget-client-java</artifactId>
             <version>${version.inget}</version>
         </dependency>
         <dependency>
@@ -83,7 +83,6 @@
             <artifactId>resources</artifactId>
             <version>${version.inget}</version>
         </dependency>
-
         <!-- TEST ONLY-->
         <dependency>
             <groupId>junit</groupId>

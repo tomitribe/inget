@@ -109,7 +109,7 @@
     <dependencies>
         <dependency>
             <groupId>org.tomitribe.inget</groupId>
-            <artifactId>inget-api</artifactId>
+            <artifactId>inget-client-commandline</artifactId>
             <version>${version.inget}</version>
         </dependency>
         <dependency>

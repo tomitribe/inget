@@ -64,17 +64,17 @@
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
-      <artifactId>inget-model</artifactId>
+      <artifactId>inget-model-generator</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
-      <artifactId>inget-client-java</artifactId>
+      <artifactId>inget-client-java-generator</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
-      <artifactId>inget-client-commandline</artifactId>
+      <artifactId>inget-client-commandline-generator</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
