@@ -1,4 +1,4 @@
-package movies.input.io.superbiz.video.model.base.filter;
+package io.superbiz.video.model.base.filter;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Generated;

@@ -16,9 +16,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package movies.input.io.superbiz.video.model;
+package io.superbiz.video.model;
 
-import movies.input.io.superbiz.video.model.base.bulk.Failure;
+import io.superbiz.video.model.base.bulk.Failure;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import javax.annotation.Generated;

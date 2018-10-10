@@ -17,8 +17,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package movies.input.io.superbiz.video.rest;
+package io.superbiz.video.rest;
 
+import io.superbiz.video.model.BulkMovieResult;
+import io.superbiz.video.model.CreateMovie;
+import io.superbiz.video.model.MovieResult;
+import io.superbiz.video.model.UpdateMovie;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,12 +39,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import movies.input.io.superbiz.video.model.BulkMovieResult;
-import movies.input.io.superbiz.video.model.CreateMovie;
-import movies.input.io.superbiz.video.model.MovieResult;
-import movies.input.io.superbiz.video.model.UpdateMovie;
 
 @Path("movies/bean")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -90,5 +91,7 @@ public interface MoviesResourceBean {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = MovieResult.class))) })
     @Generated("org.tomitribe.inget.resource.MethodGenerator")
-    Response readAll();
+    Response readAll(
+            @QueryParam("title")
+            final String title);
 }
