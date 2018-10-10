@@ -10,18 +10,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.tomitribe.inget</groupId>
-  <artifactId>inget-client-java</artifactId>
-  <name>Inget Client Java</name>
+  <artifactId>inget-client-commandline-generator</artifactId>
+  <name>Inget Client Commandline Generator</name>
 
   <dependencies>
     <dependency>
-      <groupId>com.github.javaparser</groupId>
-      <artifactId>javaparser-core</artifactId>
-      <version>3.5.15</version>
-    </dependency>
-    <dependency>
-      <artifactId>inget-common</artifactId>
       <groupId>org.tomitribe.inget</groupId>
+      <artifactId>inget-common</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>

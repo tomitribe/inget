@@ -79,7 +79,7 @@
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
-      <artifactId>inget-resources</artifactId>
+      <artifactId>inget-resources-generator</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
 
