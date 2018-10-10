@@ -1,10 +1,10 @@
-package org.tomitribe.trapease.movie.rest.cmd;
+package io.superbiz.video.model.rest.cmd;
 
 import io.airlift.airline.Arguments;
 import io.airlift.airline.Command;
+import io.superbiz.video.model.rest.client.MovieClient;
+import io.superbiz.video.model.rest.client.base.ClientConfiguration;
 import io.superbiz.video.rest.cmd.base.DefaultCommand;
-import org.tomitribe.trapease.movie.rest.client.MovieClient;
-import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
 
 @Command(name = "find")
 public class MoviesResourceClientFindCmd extends DefaultCommand {

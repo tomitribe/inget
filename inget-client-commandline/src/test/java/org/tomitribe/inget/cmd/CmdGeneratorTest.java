@@ -43,8 +43,8 @@ public class CmdGeneratorTest {
         Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.CLIENT_SOURCES = movies.input().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "org.tomitribe.trapease.movie.model";
-        Configuration.RESOURCE_PACKAGE = "org.tomitribe.trapease.movie.rest";
+        Configuration.MODEL_PACKAGE = "io.superbiz.video.model.model";
+        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.model.rest";
         Configuration.CLIENT_NAME = "MovieClient";
         Configuration.RESOURCE_SUFFIX = "ResourceBean";
         Configuration.MODEL_SUFFIX = "Model";
@@ -90,8 +90,8 @@ public class CmdGeneratorTest {
         Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.CLIENT_SOURCES = movies.input().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "org.tomitribe.trapease.movie.model";
-        Configuration.RESOURCE_PACKAGE = "org.tomitribe.trapease.movie.rest";
+        Configuration.MODEL_PACKAGE = "io.superbiz.video.model.model";
+        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.model.rest";
         Configuration.CLIENT_NAME = "MovieClient";
         Configuration.RESOURCE_SUFFIX = "ResourceBean";
         Configuration.MODEL_SUFFIX = "Model";

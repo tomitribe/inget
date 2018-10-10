@@ -2,12 +2,12 @@ package io.superbiz.video.rest.cmd.base;
 
 import io.airlift.airline.Cli;
 import io.airlift.airline.Help;
-import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientAddMovieCmd;
-import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientCountCmd;
-import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientDeleteMovieCmd;
-import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientFindCmd;
-import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientGetMoviesCmd;
-import org.tomitribe.trapease.movie.rest.cmd.MoviesResourceClientUpdateMovieCmd;
+import io.superbiz.video.model.rest.cmd.MoviesResourceClientAddMovieCmd;
+import io.superbiz.video.model.rest.cmd.MoviesResourceClientCountCmd;
+import io.superbiz.video.model.rest.cmd.MoviesResourceClientDeleteMovieCmd;
+import io.superbiz.video.model.rest.cmd.MoviesResourceClientFindCmd;
+import io.superbiz.video.model.rest.cmd.MoviesResourceClientGetMoviesCmd;
+import io.superbiz.video.model.rest.cmd.MoviesResourceClientUpdateMovieCmd;
 
 public class MainCli {
 
