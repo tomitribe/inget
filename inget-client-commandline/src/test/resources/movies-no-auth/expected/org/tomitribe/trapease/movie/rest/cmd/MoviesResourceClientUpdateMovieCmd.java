@@ -3,9 +3,9 @@ package org.tomitribe.trapease.movie.rest.cmd;
 import io.airlift.airline.Arguments;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
+import io.superbiz.video.rest.cmd.base.DefaultCommand;
 import org.tomitribe.trapease.movie.rest.client.MovieClient;
 import org.tomitribe.trapease.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.trapease.movie.rest.cmd.base.DefaultCommand;
 
 @Command(name = "update-movie")
 public class MoviesResourceClientUpdateMovieCmd extends DefaultCommand {
@@ -13,8 +13,8 @@ public class MoviesResourceClientUpdateMovieCmd extends DefaultCommand {
     @Override
     public void run(
             final ClientConfiguration clientConfiguration) {
-        final org.tomitribe.trapease.movie.model.Movie movie = org.tomitribe.trapease.movie.model.Movie.builder().id(id)
-                .title(title).director(director).genre(genre).year(year).rating(rating).build();
+        final io.superbiz.video.model.Movie movie = io.superbiz.video.model.Movie.builder().id(id).title(title)
+                .director(director).genre(genre).year(year).rating(rating).build();
         System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(
                 new MovieClient(clientConfiguration).moviesresourceclient().updateMovie(id, movie)));
     }

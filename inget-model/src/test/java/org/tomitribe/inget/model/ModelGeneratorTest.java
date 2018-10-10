@@ -31,7 +31,7 @@ public class ModelGeneratorTest {
         Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
         Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "org.tomitribe.trapease.movie.model";
+        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
         Configuration.RESOURCE_PACKAGE = null;
         Configuration.CLIENT_NAME = null;
         Configuration.RESOURCE_SUFFIX = null;
