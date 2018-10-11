@@ -28,7 +28,7 @@ public abstract class Command {
         System.setErr(null);
     }
 
-    protected static void cmd(final String cmd, final URL url) {
+    protected static void cmd(final String cmd, final String url) {
         List<String> params = new ArrayList<>(Arrays.asList(cmd.split(" (?=(([^'\"]*['\"]){2})*[^'\"]*$)")));
         params = params.stream().map(p -> p.replaceAll("\"", "")).collect(Collectors.toList());
         if (url != null) {

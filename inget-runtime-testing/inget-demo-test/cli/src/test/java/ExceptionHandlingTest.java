@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.tomitribe.inget.movie.model.Movie;
 import org.tomitribe.inget.movie.rest.MoviesResource;
-import org.tomitribe.inget.movie.rest.client.MovieClient;
 import org.tomitribe.inget.movie.rest.client.base.ClientConfiguration;
 import org.tomitribe.inget.movie.rest.client.base.SignatureAuthenticator;
 import org.tomitribe.inget.movie.rest.client.base.SignatureConfiguration;
@@ -35,11 +34,9 @@ import javax.ws.rs.client.ClientRequestFilter;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 @RunWith(Arquillian.class)
-public class CrudTest {
+public class ExceptionHandlingTest extends Command{
     @Deployment
     public static WebArchive webApp() {
         return ShrinkWrap.create(WebArchive.class)
@@ -54,60 +51,8 @@ public class CrudTest {
     }
 
     @Test
-    public void testCreate(final @ArquillianResource URL base) throws Exception {
-        Movie movie = new Movie("abc", "cde", "Action", 9, 1984);
-
-        ClientConfiguration config = ClientConfiguration.builder()
-                .url(base.toString())
-                .verbose(true)
-                .build();
-
-        MovieClient movieClient = new MovieClient(config);
-
-        movie = movieClient.movies().addMovie(movie);
-        Movie movieFound = movieClient.movies().find(movie.getId());
-
-        assertNotNull(movieFound);
+    public void testErrorHandlingCmdLine(final @ArquillianResource URL base) throws Exception {
+        cmd("movies wrongcommand --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
+        assertEquals("Error - Found unexpected parameters: [wrongcommand, --title, The Terminator, --director, James Cameron, --genre, Action, --year, 1984, --rating, 8]\n", outLogs.toString());
     }
-
-    @Test
-    public void testUpdate(final @ArquillianResource URL base) throws Exception {
-        Movie movie = new Movie("abc", "cde", "Action", 9, 1984);
-
-        ClientConfiguration config = ClientConfiguration.builder()
-                .url(base.toString())
-                .verbose(true)
-                .build();
-
-        MovieClient movieClient = new MovieClient(config);
-
-        movie = movieClient.movies().addMovie(movie);
-        Movie movieFound = movieClient.movies().find(movie.getId());
-
-        assertNotNull(movieFound);
-
-        movieFound.setRating(10);
-        movie = movieClient.movies().updateMovie(movieFound.getId(), movieFound);
-
-        assertEquals(10, movie.getRating());
-    }
-
-    @Test
-    public void testDelete(final @ArquillianResource URL base) throws Exception {
-        Movie movie = new Movie("abc", "cde", "Action", 9, 1984);
-
-        ClientConfiguration config = ClientConfiguration.builder()
-                .url(base.toString())
-                .verbose(true)
-                .build();
-
-        MovieClient movieClient = new MovieClient(config);
-
-        movie = movieClient.movies().addMovie(movie);
-        movieClient.movies().deleteMovie(movie.getId());
-
-        movie = movieClient.movies().find(movie.getId());
-        assertNull(movie);
-    }
-
 }

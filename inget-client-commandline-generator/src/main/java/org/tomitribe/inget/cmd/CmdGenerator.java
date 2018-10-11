@@ -565,8 +565,13 @@ public class CmdGenerator {
         }
 
         block.addStatement("final Cli<Runnable> cli = cliBuilder.build();");
-        block.addStatement("cli.parse(args).run();");
-
+        StringBuilder runBlock = new StringBuilder();
+        runBlock.append("try { ");
+        runBlock.append("cli.parse(args).run();");
+        runBlock.append("} catch (Exception e) { ");
+        runBlock.append("System.out.println(\"Error - \" + e.getMessage());");
+        runBlock.append("}");
+        block.addStatement(runBlock.toString());
         Utils.save("MainCli.java", BASE_OUTPUT_PACKAGE, cli.toString());
     }
 

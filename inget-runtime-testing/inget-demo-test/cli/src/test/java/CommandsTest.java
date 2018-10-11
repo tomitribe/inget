@@ -56,9 +56,9 @@ public class CommandsTest extends Command{
 
     @Test
     public void testCreate(final @ArquillianResource URL base) throws Exception {
-        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base);
+        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
 
-        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base).verbose(true).build());
+        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base.toString()).verbose(true).build());
         List<Movie> movies = movieClient.movies().getMovies();
         Movie movie = movies.stream().filter(m -> m.getTitle().equalsIgnoreCase("The Terminator")).findFirst().get();
 
@@ -71,11 +71,11 @@ public class CommandsTest extends Command{
 
     @Test
     public void testUpdate(final @ArquillianResource URL base) throws Exception {
-        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base);
+        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
         assertTrue(outLogs.toString().contains("\"director\":\"James Cameron\""));
         resetLogs();
 
-        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base).verbose(true).build());
+        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base.toString()).verbose(true).build());
         List<Movie> movies = movieClient.movies().getMovies();
         Movie movie = movies.stream().filter(m -> m.getTitle().equalsIgnoreCase("The Terminator")).findFirst().get();
 
@@ -85,7 +85,7 @@ public class CommandsTest extends Command{
         assertEquals(1984, movie.getYear());
         assertEquals(8, movie.getRating());
 
-        cmd("movies update-movie "+ movie.getId() + " --title \"The Terminator 2\" --director \"James Cameron\" --genre Action --year 1990 --rating 8", base);
+        cmd("movies update-movie "+ movie.getId() + " --title \"The Terminator 2\" --director \"James Cameron\" --genre Action --year 1990 --rating 8", base.toString());
         assertTrue(outLogs.toString().contains("\"title\":\"The Terminator 2\""));
 
         movies = movieClient.movies().getMovies();

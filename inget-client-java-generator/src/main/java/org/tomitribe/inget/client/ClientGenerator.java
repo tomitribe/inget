@@ -59,12 +59,18 @@ public class ClientGenerator {
         genericClientUnit.addImport(ImportManager.getImport("RestClientBuilder"));
         genericClientUnit.addImport(ImportManager.getImport("JohnzonProvider"));
 
-        StringBuilder cBuilder = new StringBuilder();
-        cBuilder.append("RestClientBuilder builder = RestClientBuilder.newBuilder()");
-        cBuilder.append(".baseUrl(config.getUrl())");
-        cBuilder.append(".register(JohnzonProvider.class)");
-        cBuilder.append(".register(" + Configuration.CLIENT_NAME + "ExceptionMapper.class);");
         ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
+        constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement("RestClientBuilder builder = null;"));
+
+        StringBuilder cBuilder = new StringBuilder();
+        cBuilder.append("try {");
+        cBuilder.append("builder = RestClientBuilder.newBuilder().baseUrl(new java.net.URL(config.getUrl()))\n" +
+                "                    .register(JohnzonProvider.class)");
+        cBuilder.append(".register(" + Configuration.CLIENT_NAME + "ExceptionMapper.class);");
+        cBuilder.append(" } catch (java.net.MalformedURLException e) {");
+        cBuilder.append("throw new javax.ws.rs.WebApplicationException(\"URL is not valid \" + e.getMessage());");
+        cBuilder.append("}");
+
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(cBuilder.toString()));
 
         Map<String, String> relatedResources = Utils.getResources();

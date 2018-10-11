@@ -13,7 +13,7 @@ import lombok.Getter;
 @Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class ClientConfiguration {
 
-    private URL url;
+    private String url;
 
     private boolean verbose;
 

@@ -17,7 +17,7 @@ public abstract class DefaultCommand implements Runnable {
 
     @Option(name = {
             "-l", "--url" }, type = OptionType.GLOBAL)
-    private URL url;
+    private String url;
 
     @Option(name = {
             "-v", "--verbose" }, type = OptionType.GLOBAL)
@@ -65,7 +65,7 @@ public abstract class DefaultCommand implements Runnable {
     private void updateConfigWithNewValue(
             Properties conf) {
         if (url != null) {
-            conf.put("general.url", url.toString());
+            conf.put("general.url", url);
         }
         if (username != null) {
             conf.put("basic.username", username);
@@ -78,7 +78,7 @@ public abstract class DefaultCommand implements Runnable {
     private void readValueConfigurationValueIfNotProvided(
             Properties conf) throws Exception {
         if (url == null && conf.containsKey("general.url")) {
-            url = new URL(String.valueOf(conf.get("general.url")));
+            url = (String) conf.get("general.url");
         }
         if (username == null && conf.containsKey("basic.username")) {
             username = conf.getProperty("basic.username");

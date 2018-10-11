@@ -62,7 +62,7 @@ public class ConfigFileTest extends Command{
     public void testCreate(final @ArquillianResource URL base) throws Exception {
         System.setProperty("user.home", Files.createTempDir().getAbsolutePath());
 
-        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base);
+        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
 
         File file = new File(System.getProperty("user.home") + File.separator + ".cmdline", ".cmdlineconfig");
         Properties prop = new Properties();
@@ -73,7 +73,7 @@ public class ConfigFileTest extends Command{
         // Call without URL
         cmd("movies add-movie --title \"Kelly Slater & The Young Guns\" --director \"Kelly Slater\" --genre Surf --year 2004 --rating 9");
 
-        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base).verbose(true).build());
+        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base.toString()).verbose(true).build());
         List<Movie> movies = movieClient.movies().getMovies();
         Movie movie = movies.stream().filter(m -> m.getTitle().equalsIgnoreCase("Kelly Slater & The Young Guns")).findFirst().get();
 
