@@ -16,7 +16,6 @@
  */
 
 import org.apache.johnzon.jaxrs.JohnzonProvider;
-import org.apache.openejb.arquillian.common.Files;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -26,25 +25,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.tomitribe.inget.movie.model.Movie;
 import org.tomitribe.inget.movie.rest.MoviesResource;
-import org.tomitribe.inget.movie.rest.client.MovieClient;
 import org.tomitribe.inget.movie.rest.client.base.ClientConfiguration;
 import org.tomitribe.inget.movie.rest.client.base.SignatureAuthenticator;
 import org.tomitribe.inget.movie.rest.client.base.SignatureConfiguration;
 import org.tomitribe.inget.movie.services.MoviesService;
 
 import javax.ws.rs.client.ClientRequestFilter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.net.URL;
-import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-public class ConfigFileTest extends Command{
+public class ExceptionHandlingTest extends Command{
     @Deployment
     public static WebArchive webApp() {
         return ShrinkWrap.create(WebArchive.class)
@@ -59,29 +51,8 @@ public class ConfigFileTest extends Command{
     }
 
     @Test
-    public void testCreate(final @ArquillianResource URL base) throws Exception {
-        System.setProperty("user.home", Files.createTempDir().getAbsolutePath());
-
-        cmd("movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
-
-        File file = new File(System.getProperty("user.home") + File.separator + ".cmdline", ".cmdlineconfig");
-        Properties prop = new Properties();
-        prop.load(new FileInputStream(file));
-
-        assertEquals(base.toString(), prop.getProperty("general.url"));
-
-        // Call without URL
-        cmd("movies add-movie --title \"Kelly Slater & The Young Guns\" --director \"Kelly Slater\" --genre Surf --year 2004 --rating 9");
-
-        MovieClient movieClient = new MovieClient(ClientConfiguration.builder().url(base.toString()).verbose(true).build());
-        List<Movie> movies = movieClient.movies().getMovies();
-        Movie movie = movies.stream().filter(m -> m.getTitle().equalsIgnoreCase("Kelly Slater & The Young Guns")).findFirst().get();
-
-        assertNotNull(movie);
-        assertEquals("Surf", movie.getGenre());
-        assertEquals("Kelly Slater", movie.getDirector());
-        assertEquals(2004, movie.getYear());
-        assertEquals(9, movie.getRating());
-        file.deleteOnExit();
+    public void testErrorHandlingCmdLine(final @ArquillianResource URL base) throws Exception {
+        cmd("movies wrongcommand --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
+        assertEquals("Error - Found unexpected parameters: [wrongcommand, --title, The Terminator, --director, James Cameron, --genre, Action, --year, 1984, --rating, 8]\n", outLogs.toString());
     }
 }

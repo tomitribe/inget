@@ -25,6 +25,10 @@ public class MainCli {
                 .withCommand(MoviesResourceClientDeleteMovieCmd.class)
                 .withCommand(MoviesResourceClientUpdateMovieCmd.class).withCommand(MoviesResourceClientCountCmd.class);
         final Cli<Runnable> cli = cliBuilder.build();
-        cli.parse(args).run();
+        try {
+            cli.parse(args).run();
+        } catch (Exception e) {
+            System.out.println("Error - " + e.getMessage());
+        }
     }
 }

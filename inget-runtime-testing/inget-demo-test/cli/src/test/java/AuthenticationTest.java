@@ -56,7 +56,7 @@ public class AuthenticationTest extends Command {
     @Test
     public void testBasicAuthentication(final @ArquillianResource URL base) throws Exception {
         System.setProperty("user.home", Files.createTempDir().getAbsolutePath());
-        cmd("--verbose --username john --password 12345678 movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base);
+        cmd("--verbose --username john --password 12345678 movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
         File file = new File(System.getProperty("user.home") + File.separator + ".cmdline", ".cmdlineconfig");
         assertTrue(outLogs.toString().contains("Basic am9objoxMjM0NTY3OA=="));
 
