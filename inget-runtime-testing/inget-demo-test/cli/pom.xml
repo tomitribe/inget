@@ -98,7 +98,7 @@
                         <id>pkg</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>really-executable-jar</goal>
+                            <goal>executable</goal>
                         </goals>
                     </execution>
                 </executions>
