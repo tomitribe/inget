@@ -14,7 +14,6 @@ import javax.annotation.Generated;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MultivaluedMap;
-import org.apache.commons.lang3.StringUtils;
 import org.tomitribe.auth.signatures.Algorithm;
 import org.tomitribe.auth.signatures.Signature;
 import org.tomitribe.auth.signatures.Signer;
@@ -96,7 +95,7 @@ public class SignatureAuthenticator implements ClientRequestFilter {
     private String findKey() {
         String privateKey = null;
         try {
-            if (StringUtils.isEmpty(sigConfig.getKeyLocation())) {
+            if (sigConfig.getKeyLocation() == null) {
                 if (sigConfig.getKeyId() != null) {
                     File keyLocation = new File(System.getProperty("user.home") + File.separator + ".ssh"
                             + File.separator + sigConfig.getKeyId());
