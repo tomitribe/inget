@@ -14,8 +14,13 @@ public class MoviesResourceClientAddMovieCmd extends DefaultCommand {
             final ClientConfiguration clientConfiguration) {
         final io.superbiz.video.model.Movie movie = io.superbiz.video.model.Movie.builder().id(id).title(title)
                 .director(director).genre(genre).year(year).rating(rating).build();
-        System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build()
-                .writeObjectAsString(new MovieClient(clientConfiguration).moviesresourceclient().addMovie(movie)));
+        final Object result = new MovieClient(clientConfiguration).moviesresourceclient().addMovie(movie);
+        if (result != null) {
+            System.out.println(
+                    new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(result));
+        } else {
+            System.out.println("Empty Response Body.");
+        }
     }
 
     @Option(name = "--id")

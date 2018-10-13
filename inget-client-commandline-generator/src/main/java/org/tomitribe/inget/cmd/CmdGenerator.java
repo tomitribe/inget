@@ -475,11 +475,21 @@ public class CmdGenerator {
                 + clientMethod.getNameAsString() + "(" + Join.join(",", runParams) + ")";
 
         if (!clientMethod.getType().isVoidType()) {
-            runCommand = "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(" + runCommand + "));";
+            runCommand = "final Object result = " + runCommand + ";";
+            run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(runCommand));
+            final String conditionalResponseBody =
+                    "if(result != null){\n" +
+                        "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build()\n" +
+                            "                    .writeObjectAsString(result));\n" +
+                    "} else {\n" +
+                        "System.out.println(\"Empty Response Body.\");\n" +
+                    "}";
+            run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(conditionalResponseBody));
         } else {
             runCommand += ";";
+            run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(runCommand));
         }
-        run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(runCommand));
+
     }
 
     private static boolean isPrimitiveOrValueOf(final ResolvedType type) {

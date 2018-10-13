@@ -94,4 +94,10 @@ public class CommandsTest extends Command{
         assertNotNull(movie);
         assertEquals(1990, movie.getYear());
     }
+
+    @Test
+    public void testEmptyBody(final @ArquillianResource URL base) throws Exception {
+        cmd("movies find 9999", base.toString());
+        assertTrue(outLogs.toString().contains("Empty Response Body."));
+    }
 }

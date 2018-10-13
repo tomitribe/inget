@@ -12,8 +12,13 @@ public class MoviesResourceClientFindCmd extends DefaultCommand {
     @Override
     public void run(
             final ClientConfiguration clientConfiguration) {
-        System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build()
-                .writeObjectAsString(new MovieClient(clientConfiguration).moviesresourceclient().find(id)));
+        final Object result = new MovieClient(clientConfiguration).moviesresourceclient().find(id);
+        if (result != null) {
+            System.out.println(
+                    new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(result));
+        } else {
+            System.out.println("Empty Response Body.");
+        }
     }
 
     @Arguments(required = true)

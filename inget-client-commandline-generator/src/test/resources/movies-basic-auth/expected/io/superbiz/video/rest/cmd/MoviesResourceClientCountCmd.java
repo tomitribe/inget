@@ -12,8 +12,13 @@ public class MoviesResourceClientCountCmd extends DefaultCommand {
     @Override
     public void run(
             final ClientConfiguration clientConfiguration) {
-        System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(
-                new MovieClient(clientConfiguration).moviesresourceclient().count(field, searchTerm)));
+        final Object result = new MovieClient(clientConfiguration).moviesresourceclient().count(field, searchTerm);
+        if (result != null) {
+            System.out.println(
+                    new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(result));
+        } else {
+            System.out.println("Empty Response Body.");
+        }
     }
 
     @Option(name = "--field")
