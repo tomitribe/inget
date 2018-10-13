@@ -27,6 +27,7 @@ public class MovieClient {
         if (config.getBasic() != null) {
             builder.register(new org.tomitribe.inget.client.BasicAuthenticator(config));
         }
+        builder.register(new org.tomitribe.inget.client.LogClientResponseFilter(config));
         movieResourceBeanClient = builder.build(MovieResourceBeanClient.class);
     }
 

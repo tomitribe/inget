@@ -61,6 +61,8 @@ public class ImportManager {
         importMap.put("SignatureConfiguration", "org.tomitribe.inget.client.SignatureConfiguration");
         importMap.put("SignatureAuthenticator", "org.tomitribe.inget.client.SignatureAuthenticator");
         importMap.put("BasicAuthenticator", "org.tomitribe.inget.client.BasicAuthenticator");
+        importMap.put("LogClientResponseFilter", "org.tomitribe.inget.client.LogClientResponseFilter");
+
     }
 
     public static String getImport(String className) {

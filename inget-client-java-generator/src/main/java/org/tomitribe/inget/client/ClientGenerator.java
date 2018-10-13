@@ -242,6 +242,10 @@ public class ClientGenerator {
         authentication.append("builder.register(new " + ImportManager.getImport("BasicAuthenticator") + "(config));");
         authentication.append("}");
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(authentication.toString()));
+
+        String logClientResponseFilter = "builder.register(new " + ImportManager.getImport("LogClientResponseFilter") + "(config));";
+        constructor.getBody().asBlockStmt().addStatement(logClientResponseFilter);
+
         StringBuilder builder = new StringBuilder();
         builder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = builder.build(" + resourceClientClass.getNameAsString() + ".class);");
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(builder.toString()));

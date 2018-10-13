@@ -15,32 +15,31 @@ public class LogClientResponseFilter implements ClientResponseFilter {
 
     @Override
     public void filter(ClientRequestContext request, ClientResponseContext response) throws IOException {
-        printVerboseLabel("REQUEST", config.isVerbose());
-        printRequiredValue("Method", request.getMethod());
-        printRequiredValue("Location", request.getUri());
-        printVerboseValue("Accept", request.getMediaType(), config.isVerbose());
-        skipLine();
-        printVerboseLabel("RESPONSE", config.isVerbose());
-        printRequiredValue("Date", response.getDate());
-        printRequiredValue("Status", response.getStatusInfo().getStatusCode() + " (" + response.getStatusInfo().getReasonPhrase() + ")");
-        printVerboseValue("Content Type", response.getMediaType(), config.isVerbose());
-        skipLine();
+        if(config.isVerbose()){
+            printLabel("REQUEST");
+            printValue("Method", request.getMethod());
+            printValue("Location", request.getUri());
+            printValue("Accept", request.getMediaType());
+            skipLine();
+            printLabel("RESPONSE");
+            printValue("Date", response.getDate());
+            printValue("Status", response.getStatusInfo().getStatusCode() + " (" + response.getStatusInfo().getReasonPhrase() + ")");
+            printValue("Content Type", response.getMediaType());
+            skipLine();
+        }
+
     }
 
-    private void printVerboseValue(String label, Object value, boolean isVerbose) {
-        if (value != null && isVerbose) {
+    private void printValue(String label, Object value) {
+        if (value != null) {
             System.out.println(label + ": " + value);
         }
     }
 
-    private void printVerboseLabel(String label, boolean isVerbose) {
-        if (label != null && isVerbose) {
+    private void printLabel(String label) {
+        if (label != null) {
             System.out.println(label);
         }
-    }
-
-    private void printRequiredValue(String label, Object value) {
-        System.out.println(label + ": " + value);
     }
 
     private void skipLine() {
