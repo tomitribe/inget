@@ -63,14 +63,17 @@ public class ClientGenerator {
 
         StringBuilder cBuilder = new StringBuilder();
         cBuilder.append("try {");
-        cBuilder.append("builder = RestClientBuilder.newBuilder().baseUrl(new java.net.URL(config.getUrl()))\n" +
-                "                    .register(JohnzonProvider.class)");
+        cBuilder.append("builder = RestClientBuilder.newBuilder()" +
+                ".baseUrl(new java.net.URL(config.getUrl()))\n" +
+                ".register(JohnzonProvider.class)");
         cBuilder.append(".register(" + Configuration.CLIENT_NAME + "ExceptionMapper.class);");
         cBuilder.append(" } catch (java.net.MalformedURLException e) {");
         cBuilder.append("throw new javax.ws.rs.WebApplicationException(\"URL is not valid \" + e.getMessage());");
         cBuilder.append("}");
 
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(cBuilder.toString()));
+
+        registerFilters(genericClientClass);
 
         Map<String, String> relatedResources = Utils.getResources();
 
@@ -216,21 +219,7 @@ public class ClientGenerator {
         save(clientClassPackage, clientName, newClassCompilationUnit);
     }
 
-    private static void createResourceClientReference(String clientName, String pkg, ClassOrInterfaceDeclaration genericClientClass, ClassOrInterfaceDeclaration resourceClientClass) {
-        VariableDeclarator var = new VariableDeclarator(new TypeParameter(resourceClientClass.getNameAsString()), WordUtils.uncapitalize(resourceClientClass.getNameAsString()));
-        FieldDeclaration reference = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), var);
-        genericClientClass.getMembers().add(0, reference);
-        genericClientClass.findCompilationUnit().get().addImport(pkg + "." + clientName);
-        final String replaceValue = Configuration.RESOURCE_SUFFIX == null ?
-                "Client" : Configuration.RESOURCE_SUFFIX + "Client";
-        String name = clientName.replace(replaceValue, "");
-        MethodDeclaration referenceMethod = new MethodDeclaration();
-        referenceMethod.setModifiers(EnumSet.of(Modifier.PUBLIC));
-        referenceMethod.setName(name.toLowerCase());
-        referenceMethod.setType(resourceClientClass.getNameAsString());
-        referenceMethod.setBody(JavaParser.parseBlock("{ return this." + WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + "; }"));
-        genericClientClass.addMember(referenceMethod);
-
+    private static void registerFilters(ClassOrInterfaceDeclaration genericClientClass){
         ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
         StringBuilder authentication = new StringBuilder();
         authentication.append("if(config.getSignature() != null){");
@@ -248,6 +237,24 @@ public class ClientGenerator {
 
         String logClientRequestFilter = "builder.register(new " + ImportManager.getImport("LogClientRequestFilter") + "(config));";
         constructor.getBody().asBlockStmt().addStatement(logClientRequestFilter);
+    }
+
+    private static void createResourceClientReference(String clientName, String pkg, ClassOrInterfaceDeclaration genericClientClass, ClassOrInterfaceDeclaration resourceClientClass) {
+        VariableDeclarator var = new VariableDeclarator(new TypeParameter(resourceClientClass.getNameAsString()), WordUtils.uncapitalize(resourceClientClass.getNameAsString()));
+        FieldDeclaration reference = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), var);
+        genericClientClass.getMembers().add(0, reference);
+        genericClientClass.findCompilationUnit().get().addImport(pkg + "." + clientName);
+        final String replaceValue = Configuration.RESOURCE_SUFFIX == null ?
+                "Client" : Configuration.RESOURCE_SUFFIX + "Client";
+        String name = clientName.replace(replaceValue, "");
+        MethodDeclaration referenceMethod = new MethodDeclaration();
+        referenceMethod.setModifiers(EnumSet.of(Modifier.PUBLIC));
+        referenceMethod.setName(name.toLowerCase());
+        referenceMethod.setType(resourceClientClass.getNameAsString());
+        referenceMethod.setBody(JavaParser.parseBlock("{ return this." + WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + "; }"));
+        genericClientClass.addMember(referenceMethod);
+
+        ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
 
         StringBuilder builder = new StringBuilder();
         builder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = builder.build(" + resourceClientClass.getNameAsString() + ".class);");
