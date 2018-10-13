@@ -28,6 +28,7 @@ public class MovieClient {
             builder.register(new org.tomitribe.inget.client.BasicAuthenticator(config));
         }
         builder.register(new org.tomitribe.inget.client.LogClientResponseFilter(config));
+        builder.register(new org.tomitribe.inget.client.LogClientRequestFilter(config));
         movieResourceBeanClient = builder.build(MovieResourceBeanClient.class);
     }
 

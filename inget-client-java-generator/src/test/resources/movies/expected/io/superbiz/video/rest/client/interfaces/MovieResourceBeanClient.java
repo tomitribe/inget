@@ -35,10 +35,13 @@ import javax.ws.rs.core.Response;
 import movies.input.io.superbiz.video.model.CreateMovie;
 import movies.input.io.superbiz.video.model.Movie;
 import movies.input.io.superbiz.video.model.UpdateMovie;
+import org.apache.cxf.interceptor.OutInterceptors;
+import org.tomitribe.inget.client.NoOpInterceptor;
 
 @Path("movie/bean")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@OutInterceptors(classes = NoOpInterceptor.class)
 @Generated("org.tomitribe.inget.client.ClientGenerator")
 public interface MovieResourceBeanClient {
 

@@ -1,28 +1,26 @@
 package org.tomitribe.inget.client;
 
 import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
+import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
 
-public class LogClientResponseFilter implements ClientResponseFilter {
+public class LogClientRequestFilter implements ClientRequestFilter {
 
     private final ClientConfiguration config;
 
-    public LogClientResponseFilter(ClientConfiguration config) {
+    public LogClientRequestFilter(ClientConfiguration config) {
         this.config = config;
     }
 
     @Override
-    public void filter(ClientRequestContext request, ClientResponseContext response) throws IOException {
+    public void filter(ClientRequestContext request) throws IOException {
         if(config.isVerbose()){
-            printLabel("RESPONSE");
-            printValue("Date", response.getDate());
-            printValue("Status", response.getStatusInfo().getStatusCode() + " (" + response.getStatusInfo().getReasonPhrase() + ")");
-            printValue("Content Type", response.getMediaType());
+            printLabel("REQUEST");
+            printValue("Method", request.getMethod());
+            printValue("Location", request.getUri());
+            printValue("Accept", request.getMediaType());
             skipLine();
         }
-
     }
 
     private void printValue(String label, Object value) {

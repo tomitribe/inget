@@ -40,7 +40,6 @@ import org.tomitribe.inget.common.Configuration;
 import org.tomitribe.inget.common.ImportManager;
 import org.tomitribe.inget.common.Reformat;
 import org.tomitribe.inget.common.RemoveDuplicateImports;
-import org.tomitribe.inget.common.TemplateUtil;
 import org.tomitribe.inget.common.Utils;
 
 import java.io.IOException;
@@ -81,6 +80,13 @@ public class ClientGenerator {
             generateClient(resource.getKey(), resource.getValue(), genericClientClass);
         }
         save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
+    }
+
+    private static void addCxfLogInterceptor(ClassOrInterfaceDeclaration clazz) {
+        CompilationUnit unit = clazz.findCompilationUnit().get();
+        unit.addImport(ImportManager.getImport("OutInterceptors"));
+        unit.addImport(ImportManager.getImport("NoOpInterceptor"));
+        clazz.addAnnotation(JavaParser.parseAnnotation("@OutInterceptors(classes = NoOpInterceptor.class)"));
     }
 
     private static CompilationUnit createResourceClient() throws IOException {
@@ -153,16 +159,9 @@ public class ClientGenerator {
         save(outputBasePackage, Configuration.CLIENT_NAME + "ExceptionMapper", exceptionMapper);
     }
 
-    private static void createTemplateClass(final String outputBasePackage, final String clazzName) throws IOException {
-        final CompilationUnit content = JavaParser.parse(TemplateUtil.readTemplate(clazzName));
-        content.setPackageDeclaration(outputBasePackage);
-        Utils.save(clazzName, outputBasePackage, content.toString());
-    }
-
     private static void generateClient(String fileName, String resourceContent, ClassOrInterfaceDeclaration genericResourceClientClass) throws IOException {
         final CompilationUnit resourceClientUnit = JavaParser.parse(resourceContent);
         final ClassOrInterfaceDeclaration resourceClientClass = Utils.getClazz(resourceClientUnit);
-
         final String clientClassPackage = Configuration.RESOURCE_PACKAGE + ".client.interfaces";
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(clientClassPackage);
         final String clientName = fileName.replace(".java", "Client");
@@ -178,6 +177,7 @@ public class ClientGenerator {
                 .collect(Collectors.toList());
 
         newClass.setAnnotations(new NodeList<>(classAnnotations));
+        addCxfLogInterceptor(newClass);
 
         resourceClientClass.getMethods().stream().forEach(m -> {
             if (m.getModifiers().contains(Modifier.PRIVATE)) {
@@ -245,6 +245,9 @@ public class ClientGenerator {
 
         String logClientResponseFilter = "builder.register(new " + ImportManager.getImport("LogClientResponseFilter") + "(config));";
         constructor.getBody().asBlockStmt().addStatement(logClientResponseFilter);
+
+        String logClientRequestFilter = "builder.register(new " + ImportManager.getImport("LogClientRequestFilter") + "(config));";
+        constructor.getBody().asBlockStmt().addStatement(logClientRequestFilter);
 
         StringBuilder builder = new StringBuilder();
         builder.append(WordUtils.uncapitalize(resourceClientClass.getNameAsString()) + " = builder.build(" + resourceClientClass.getNameAsString() + ".class);");

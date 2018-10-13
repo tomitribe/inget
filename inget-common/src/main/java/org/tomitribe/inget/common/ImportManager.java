@@ -47,6 +47,7 @@ public class ImportManager {
 
         // CXF - Microprofile
         importMap.put("RestClientBuilder", "org.eclipse.microprofile.rest.client.RestClientBuilder");
+        importMap.put("OutInterceptors", "org.apache.cxf.interceptor.OutInterceptors");
 
         // Airlift
         importMap.put("Option", "io.airlift.airline.Option");
@@ -61,8 +62,9 @@ public class ImportManager {
         importMap.put("SignatureConfiguration", "org.tomitribe.inget.client.SignatureConfiguration");
         importMap.put("SignatureAuthenticator", "org.tomitribe.inget.client.SignatureAuthenticator");
         importMap.put("BasicAuthenticator", "org.tomitribe.inget.client.BasicAuthenticator");
+        importMap.put("LogClientRequestFilter", "org.tomitribe.inget.client.LogClientRequestFilter");
         importMap.put("LogClientResponseFilter", "org.tomitribe.inget.client.LogClientResponseFilter");
-
+        importMap.put("NoOpInterceptor", "org.tomitribe.inget.client.NoOpInterceptor");
     }
 
     public static String getImport(String className) {
