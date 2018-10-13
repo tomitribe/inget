@@ -42,12 +42,12 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.tomitribe.inget.cmd.base.ModelType;
 import org.tomitribe.inget.common.Authentication;
 import org.tomitribe.inget.common.Configuration;
+import org.tomitribe.inget.common.CustomTypeSolver;
 import org.tomitribe.inget.common.ImportManager;
 import org.tomitribe.inget.common.Operation;
 import org.tomitribe.inget.common.Reformat;
 import org.tomitribe.inget.common.RemoveDuplicateImports;
 import org.tomitribe.inget.common.TemplateUtil;
-import org.tomitribe.inget.common.CustomTypeSolver;
 import org.tomitribe.inget.common.Utils;
 import org.tomitribe.util.Join;
 
@@ -118,12 +118,12 @@ public class CmdGenerator {
     }
 
     private static void addImports(CompilationUnit modifiedClassUnit) {
-        modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
+        modifiedClassUnit.addImport(ImportManager.getImport("ClientConfiguration"));
         if (Configuration.AUTHENTICATION == Authentication.BASIC) {
-            modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.BasicConfiguration");
+            modifiedClassUnit.addImport(ImportManager.getImport("BasicConfiguration"));
         }
         if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
-            modifiedClassUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.SignatureConfiguration");
+            modifiedClassUnit.addImport(ImportManager.getImport("SignatureConfiguration"));
         }
     }
 
@@ -280,7 +280,7 @@ public class CmdGenerator {
                         new TypeParameter("ClientConfiguration"),
                         new SimpleName("clientConfiguration")));
         commandClass.addMember(method);
-        command.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
+        command.addImport(ImportManager.getImport("ClientConfiguration"));
     }
 
     private static void addCommandFlags(final CompilationUnit command,

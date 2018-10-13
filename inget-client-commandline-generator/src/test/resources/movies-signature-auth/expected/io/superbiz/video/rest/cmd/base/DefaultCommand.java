@@ -2,8 +2,6 @@ package io.superbiz.video.rest.cmd.base;
 
 import io.airlift.airline.Option;
 import io.airlift.airline.OptionType;
-import io.superbiz.video.model.rest.client.base.ClientConfiguration;
-import io.superbiz.video.model.rest.client.base.SignatureConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,6 +9,8 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
 import javax.annotation.Generated;
+import org.tomitribe.inget.client.ClientConfiguration;
+import org.tomitribe.inget.client.SignatureConfiguration;
 
 @Generated("org.tomitribe.inget.cmd.CmdGenerator")
 public abstract class DefaultCommand implements Runnable {

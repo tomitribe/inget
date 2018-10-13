@@ -4,8 +4,8 @@ import io.airlift.airline.Arguments;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
 import io.superbiz.video.model.rest.client.MovieClient;
-import io.superbiz.video.model.rest.client.base.ClientConfiguration;
 import io.superbiz.video.rest.cmd.base.DefaultCommand;
+import org.tomitribe.inget.client.ClientConfiguration;
 
 @Command(name = "update-movie")
 public class MoviesResourceClientUpdateMovieCmd extends DefaultCommand {

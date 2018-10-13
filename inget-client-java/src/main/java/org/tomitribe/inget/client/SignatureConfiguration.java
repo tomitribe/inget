@@ -1,10 +1,11 @@
-package io.superbiz.video.rest.client.base;
+package org.tomitribe.inget.client;
 
-import java.util.List;
-import javax.annotation.Generated;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.annotation.Generated;
+import java.util.List;
 
 @Builder
 @Getter

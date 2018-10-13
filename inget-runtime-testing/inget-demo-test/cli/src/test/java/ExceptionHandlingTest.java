@@ -23,11 +23,11 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.tomitribe.inget.client.ClientConfiguration;
+import org.tomitribe.inget.client.SignatureAuthenticator;
+import org.tomitribe.inget.client.SignatureConfiguration;
 import org.tomitribe.inget.movie.model.Movie;
 import org.tomitribe.inget.movie.rest.MoviesResource;
-import org.tomitribe.inget.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.inget.movie.rest.client.base.SignatureAuthenticator;
-import org.tomitribe.inget.movie.rest.client.base.SignatureConfiguration;
 import org.tomitribe.inget.movie.services.MoviesService;
 
 import javax.ws.rs.client.ClientRequestFilter;

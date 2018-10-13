@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 
 public class ClientGenerator {
     public static void execute() throws IOException {
-        createBaseClientClasses();
+        createClientExceptions(Configuration.RESOURCE_PACKAGE + ".client.base");
         CompilationUnit genericClientUnit = createResourceClient();
         ClassOrInterfaceDeclaration genericClientClass = Utils.getClazz(genericClientUnit);
         genericClientUnit.addImport(ImportManager.getImport("RestClientBuilder"));
@@ -83,16 +83,6 @@ public class ClientGenerator {
         save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
     }
 
-    private static void createBaseClientClasses() throws IOException {
-        final String outputBasePackage = Configuration.RESOURCE_PACKAGE + ".client.base";
-        createTemplateClass(outputBasePackage, "ClientConfiguration.java");
-        createTemplateClass(outputBasePackage, "SignatureConfiguration.java");
-        createTemplateClass(outputBasePackage, "SignatureAuthenticator.java");
-        createTemplateClass(outputBasePackage, "BasicConfiguration.java");
-        createTemplateClass(outputBasePackage, "BasicAuthenticator.java");
-        createClientExceptions(outputBasePackage);
-    }
-
     private static CompilationUnit createResourceClient() throws IOException {
         final String outputBasePackage = Configuration.getClientPackage();
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(outputBasePackage);
@@ -101,7 +91,7 @@ public class ClientGenerator {
 
         ConstructorDeclaration constructor = newClass.addConstructor(Modifier.PUBLIC);
         constructor.addParameter("ClientConfiguration", "config");
-        newClassCompilationUnit.addImport(Configuration.RESOURCE_PACKAGE + ".client.base.ClientConfiguration");
+        newClassCompilationUnit.addImport(ImportManager.getImport("ClientConfiguration"));
         newClassCompilationUnit.addImport(
                 Configuration.RESOURCE_PACKAGE + ".client.base." + Configuration.CLIENT_NAME + "ExceptionMapper");
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ClientGenerator.class);
@@ -244,12 +234,12 @@ public class ClientGenerator {
         ConstructorDeclaration constructor = genericClientClass.getConstructors().stream().findFirst().get();
         StringBuilder authentication = new StringBuilder();
         authentication.append("if(config.getSignature() != null){");
-        authentication.append("builder.register(new " + Configuration.RESOURCE_PACKAGE + ".client.base.SignatureAuthenticator(config));");
+        authentication.append("builder.register(new " + ImportManager.getImport("SignatureAuthenticator") + "(config));");
         authentication.append("}");
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(authentication.toString()));
         authentication = new StringBuilder();
         authentication.append("if(config.getBasic() != null){");
-        authentication.append("builder.register(new " + Configuration.RESOURCE_PACKAGE + ".client.base.BasicAuthenticator(config));");
+        authentication.append("builder.register(new " + ImportManager.getImport("BasicAuthenticator") + "(config));");
         authentication.append("}");
         constructor.getBody().asBlockStmt().addStatement(JavaParser.parseStatement(authentication.toString()));
         StringBuilder builder = new StringBuilder();

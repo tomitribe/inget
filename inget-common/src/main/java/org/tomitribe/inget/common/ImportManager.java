@@ -54,6 +54,13 @@ public class ImportManager {
         importMap.put("Arguments", "io.airlift.airline.Arguments");
         importMap.put("Cli", "io.airlift.airline.Cli");
         importMap.put("Help", "io.airlift.airline.Help");
+
+        // Inget
+        importMap.put("ClientConfiguration", "org.tomitribe.inget.client.ClientConfiguration");
+        importMap.put("BasicConfiguration", "org.tomitribe.inget.client.BasicConfiguration");
+        importMap.put("SignatureConfiguration", "org.tomitribe.inget.client.SignatureConfiguration");
+        importMap.put("SignatureAuthenticator", "org.tomitribe.inget.client.SignatureAuthenticator");
+        importMap.put("BasicAuthenticator", "org.tomitribe.inget.client.BasicAuthenticator");
     }
 
     public static String getImport(String className) {

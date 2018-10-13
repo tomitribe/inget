@@ -1,14 +1,14 @@
-package io.superbiz.video.rest.client.base;
+package org.tomitribe.inget.client;
 
-import javax.annotation.Generated;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.annotation.Generated;
+
 @Builder
 @Getter
 @Setter
-@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class BasicConfiguration {
 
     private String username;

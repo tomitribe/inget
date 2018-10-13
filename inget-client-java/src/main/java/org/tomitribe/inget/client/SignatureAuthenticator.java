@@ -1,5 +1,15 @@
-package io.superbiz.video.rest.client.base;
+package org.tomitribe.inget.client;
 
+import org.tomitribe.auth.signatures.Algorithm;
+import org.tomitribe.auth.signatures.Signature;
+import org.tomitribe.auth.signatures.Signer;
+import org.tomitribe.churchkey.Key;
+import org.tomitribe.churchkey.Keys;
+import org.tomitribe.util.IO;
+
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,18 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
-import javax.annotation.Generated;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.MultivaluedMap;
-import org.tomitribe.auth.signatures.Algorithm;
-import org.tomitribe.auth.signatures.Signature;
-import org.tomitribe.auth.signatures.Signer;
-import org.tomitribe.churchkey.Key;
-import org.tomitribe.churchkey.Keys;
-import org.tomitribe.util.IO;
 
-@Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class SignatureAuthenticator implements ClientRequestFilter {
 
     private final ClientConfiguration config;

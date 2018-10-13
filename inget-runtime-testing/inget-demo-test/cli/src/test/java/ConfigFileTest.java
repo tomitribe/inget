@@ -24,12 +24,12 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.tomitribe.inget.client.ClientConfiguration;
+import org.tomitribe.inget.client.SignatureAuthenticator;
+import org.tomitribe.inget.client.SignatureConfiguration;
 import org.tomitribe.inget.movie.model.Movie;
 import org.tomitribe.inget.movie.rest.MoviesResource;
 import org.tomitribe.inget.movie.rest.client.MovieClient;
-import org.tomitribe.inget.movie.rest.client.base.ClientConfiguration;
-import org.tomitribe.inget.movie.rest.client.base.SignatureAuthenticator;
-import org.tomitribe.inget.movie.rest.client.base.SignatureConfiguration;
 import org.tomitribe.inget.movie.services.MoviesService;
 
 import javax.ws.rs.client.ClientRequestFilter;
@@ -41,7 +41,6 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
 public class ConfigFileTest extends Command{
