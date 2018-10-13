@@ -21,9 +21,14 @@ public class BasicAuthenticator implements ClientRequestFilter {
     @Override
     public void filter(
             final ClientRequestContext requestContext) throws IOException {
-        requestContext.getHeaders().add(HttpHeaders.AUTHORIZATION,
+        String token = generateBasicAuth(basicConfig.getUsername(), basicConfig.getPassword());
+        requestContext.getHeaders().add(basicConfig.getHeader(), token);
 
-                generateBasicAuth(basicConfig.getUsername(), basicConfig.getPassword()));
+        if (config.isVerbose()) {
+            System.out.println("AUTHENTICATION");
+            System.out.println(HttpHeaders.AUTHORIZATION + ": " + token);
+            System.out.println("");
+        }
     }
 
     private String generateBasicAuth(
@@ -31,9 +36,6 @@ public class BasicAuthenticator implements ClientRequestFilter {
 
             String password) {
         String value = "Basic " + new String(Base64.getEncoder().encode((username + ":" + password).getBytes()));
-        if (config.isVerbose()) {
-            System.out.println(value);
-        }
         return value;
     }
 }

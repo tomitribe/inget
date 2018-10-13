@@ -9,6 +9,7 @@ import org.tomitribe.util.IO;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,15 +38,20 @@ public class SignatureAuthenticator implements ClientRequestFilter {
             ClientRequestContext requestContext) throws IOException {
         addDefaultSignedHeaders();
         MultivaluedMap<String, Object> headers = requestContext.getHeaders();
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-        String date = sdf.format(new Date());
-        if (config.isVerbose()) {
-            System.out.println("Signature date: " + date);
-        }
-        headers.add("date", date);
-        final String authentication = getSignatureAuthentication(requestContext, headers);
-        if (authentication != null) {
-            headers.add(sigConfig.getHeader(), authentication);
+        final String token = getSignatureAuthentication(requestContext, headers);
+
+        if (token != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+            String date = sdf.format(new Date());
+            headers.add("date", date);
+            headers.add(sigConfig.getHeader(), token);
+            if (config.isVerbose()) {
+                System.out.println("AUTHENTICATION");
+                System.out.println(sigConfig.getHeader() + ": " + token);
+                System.out.println("");
+            }
+        } else {
+            System.out.println("Signature token was not generated.");
         }
     }
 
