@@ -37,7 +37,7 @@ public abstract class DefaultCommand implements Runnable {
         ClientConfiguration.ClientConfigurationBuilder builder = ClientConfiguration.builder().url(url)
                 .verbose(verbose);
         SignatureConfiguration signatureConfiguration = null;
-        if (keyId != null || keyLocation != null) {
+        if (keyId != null && keyLocation != null) {
             signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)
                     .header("Authorization").prefix("Signature").build();
             builder.signature(signatureConfiguration);

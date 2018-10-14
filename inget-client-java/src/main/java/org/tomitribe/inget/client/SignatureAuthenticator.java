@@ -9,7 +9,6 @@ import org.tomitribe.util.IO;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,18 +37,12 @@ public class SignatureAuthenticator implements ClientRequestFilter {
             ClientRequestContext requestContext) throws IOException {
         addDefaultSignedHeaders();
         MultivaluedMap<String, Object> headers = requestContext.getHeaders();
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        String date = sdf.format(new Date());
+        headers.add("date", date);
         final String token = getSignatureAuthentication(requestContext, headers);
-
         if (token != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-            String date = sdf.format(new Date());
-            headers.add("date", date);
             headers.add(sigConfig.getHeader(), token);
-            if (config.isVerbose()) {
-                System.out.println("AUTHENTICATION");
-                System.out.println(sigConfig.getHeader() + ": " + token);
-                System.out.println("");
-            }
         } else {
             System.out.println("Signature token was not generated.");
         }
@@ -57,36 +50,47 @@ public class SignatureAuthenticator implements ClientRequestFilter {
 
     private String getSignatureAuthentication(
             ClientRequestContext requestContext,
-
             MultivaluedMap<String, Object> requestHeaders) {
+
         String privateKey = findKey();
+
+        if(config.getSignature().getKeyId() == null){
+            System.out.println("Key id could not be found.");
+            return null;
+        }
+
         if (privateKey == null) {
             System.out.println("Private key could not be found.");
             return null;
         }
-        Key decodedKey = Keys.decode(privateKey.getBytes());
-        Signature signature = new Signature(sigConfig.getKeyId(), Algorithm.RSA_SHA256, null,
 
-                sigConfig.getSignedHeaders());
+        Key decodedKey = Keys.decode(privateKey.getBytes());
+        Signature signature = new Signature(sigConfig.getKeyId(), Algorithm.RSA_SHA256, null, sigConfig.getSignedHeaders());
+
+        HashMap<String, String> headersToBeSigned = addHeadersToBeSigned(requestHeaders);
+
+        Signer signer = new Signer(decodedKey.getKey(), signature);
+        Signature sign = null;
+        try {
+            sign = signer.sign(requestContext.getMethod(), requestContext.getUri().getPath(), headersToBeSigned);
+        } catch (IOException e) {
+            System.out.println("Fail to sign request:" + sign.toString());
+            return null;
+        }
+
+        return sign.toString();
+    }
+
+    private HashMap<String, String> addHeadersToBeSigned(MultivaluedMap<String, Object> requestHeaders) {
         HashMap<String, String> headersToBeSigned = new HashMap<>();
         Iterator<String> itHeaders = requestHeaders.keySet().iterator();
         while (itHeaders.hasNext()) {
             String key = itHeaders.next();
             if (sigConfig.getSignedHeaders().contains(key)) {
-                headersToBeSigned.put(key, String.valueOf(requestHeaders.get(key)));
+                headersToBeSigned.put(key, requestHeaders.get("date").stream().findFirst().get().toString());
             }
         }
-        Signer signer = new Signer(decodedKey.getKey(), signature);
-        Signature sign = null;
-        try {
-            sign = signer.sign(requestContext.getMethod(), requestContext.getUri().toString(), headersToBeSigned);
-            if (config.isVerbose()) {
-                System.out.println("Request signed:" + sign.toString());
-            }
-        } catch (IOException e) {
-            System.out.println("Fail to sign request:" + sign.toString());
-        }
-        return sign.toString();
+        return headersToBeSigned;
     }
 
     private void addDefaultSignedHeaders() {
@@ -100,20 +104,7 @@ public class SignatureAuthenticator implements ClientRequestFilter {
     private String findKey() {
         String privateKey = null;
         try {
-            if (sigConfig.getKeyLocation() == null) {
-                if (sigConfig.getKeyId() != null) {
-                    File keyLocation = new File(System.getProperty("user.home") + File.separator + ".ssh"
-                            + File.separator + sigConfig.getKeyId());
-                    if (keyLocation.exists()) {
-                        privateKey = IO.slurp(new FileInputStream(keyLocation));
-                        if (config.isVerbose()) {
-                            System.out.println("Using key: " + keyLocation.getAbsolutePath());
-                        }
-                    } else {
-                        throw new FileNotFoundException("counldn't find key on " + keyLocation.getAbsolutePath());
-                    }
-                }
-            } else {
+            if (sigConfig.getKeyLocation() != null) {
                 String keyLocation = sigConfig.getKeyLocation();
                 File keyLocationFile = new File(keyLocation);
                 if (keyLocationFile.exists()) {
@@ -122,7 +113,7 @@ public class SignatureAuthenticator implements ClientRequestFilter {
                         System.out.println("Using key: " + keyLocationFile.getAbsolutePath());
                     }
                 } else {
-                    throw new FileNotFoundException("counldn't find key on " + keyLocationFile.getAbsolutePath());
+                    throw new FileNotFoundException("couldn't find key on " + keyLocationFile.getAbsolutePath());
                 }
             }
         } catch (Exception e) {

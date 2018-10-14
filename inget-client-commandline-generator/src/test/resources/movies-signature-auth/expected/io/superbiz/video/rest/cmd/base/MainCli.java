@@ -28,7 +28,8 @@ public class MainCli {
         try {
             cli.parse(args).run();
         } catch (Exception e) {
-            System.out.println("Error - " + e.getMessage());
+            System.out.println("ERROR");
+            System.out.println(e.getMessage());
         }
     }
 }

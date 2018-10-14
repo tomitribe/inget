@@ -19,6 +19,11 @@ public class LogClientRequestFilter implements ClientRequestFilter {
             printValue("Method", request.getMethod());
             printValue("Location", request.getUri());
             printValue("Accept", request.getMediaType());
+            StringBuilder headers = new StringBuilder();
+            request.getHeaders().forEach((k, v) -> {
+                headers.append(k + ": " + v + "\n         ");
+            });
+            printValue("Headers", headers);
             skipLine();
         }
     }

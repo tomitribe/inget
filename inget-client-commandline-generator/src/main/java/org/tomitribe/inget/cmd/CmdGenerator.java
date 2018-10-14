@@ -146,7 +146,7 @@ public class CmdGenerator {
             body.asBlockStmt().addStatement(JavaParser.parseStatement("SignatureConfiguration signatureConfiguration = null;"));
 
             String signature =
-                    "if (keyId != null || keyLocation != null) {\n" +
+                    "if (keyId != null && keyLocation != null) {\n" +
                             "signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)\n" +
                             ".header(\"Authorization\").prefix(\"Signature\").build();\n" +
                             "builder.signature(signatureConfiguration);\n" +
@@ -579,7 +579,8 @@ public class CmdGenerator {
         runBlock.append("try { ");
         runBlock.append("cli.parse(args).run();");
         runBlock.append("} catch (Exception e) { ");
-        runBlock.append("System.out.println(\"Error - \" + e.getMessage());");
+        runBlock.append("System.out.println(\"ERROR\");");
+        runBlock.append("System.out.println(e.getMessage());");
         runBlock.append("}");
         block.addStatement(runBlock.toString());
         Utils.save("MainCli.java", BASE_OUTPUT_PACKAGE, cli.toString());

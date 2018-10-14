@@ -20,6 +20,11 @@ public class LogClientResponseFilter implements ClientResponseFilter {
             printValue("Date", response.getDate());
             printValue("Status", response.getStatusInfo().getStatusCode() + " (" + response.getStatusInfo().getReasonPhrase() + ")");
             printValue("Content Type", response.getMediaType());
+            StringBuilder headers = new StringBuilder();
+            response.getHeaders().forEach((k, v) -> {
+                headers.append(k + ": " + v + "\n         ");
+            });
+            printValue("Headers", headers);
             skipLine();
         }
 

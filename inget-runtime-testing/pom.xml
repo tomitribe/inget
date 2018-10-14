@@ -14,6 +14,7 @@
 
     <modules>
         <module>inget-demo-test</module>
+        <module>inget-demo-test-signature</module>
     </modules>
 
 </project>

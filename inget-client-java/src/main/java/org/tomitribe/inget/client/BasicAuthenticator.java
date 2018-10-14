@@ -2,7 +2,6 @@ package org.tomitribe.inget.client;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -23,12 +22,6 @@ public class BasicAuthenticator implements ClientRequestFilter {
             final ClientRequestContext requestContext) throws IOException {
         String token = generateBasicAuth(basicConfig.getUsername(), basicConfig.getPassword());
         requestContext.getHeaders().add(basicConfig.getHeader(), token);
-
-        if (config.isVerbose()) {
-            System.out.println("AUTHENTICATION");
-            System.out.println(HttpHeaders.AUTHORIZATION + ": " + token);
-            System.out.println("");
-        }
     }
 
     private String generateBasicAuth(
