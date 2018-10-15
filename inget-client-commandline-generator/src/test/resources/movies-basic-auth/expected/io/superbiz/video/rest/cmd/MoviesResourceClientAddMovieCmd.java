@@ -18,8 +18,6 @@ public class MoviesResourceClientAddMovieCmd extends DefaultCommand {
         if (result != null) {
             System.out.println(
                     new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build().writeObjectAsString(result));
-        } else {
-            System.out.println("Empty Response Body.");
         }
     }
 

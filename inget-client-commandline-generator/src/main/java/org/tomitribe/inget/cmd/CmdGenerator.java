@@ -483,8 +483,6 @@ public class CmdGenerator {
                     "if(result != null){\n" +
                         "System.out.println(new org.apache.johnzon.mapper.MapperBuilder().setPretty(true).build()\n" +
                             "                    .writeObjectAsString(result));\n" +
-                    "} else {\n" +
-                        "System.out.println(\"Empty Response Body.\");\n" +
                     "}";
             run.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(conditionalResponseBody));
         } else {
