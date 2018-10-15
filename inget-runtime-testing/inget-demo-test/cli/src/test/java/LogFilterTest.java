@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-public class LogClientResponseFilterTest extends Command {
+public class LogFilterTest extends Command {
     @Deployment
     public static WebArchive webApp() {
         return ShrinkWrap.create(WebArchive.class)
@@ -37,17 +37,14 @@ public class LogClientResponseFilterTest extends Command {
     }
 
     @Test
-    public void testResponseVerboseLogs(final @ArquillianResource URL base) throws Exception {
+    public void testRequestResponseVerboseLogs(final @ArquillianResource URL base) throws Exception {
         cmd("-v movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
         assertNotNull(outLogs.toString());
-        assertTrue(outLogs.toString().contains("REQUEST"));
-        assertTrue(outLogs.toString().contains("Method: POST"));
-        assertTrue(outLogs.toString().contains("Location:"));
-        assertTrue(outLogs.toString().contains("Accept: application/json"));
-
-        assertTrue(outLogs.toString().contains("RESPONSE"));
-        assertTrue(outLogs.toString().contains("Date"));
-        assertTrue(outLogs.toString().contains("Status: 200 (OK)"));
-        assertTrue(outLogs.toString().contains("Content Type: application/json"));
+        assertTrue(outLogs.toString().contains("> POST /"));
+        assertTrue(outLogs.toString().contains("> Content-Type: application/json"));
+        assertTrue(outLogs.toString().contains("> Accept: application/json"));
+        assertTrue(outLogs.toString().contains("< HTTP 1.1 200 OK"));
+        assertTrue(outLogs.toString().contains("< content-type: application/json"));
+        outLogs.toString().contains("\"director\":\"James Cameron\"");
     }
 }

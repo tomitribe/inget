@@ -1,10 +1,13 @@
 package org.tomitribe.inget.client;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import java.io.IOException;
 
+@Priority(Priorities.USER)
 public class LogClientResponseFilter implements ClientResponseFilter {
 
     private final ClientConfiguration config;
@@ -15,34 +18,14 @@ public class LogClientResponseFilter implements ClientResponseFilter {
 
     @Override
     public void filter(ClientRequestContext request, ClientResponseContext response) throws IOException {
-        if(config.isVerbose()){
-            printLabel("RESPONSE");
-            printValue("Date", response.getDate());
-            printValue("Status", response.getStatusInfo().getStatusCode() + " (" + response.getStatusInfo().getReasonPhrase() + ")");
-            printValue("Content Type", response.getMediaType());
+        if (config.isVerbose()) {
+            System.out.println("< HTTP 1.1 " + response.getStatus() + " " + response.getStatusInfo().getReasonPhrase());
             StringBuilder headers = new StringBuilder();
             response.getHeaders().forEach((k, v) -> {
-                headers.append(k + ": " + v + "\n         ");
+                headers.append("< " + k + ": " + v.stream().findFirst().get() + "\n");
             });
-            printValue("Headers", headers);
-            skipLine();
+            System.out.println(headers);
         }
 
-    }
-
-    private void printValue(String label, Object value) {
-        if (value != null) {
-            System.out.println(label + ": " + value);
-        }
-    }
-
-    private void printLabel(String label) {
-        if (label != null) {
-            System.out.println(label);
-        }
-    }
-
-    private void skipLine() {
-        System.out.println("");
     }
 }

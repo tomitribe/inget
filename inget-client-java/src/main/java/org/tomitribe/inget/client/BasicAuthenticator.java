@@ -1,10 +1,13 @@
 package org.tomitribe.inget.client;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
 import java.util.Base64;
 
+@Priority(Priorities.AUTHENTICATION)
 public class BasicAuthenticator implements ClientRequestFilter {
 
     private final ClientConfiguration config;

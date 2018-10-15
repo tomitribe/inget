@@ -7,6 +7,8 @@ import org.tomitribe.churchkey.Key;
 import org.tomitribe.churchkey.Keys;
 import org.tomitribe.util.IO;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.MultivaluedMap;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
+@Priority(Priorities.AUTHENTICATION)
 public class SignatureAuthenticator implements ClientRequestFilter {
 
     private final ClientConfiguration config;
