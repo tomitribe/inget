@@ -18,19 +18,33 @@
  */
 package io.superbiz.video.model;
 
-import io.superbiz.video.model.base.bulk.Failure;
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import javax.annotation.Generated;
-import lombok.EqualsAndHashCode;
+import lombok.Builder;
 import lombok.Value;
 
 @Value
-@EqualsAndHashCode
+@Builder(builderClassName = "Read", toBuilder = true)
 @Generated("org.tomitribe.inget.model.ModelClassGenerator")
-@Schema(description = "The result of the bulk operation.")
-public class BulkMovieResult {
+public class Movie {
 
-    @Schema(description = "The movies that failed in the bulk operation.")
-    private List<Failure> movies;
+    private String id;
+
+    private String title;
+
+    private String director;
+
+    private String genre;
+
+    private int year;
+
+    private int rating;
+
+    public CreateMovie.Create toCreate() {
+        return CreateMovie.builder().title(this.title).director(this.director).genre(this.genre).year(this.year)
+                .rating(this.rating);
+    }
+
+    public static CreateMovie.Create create() {
+        return CreateMovie.builder();
+    }
 }

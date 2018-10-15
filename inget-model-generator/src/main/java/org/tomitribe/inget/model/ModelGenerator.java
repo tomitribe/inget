@@ -69,10 +69,15 @@ public class ModelGenerator {
                     }
                 }
 
-                String bulkClassName = "Bulk" + rootClassName + "Result";
-                CompilationUnit bulkUnit = ModelClassGenerator.createBulkClass(rootClassUnit, rootClass, rootClassName, bulkClassName);
-                if (bulkUnit != null) {
-                    save(bulkClassName, rootClassUnit, bulkUnit);
+                if(classOperations == null ||
+                        classOperations.contains(Operation.BULK_CREATE) ||
+                        classOperations.contains(Operation.BULK_UPDATE) ||
+                        classOperations.contains(Operation.BULK_DELETE)){
+                    String bulkClassName = "Bulk" + rootClassName + "Result";
+                    CompilationUnit bulkUnit = ModelClassGenerator.createBulkClass(rootClassUnit, rootClass, rootClassName, bulkClassName);
+                    if (bulkUnit != null) {
+                        save(bulkClassName, rootClassUnit, bulkUnit);
+                    }
                 }
 
                 if (classOperations == null || classOperations.contains(Operation.CREATE)) {
@@ -85,11 +90,9 @@ public class ModelGenerator {
                     save(UPDATE_PREFIX + rootClassName, rootClassUnit, updateUnit);
                 }
 
-                if (classOperations == null || classOperations.contains(Operation.READ)) {
-                    CompilationUnit readUnit = ModelClassGenerator.createClass(rootClassUnit, rootClass, rootClassName, Operation.READ, READ_PREFIX);
-                    readUnit = ModelMethodGenerator.createMethods(rootClassName, rootClassUnit, createUnit, updateUnit, readUnit, classOperations);
-                    save(READ_PREFIX + rootClassName, rootClassUnit, readUnit);
-                }
+                CompilationUnit readUnit = ModelClassGenerator.createClass(rootClassUnit, rootClass, rootClassName, Operation.READ, READ_PREFIX);
+                readUnit = ModelMethodGenerator.createMethods(rootClassName, rootClassUnit, createUnit, updateUnit, readUnit, classOperations);
+                save(READ_PREFIX + rootClassName, rootClassUnit, readUnit);
             }
 
         }

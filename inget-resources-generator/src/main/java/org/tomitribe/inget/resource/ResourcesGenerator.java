@@ -148,7 +148,17 @@ public class ResourcesGenerator {
                 .map(RemoveUnusedImports::removeUnusedImports)
                 .findFirst().get();
 
-        // Write the source back out
-        IO.copy(IO.read(modified), resource);
+        CompilationUnit modifiedUnit = JavaParser.parse(modified);
+        ClassOrInterfaceDeclaration modifiedClazz = Utils.getClazz(modifiedUnit);
+        if(modifiedClazz.getMethods().size() > 0){
+            IO.copy(IO.read(modified), resource);
+        } else {
+            if(resource.exists() && IO.slurp(resource)
+                    .contains("@Generated(\"org.tomitribe.inget.resource.ResourcesGenerator\")")){
+                resource.delete();
+            }
+        }
+
+
     }
 }

@@ -29,7 +29,6 @@ public class ModelGeneratorTest {
         final Resources movies = Resources.name("movies");
 
         Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
         Configuration.RESOURCE_PACKAGE = null;
@@ -50,7 +49,7 @@ public class ModelGeneratorTest {
         final Resources movies = Resources.name("custom-package");
 
         Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
+        Configuration.RESOURCE_SOURCES = null;
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
         Configuration.RESOURCE_PACKAGE = null;
@@ -71,7 +70,7 @@ public class ModelGeneratorTest {
         final Resources movies = Resources.name("custom-suffix");
 
         Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
+        Configuration.RESOURCE_SOURCES = null;
         Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
         Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
         Configuration.RESOURCE_PACKAGE = null;
