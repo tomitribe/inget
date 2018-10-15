@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -90,7 +91,7 @@ public class SignatureAuthenticator implements ClientRequestFilter {
         if(config.getSignature().isSignatureDetails()){
             String signingString = Signatures.createSigningString(config.getSignature().getSignedHeaders(), requestContext.getMethod(),
                     requestContext.getUri().getPath(), headersToBeSigned);
-            requestContext.getHeaders().add("X-Signing-String", signingString);
+            requestContext.getHeaders().add("X-Signing-String", Base64.getEncoder().encodeToString(signingString.getBytes()));
 
         }
     }

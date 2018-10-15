@@ -31,7 +31,7 @@ public class BasicAuthenticator implements ClientRequestFilter {
             String username,
 
             String password) {
-        String value = "Basic " + new String(Base64.getEncoder().encode((username + ":" + password).getBytes()));
+        String value = config.getBasic().getPrefix() + " " + new String(Base64.getEncoder().encode((username + ":" + password).getBytes()));
         return value;
     }
 }
