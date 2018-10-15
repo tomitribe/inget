@@ -39,7 +39,7 @@ public abstract class DefaultCommand implements Runnable {
         SignatureConfiguration signatureConfiguration = null;
         if (keyId != null && keyLocation != null) {
             signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)
-                    .header("Authorization").prefix("Signature").build();
+                    .signatureDetails(signatureDetails).header("Authorization").prefix("Signature").build();
             builder.signature(signatureConfiguration);
         }
         return builder.build();
@@ -98,4 +98,8 @@ public abstract class DefaultCommand implements Runnable {
     @Option(name = {
             "-n", "--key-location" }, type = OptionType.GLOBAL)
     private String keyLocation;
+
+    @Option(name = {
+            "-s", "--signature-details" }, type = OptionType.GLOBAL)
+    private boolean signatureDetails;
 }

@@ -148,7 +148,7 @@ public class CmdGenerator {
             String signature =
                     "if (keyId != null && keyLocation != null) {\n" +
                             "signatureConfiguration = SignatureConfiguration.builder().keyId(keyId).keyLocation(keyLocation)\n" +
-                            ".header(\"Authorization\").prefix(\"Signature\").build();\n" +
+                            ".signatureDetails(signatureDetails).header(\"Authorization\").prefix(\"Signature\").build();\n" +
                             "builder.signature(signatureConfiguration);\n" +
                             "}";
             body.asBlockStmt().addStatement(JavaParser.parseStatement(signature));
@@ -234,6 +234,8 @@ public class CmdGenerator {
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-k\", \"--key-id\"}, type = OptionType.GLOBAL)"));
             f = commandClass.addField("String", "keyLocation", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-n\", \"--key-location\"}, type = OptionType.GLOBAL)"));
+            f = commandClass.addField("boolean", "signatureDetails", Modifier.PRIVATE);
+            f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-s\", \"--signature-details\"}, type = OptionType.GLOBAL)"));
         }
     }
 

@@ -13,6 +13,8 @@ import java.util.List;
 @Generated(value = "org.tomitribe.inget.model.ClientGenerator")
 public class SignatureConfiguration {
 
+    private boolean signatureDetails;
+
     private String keyId;
 
     private String keyLocation;

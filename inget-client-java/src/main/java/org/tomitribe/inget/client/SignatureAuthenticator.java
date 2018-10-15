@@ -2,6 +2,7 @@ package org.tomitribe.inget.client;
 
 import org.tomitribe.auth.signatures.Algorithm;
 import org.tomitribe.auth.signatures.Signature;
+import org.tomitribe.auth.signatures.Signatures;
 import org.tomitribe.auth.signatures.Signer;
 import org.tomitribe.churchkey.Key;
 import org.tomitribe.churchkey.Keys;
@@ -76,12 +77,22 @@ public class SignatureAuthenticator implements ClientRequestFilter {
         Signature sign = null;
         try {
             sign = signer.sign(requestContext.getMethod(), requestContext.getUri().getPath(), headersToBeSigned);
+            addSignatureDetails(requestContext, headersToBeSigned);
         } catch (IOException e) {
             System.out.println("Fail to sign request:" + sign.toString());
             return null;
         }
 
         return sign.toString();
+    }
+
+    private void addSignatureDetails(ClientRequestContext requestContext, HashMap<String, String> headersToBeSigned) {
+        if(config.getSignature().isSignatureDetails()){
+            String signingString = Signatures.createSigningString(config.getSignature().getSignedHeaders(), requestContext.getMethod(),
+                    requestContext.getUri().getPath(), headersToBeSigned);
+            requestContext.getHeaders().add("X-Signing-String", signingString);
+
+        }
     }
 
     private HashMap<String, String> addHeadersToBeSigned(MultivaluedMap<String, Object> requestHeaders) {

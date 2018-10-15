@@ -16,7 +16,6 @@
  */
 
 import org.apache.johnzon.jaxrs.JohnzonProvider;
-import org.apache.openejb.arquillian.common.Files;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -32,10 +31,8 @@ import org.tomitribe.inget.movie.rest.MoviesResource;
 import org.tomitribe.inget.movie.services.MoviesService;
 
 import javax.ws.rs.client.ClientRequestFilter;
-import java.io.File;
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
@@ -60,6 +57,14 @@ public class AuthenticationTest extends Command {
         assertTrue(outLogs.toString().contains("Signature keyId=\"testkey\""));
         assertTrue(outLogs.toString().contains("algorithm=\"rsa-sha256\""));
         assertTrue(outLogs.toString().contains("headers=\"date (request-target)\""));
+        outLogs.reset();
+    }
+
+    @Test
+    public void testSignatureDetails(final @ArquillianResource URL base) throws Exception {
+        URL key = Thread.currentThread().getContextClassLoader().getResource("key");
+        cmd("--signature-details --verbose --key-id testkey --key-location " + key.getPath() + " movies add-movie --title \"The Terminator\" --director \"James Cameron\" --genre Action --year 1984 --rating 8", base.toString());
+        assertTrue(outLogs.toString().contains("X-Signing-String"));
         outLogs.reset();
     }
 }
