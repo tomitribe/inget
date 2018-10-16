@@ -22,7 +22,56 @@ Maven depedency
 ```
 
 ## Inget Maven Plugin
-The Inget Maven Plugin is used to generate all the code looking into your configured model. See below how each part of the generation work:
+The Inget Maven Plugin is used to generate all the code.
+
+To setup the plugin, you just need to add the inget maven plugin as following :
+
+```xml
+<plugin>
+<groupId>org.tomitribe.inget</groupId>
+<artifactId>inget-maven-plugin</artifactId>
+<version>${version.inget}</version>
+<configuration>
+  <modelPackage>yourpackage.model</modelPackage>
+  <resourcePackage>yourpackage.rest</resourcePackage>
+  <generateModel>true</generateModel> 
+  <generateResources>true</generateResources>
+  <generateClient>true</generateClient> 
+  <modelSuffix>Entity</modelSuffix>
+  <resourceSuffix>Service</resourceSuffix>
+  <clientName>YourClientName</clientName>
+  <generateCli>true</generateCli>
+  <cmdLineName>baby</cmdLineName>
+  <programFile>baby</programFile>
+  <authentication>basic</authentication>
+</configuration>
+<executions>
+  <execution>
+    <phase>generate-sources</phase>
+    <goals>
+      <goal>generate</goal>
+    </goals>
+  </execution>
+</executions>
+</plugin>
+``` 
+
+| Configuration | Required | Description |
+| ------------- |:-------------:|-----|
+| modelPackage |All| The package where your model is located. |
+| resourcePackage     |Resources, Client, CLI| The package where your resources are located. |
+| modelSuffix |No|Model suffix, in FoodDao, Dao would be the modelSuffix.|
+| resourceSuffix |No |Resource suffix, in FoodService, Service would be the resourceSuffix.|
+| clientName | Client, CLI | Name of the main class for the java client.|
+| cmdLineName | CLI | Name of the main command in the CLI.|
+| cmdFileName | CLI | Name of the file generated for the CLI. |
+| generateModel |No     |Flag to generate the model.|
+| generateResources |No     |Flag to generate the resources.|
+| generateClient |Client| Flag to generate the client.|
+| generateCli | CLI | Flag to generate the CLI. |
+| authentication | No | Authentication type for the CLI. Supported types: 'basic' and 'signature'
+
+See below how each part of the generation:
 
 ### Model
 
@@ -139,42 +188,4 @@ After the generation you will be able to call the resources directly using the g
 ### Command line
 
 This is not ready.
-
-### Setup
-
-To setup Inget, you just need to add the inget maven plugin as following :
-
-```xml
-<plugin>
-<groupId>org.tomitribe.inget</groupId>
-<artifactId>inget-maven-plugin</artifactId>
-<version>${version.inget}</version>
-<configuration>
-  <modelPackage>yourpackage.model</modelPackage>
-  <resourcePackage>yourpackage.rest</resourcePackage>
-  <!--<generateModel>true</generateModel> -->
-  <!--<generateResources>true</generateResources> -->
-  <!--<generateClient>true</generateClient> -->
-  <!--<modelSuffix>Entity</modelSuffix>-->
-  <!--<resourceSuffix>Service</resourceSuffix>-->
-  <!--<clientName>YourClientName</clientName>-->
-</configuration>
-<executions>
-  <execution>
-    <phase>generate-sources</phase>
-    <goals>
-      <goal>generate</goal>
-    </goals>
-  </execution>
-</executions>
-</plugin>
-``` 
-
-And point the plugin property ```modelPackage``` to the package where the model classes reside. The 
-```resourcePackage``` is the package used by inget to generate the REST Resources.
-
-The ```modelSuffix``` is "<class-name>Model" by default, but you can change it for "<class-name>Entity" for example.
-The ```resourceSuffix``` is "<class-name>Resource" by default, but you can change it for "<class-name>Service" for example.
-
-
 
