@@ -135,7 +135,7 @@ public class ClientGenerator {
                 .setTypeArguments(new TypeParameter(clientExceptionClass.getNameAsString()));
         exceptionMapper.addImport("org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper");
 
-        exceptionMapperClass.addAnnotation("Provider");
+        exceptionMapperClass.addMarkerAnnotation("Provider");
         exceptionMapper.addImport("javax.ws.rs.ext.Provider");
 
         exceptionMapper.addImport("javax.ws.rs.core.Response");

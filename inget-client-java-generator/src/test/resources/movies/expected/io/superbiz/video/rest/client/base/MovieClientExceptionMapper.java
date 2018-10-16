@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
 
-@Provider()
+@Provider
 @Generated("org.tomitribe.inget.client.ClientGenerator")
 public class MovieClientExceptionMapper implements ResponseExceptionMapper<MovieClientException> {
 
