@@ -24,6 +24,24 @@ Maven depedency
 ## Inget Maven Plugin
 The Inget Maven Plugin is used to generate all the code.
 
+There are some pre-requisites that must be respected and we'll improve it over time:
+
+1. Model, resources and client needs to have their own module. The java client jar must not have the jax-rs resources and it needs the model classes. Having the resources in the java client will make the them to be deployable in other application servers.
+
+2. Each module must build a jar with .java files, as inget will read the .java files.
+```xml
+<build>
+  <resources>
+      <resource>
+          <directory>src/main/java</directory>
+          <includes>
+              <include>**/*.java</include>
+          </includes>
+      </resource>
+  </resources>
+</build>
+```
+
 To setup the plugin, you just need to add the inget maven plugin as following :
 
 ```xml
