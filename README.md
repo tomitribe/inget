@@ -226,7 +226,90 @@ After the generation you will be able to call the resources directly using the g
                                                             .build());
 ```
 
-### Command line
+### Command Line Interface (CLI)
 
-This is not ready.
+To generate the client you need to add the required configuration as previously stated in the maven plugin table. Also, you will need to add the shade plugin your build project will generate a fatjar to be used by the CLI anywhere.
 
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-shade-plugin</artifactId>
+    <version>${maven.shade.version}</version>
+    <executions>
+        <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>shade</goal>
+            </goals>
+            <configuration>
+                <transformers>
+                    <transformer
+                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    <transformer
+                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <mainClass>yourpackage.MainCli</mainClass>
+                    </transformer>
+                    <transformer
+                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                        <resource>META-INF/cxf/bus-extensions.txt</resource>
+                    </transformer>
+                </transformers>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+                <filters>
+                    <filter>
+                        <artifact>*:*</artifact>
+                        <excludes>
+                            <exclude>META-INF/*.SF</exclude>
+                            <exclude>META-INF/*.DSA</exclude>
+                            <exclude>META-INF/*.RSA</exclude>
+                        </excludes>
+                    </filter>
+                </filters>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Also in the inget-maven-plugin you will need to add the execution goal *executable* in the phase *package*, see the example below. This will make the bash script generation for your CLI.
+
+<plugin>
+  <groupId>org.tomitribe.inget</groupId>
+  <artifactId>inget-maven-plugin</artifactId>
+  <version>${version.inget}</version>
+  <configuration>
+      <modelPackage>io.superbiz.baby.model</modelPackage>
+      <resourcePackage>io.superbiz.baby.rest</resourcePackage>
+      <generateCmd>true</generateCmd>
+      <clientName>BabyClient</clientName>
+      <resourceSuffix>Resource</resourceSuffix>
+      <cmdLineName>appmanager</cmdLineName>
+      <programFile>appmanager</programFile>
+  </configuration>
+  <executions>
+      <execution>
+          <id>gen</id>
+          <phase>generate-sources</phase>
+          <goals>
+              <goal>generate</goal>
+          </goals>
+      </execution>
+      <execution>
+          <id>pkg</id>
+          <phase>package</phase>
+          <goals>
+              <goal>executable</goal>
+          </goals>
+      </execution>
+  </executions>
+</plugin>
+
+After the build you will see in the target folder that it generated a file called *appmanager* that you configured in the *programFile* pom property. Now you will be able to execute it from anywhere.
+
+This command will show you the commands for account.
+./appmanager help account
+
+This command will create a new account. 
+./appmanager --url http://localhost:8080/api account create --fullname "Steve Jobs" --username steve 
+
+The url is only required in the first time you execute it.
