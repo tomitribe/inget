@@ -272,7 +272,7 @@ To generate the client you need to add the required configuration as previously 
 ```
 
 Also in the inget-maven-plugin you will need to add the execution goal *executable* in the phase *package*, see the example below. This will make the bash script generation for your CLI.
-
+```xml
 <plugin>
   <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget-maven-plugin</artifactId>
@@ -303,7 +303,7 @@ Also in the inget-maven-plugin you will need to add the execution goal *executab
       </execution>
   </executions>
 </plugin>
-
+```
 After the build you will see in the target folder that it generated a file called *appmanager* that you configured in the *programFile* pom property. Now you will be able to execute it from anywhere.
 
 This command will show you the commands for account.
