@@ -231,6 +231,8 @@ Also add the jax-rs resources as a dependency in your pom file with the classifi
     <scope>provided</scope>
 </dependency>
 ```
+Make sure to add the model dependency for the java client as well, as it will need it.
+
 After the generation you will be able to call the resources directly using the generated client. See the following example:
 
 ```java
