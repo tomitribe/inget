@@ -307,9 +307,11 @@ Also in the inget-maven-plugin you will need to add the execution goal *executab
 After the build you will see in the target folder that it generated a file called *appmanager* that you configured in the *programFile* pom property. Now you will be able to execute it from anywhere.
 
 This command will show you the commands for account.
+```bash
 ./appmanager help account
-
-This command will create a new account. 
+```
+This command will create a new account.
+```bash
 ./appmanager --url http://localhost:8080/api account create --fullname "Steve Jobs" --username steve 
-
+```
 The url is only required in the first time you execute it.
