@@ -261,7 +261,7 @@ Add the inget command-line dependecy:
 ```
 Make sure you have the jax-rs resources jar as a dependency in you pom file as well.
 
-Also, you will need to add the shade plugin your build project will generate a fatjar to be used by the CLI anywhere.
+Also, you will need to add the shade plugin your build project will generate a fatjar to be used by the CLI anywhere. Replace the ${resourcePackage} by your resource package configuration.
 
 ```xml
 <plugin>
@@ -280,7 +280,7 @@ Also, you will need to add the shade plugin your build project will generate a f
                             implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                     <transformer
                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                        <mainClass>yourpackage.MainCli</mainClass>
+                        <mainClass>${resourcePackage}.cmd.base.MainCli</mainClass>
                     </transformer>
                     <transformer
                             implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
