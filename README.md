@@ -212,7 +212,7 @@ Path: /account
 ### Client
 To generate the client you need to add the required configuration as previously stated in the maven plugin table.
 
-Add the inget command-line dependecy:
+Add the inget client java dependecy:
 ```xml
  <dependency>
     <groupId>org.tomitribe.inget</groupId>
