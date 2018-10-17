@@ -212,6 +212,25 @@ Path: /account
 ### Client
 To generate the client you need to add the required configuration as previously stated in the maven plugin table.
 
+Add the inget command-line dependecy:
+```xml
+ <dependency>
+    <groupId>org.tomitribe.inget</groupId>
+    <artifactId>inget-client-java</artifactId>
+    <version>${version.inget}</version>
+</dependency>
+```
+Also add the jax-rs resources as a dependency in your pom file with the classifier you choose and scope *provided* so it is not incorporated to the client jar.
+
+```xml
+<dependency>
+    <groupId>yourpackage</groupId>
+    <artifactId>resources</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <classifier>resources</classifier>
+    <scope>provided</scope>
+</dependency>
+```
 After the generation you will be able to call the resources directly using the generated client. See the following example:
 
 ```java
@@ -228,7 +247,19 @@ After the generation you will be able to call the resources directly using the g
 
 ### Command Line Interface (CLI)
 
-To generate the client you need to add the required configuration as previously stated in the maven plugin table. Also, you will need to add the shade plugin your build project will generate a fatjar to be used by the CLI anywhere.
+To generate the client you need to add the required configuration as previously stated in the maven plugin table. 
+
+Add the inget command-line dependecy:
+```xml
+<dependency>
+    <groupId>org.tomitribe.inget</groupId>
+    <artifactId>inget-client-commandline</artifactId>
+    <version>${version.inget}</version>
+</dependency>
+```
+Make sure you have the jax-rs resources jar as a dependency in you pom file as well.
+
+Also, you will need to add the shade plugin your build project will generate a fatjar to be used by the CLI anywhere.
 
 ```xml
 <plugin>
@@ -271,7 +302,7 @@ To generate the client you need to add the required configuration as previously 
 </plugin>
 ```
 
-Also in the inget-maven-plugin you will need to add the execution goal *executable* in the phase *package*, see the example below. This will make the bash script generation for your CLI.
+In the inget-maven-plugin you will need to add the execution goal *executable* in the phase *package*, see the example below. This will make the bash script generation for your CLI.
 ```xml
 <plugin>
   <groupId>org.tomitribe.inget</groupId>
@@ -315,3 +346,6 @@ This command will create a new account.
 ./appmanager --url http://localhost:8080/api account create --fullname "Steve Jobs" --username steve 
 ```
 The url is only required in the first time you execute it.
+
+### Documentation
+
