@@ -351,3 +351,70 @@ The url is only required in the first time you execute it.
 
 ### Documentation
 
+The document generation will produce open api, asciidoc and html files.
+
+To add documentation to your project add the configuration below
+
+```xml
+<plugins>
+  <plugin>
+    <groupId>org.tomitribe</groupId>
+    <artifactId>openapi-maven-plugin</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <configuration>
+      <outputDirectory>/home/test/openapi</outputDirectory>
+      <resourcePackages>${yourrestpackage}</resourcePackages>
+    </configuration>
+    <executions>
+      <execution>
+        <phase>process-classes</phase>
+        <goals>
+          <goal>openApi2markup</goal>
+        </goals>
+      </execution>
+    </executions>
+    <dependencies>
+      <dependency>
+        <groupId>${yourpackage}</groupId>
+        <artifactId>resources</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tomitribe.swagger2markup</groupId>
+        <artifactId>swagger2markup-extensions</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+      </dependency>
+    </dependencies>
+  </plugin>
+  <plugin>
+    <groupId>org.asciidoctor</groupId>
+    <artifactId>asciidoctor-maven-plugin</artifactId>
+    <configuration>
+      <sourceDirectory>${openapi.directory}</sourceDirectory>
+      <outputDirectory>${openapi.directory}/html</outputDirectory>
+      <backend>html5</backend>
+      <attributes>
+        <doctype>book</doctype>
+        <toc>left</toc>
+        <toclevels>4</toclevels>
+      </attributes>
+    </configuration>
+    <executions>
+      <execution>
+        <id>docs-html</id>
+        <phase>prepare-package</phase>
+        <goals>
+          <goal>process-asciidoc</goal>
+        </goals>
+        <configuration>
+          <sourceHighlighter>coderay</sourceHighlighter>
+          <backend>html</backend>
+          <attributes>
+            <toclevels>3</toclevels>
+          </attributes>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+</plugins>
+```
