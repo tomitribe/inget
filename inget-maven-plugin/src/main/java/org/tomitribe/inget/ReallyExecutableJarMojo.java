@@ -68,8 +68,8 @@ public class ReallyExecutableJarMojo extends AbstractMojo {
     /**
      * Name of the generated binary.
      */
-    @Parameter(property = "really-executable-jar.programFile")
-    private String programFile = null;
+    @Parameter(property = "really-executable-jar.cmdFileName")
+    private String cmdFileName = null;
 
     /**
      * Specifies the classifier of the artifact that will be made executable.
@@ -131,10 +131,10 @@ public class ReallyExecutableJarMojo extends AbstractMojo {
                 throw new MojoExecutionException("Could not find any jars to make executable");
             }
 
-            if (programFile != null && !programFile.matches("\\s+")) {
+            if (cmdFileName != null && !cmdFileName.matches("\\s+")) {
                 for (File file : files) {
                     File dir = file.getParentFile();
-                    File exec = new File(dir, programFile);
+                    File exec = new File(dir, cmdFileName);
                     FileUtils.copyFile(file, exec);
                     makeExecutable(exec);
                     if (attachProgramFile) {

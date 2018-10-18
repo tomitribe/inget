@@ -87,11 +87,11 @@
                 <configuration>
                     <modelPackage>org.tomitribe.inget.movie.model</modelPackage>
                     <resourcePackage>org.tomitribe.inget.movie.rest</resourcePackage>
-                    <generateCmd>true</generateCmd>
+                    <generateCli>true</generateCli>
                     <clientName>MovieClient</clientName>
                     <resourceSuffix>Resource</resourceSuffix>
                     <cmdLineName>cmdline</cmdLineName>
-                    <programFile>cmdline</programFile>
+                    <cmdFileName>cmdline</cmdFileName>
                     <authentication>signature</authentication>
                 </configuration>
                 <executions>

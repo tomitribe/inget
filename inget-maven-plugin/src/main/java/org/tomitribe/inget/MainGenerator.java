@@ -45,7 +45,7 @@ import java.util.zip.ZipEntry;
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class MainGenerator extends AbstractMojo {
 
-    @Parameter(property = "generate.model_package")
+    @Parameter(property = "generate.model_package", required = true)
     private String modelPackage;
 
     @Parameter(property = "generate.resource_package")
@@ -60,8 +60,8 @@ public class MainGenerator extends AbstractMojo {
     @Parameter(property = "generate.generate_client", defaultValue = "false")
     private Boolean generateClient;
 
-    @Parameter(property = "generate.generate_cmd", defaultValue = "false")
-    private Boolean generateCmd;
+    @Parameter(property = "generate.generate_cli", defaultValue = "false")
+    private Boolean generateCli;
 
     @Parameter(property = "generate.client_name", defaultValue = "ResourceClient")
     private String clientName;
@@ -129,7 +129,7 @@ public class MainGenerator extends AbstractMojo {
                 Configuration.CLIENT_SOURCES = Configuration.GENERATED_SOURCES;
             }
 
-            if (generateCmd) {
+            if (generateCli) {
                 boolean clientExistsInCurrentProject = new File(Configuration.getClientPath()).exists();
                 if (clientExistsInCurrentProject) {
                     Configuration.CLIENT_SOURCES = Configuration.getClientPath();

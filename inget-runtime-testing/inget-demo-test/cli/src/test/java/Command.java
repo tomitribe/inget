@@ -4,7 +4,6 @@ import org.tomitribe.inget.movie.rest.cmd.base.MainCli;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
