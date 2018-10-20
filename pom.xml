@@ -18,6 +18,13 @@
     <maven.version>3.3.9</maven.version>
   </properties>
 
+  <scm>
+    <connection>scm:git:git@github.com:tomitribe/inget.git</connection>
+    <url>scm:git:git@github.com:tomitribe/inget.git</url>
+    <developerConnection>scm:git:git@github.com:tomitribe/inget.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
   <repositories>
     <repository>
       <id>tomitribe-all</id>
