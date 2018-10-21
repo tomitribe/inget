@@ -25,10 +25,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.tomitribe.inget</groupId>
     <artifactId>client-signature</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
 
     <name>client</name>
 

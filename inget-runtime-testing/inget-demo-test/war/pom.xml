@@ -25,9 +25,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.tomitribe.inget</groupId>
     <artifactId>inget-movie-demo</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>war</name>
