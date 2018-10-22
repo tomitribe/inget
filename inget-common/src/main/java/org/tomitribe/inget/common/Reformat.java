@@ -32,6 +32,10 @@ import java.util.Map;
 
 public class Reformat {
 
+    private Reformat() {
+        // no-op
+    }
+
     public static String apply(final String source) {
         final Map options = DefaultCodeFormatterConstants.getEclipseDefaultSettings();
 

@@ -22,6 +22,11 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 public class TemplateUtil {
+
+    private TemplateUtil() {
+        // no-op
+    }
+
     public static String readTemplate(String fileName) {
 
         StringBuilder result = new StringBuilder("");

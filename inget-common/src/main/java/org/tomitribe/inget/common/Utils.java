@@ -175,16 +175,16 @@ public class Utils {
             headerString = ", headers = {@Header(name = \"" + header.getName() + "\", description = \"" + header.getDescription() + "\")}";
         }
 
-        final String RESPONSE = "@ApiResponse(responseCode = \"" + code + "\", description = \"" + message + "\"" + headerString + ")";
+        final String response = "@ApiResponse(responseCode = \"" + code + "\", description = \"" + message + "\"" + headerString + ")";
 
         if (apiResponses == null) {
-            method.addAnnotation(JavaParser.parseAnnotation("@ApiResponses( value = {" + RESPONSE + "})"));
+            method.addAnnotation(JavaParser.parseAnnotation("@ApiResponses( value = {" + response + "})"));
             return;
         }
 
         final MemberValuePair value = pairs(apiResponses).get("value");
         if (value == null) {
-            apiResponses.addPair("value", "{" + RESPONSE + "}");
+            apiResponses.addPair("value", "{" + response + "}");
             return;
         }
 
@@ -193,7 +193,7 @@ public class Utils {
         final boolean has409 = annotations.stream().anyMatch(has("responseCode", "\"" + code + "\""));
 
         if (!has409) {
-            annotations.add((NormalAnnotationExpr) JavaParser.parseAnnotation(RESPONSE));
+            annotations.add((NormalAnnotationExpr) JavaParser.parseAnnotation(response));
             final ArrayInitializerExpr value1 = asArray(annotations);
             value.setValue(value1);
         }
@@ -635,21 +635,20 @@ public class Utils {
 
     public static String getResponseImplementation(MethodDeclaration m) {
         final NormalAnnotationExpr apiResponses = Utils.getAnnotation(m, "ApiResponses");
-        try {
-            final MemberValuePair value = pairs(apiResponses).get("value");
-            final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
-            Optional<NormalAnnotationExpr> responseOptional = annotations.stream().filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\"")).findFirst();
-            if (responseOptional.isPresent()) {
-                NormalAnnotationExpr response = responseOptional.get();
-                Map<String, MemberValuePair> responsePairs = pairs(response);
-                Expression content = responsePairs.get("content").getValue();
-                Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
-                NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
-                Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
-                Expression implementation = schemaPairs.get("implementation").getValue();
-                return implementation.asClassExpr().getTypeAsString();
-            }
-        } catch (Exception e) {
+        final MemberValuePair value = pairs(apiResponses).get("value");
+        final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
+        Optional<NormalAnnotationExpr> responseOptional = annotations.stream()
+                .filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\""))
+                .findFirst();
+        if (responseOptional.isPresent()) {
+            NormalAnnotationExpr response = responseOptional.get();
+            Map<String, MemberValuePair> responsePairs = pairs(response);
+            Expression content = responsePairs.get("content").getValue();
+            Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
+            NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
+            Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
+            Expression implementation = schemaPairs.get("implementation").getValue();
+            return implementation.asClassExpr().getTypeAsString();
         }
         return null;
     }

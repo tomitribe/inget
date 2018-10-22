@@ -23,6 +23,10 @@ import java.io.File;
 
 public class Configuration {
 
+    private Configuration() {
+        // Utility class
+    }
+
     public static String TEMP_SOURCE;
     public static String MODEL_SUFFIX;
     public static String RESOURCE_SOURCES;

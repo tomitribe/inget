@@ -27,16 +27,20 @@ import java.io.File;
 
 public class CustomTypeSolver {
 
-    private static CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+    private CustomTypeSolver() {
+        // utility class
+    }
+
+    private static final CombinedTypeSolver COMBINED_TYPE_SOLVER = new CombinedTypeSolver();
 
     public static void init() {
-        combinedTypeSolver.add(new ReflectionTypeSolver());
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File(Configuration.MODEL_SOURCES)));
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File(Configuration.RESOURCE_SOURCES)));
-        combinedTypeSolver.add(new JavaParserTypeSolver(new File(Configuration.GENERATED_SOURCES)));
+        COMBINED_TYPE_SOLVER.add(new ReflectionTypeSolver());
+        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.MODEL_SOURCES)));
+        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.RESOURCE_SOURCES)));
+        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.GENERATED_SOURCES)));
     }
 
     public static TypeSolver get() {
-        return combinedTypeSolver;
+        return COMBINED_TYPE_SOLVER;
     }
 }

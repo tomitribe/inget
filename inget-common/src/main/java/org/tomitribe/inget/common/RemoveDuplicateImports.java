@@ -37,6 +37,10 @@ import java.util.stream.Collectors;
  */
 public class RemoveDuplicateImports {
 
+    private RemoveDuplicateImports() {
+        // utility class
+    }
+
     public static String apply(String source) {
         final CompilationUnit unit = JavaParser.parse(source);
 
