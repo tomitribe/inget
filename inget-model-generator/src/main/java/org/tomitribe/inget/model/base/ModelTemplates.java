@@ -20,7 +20,11 @@ package org.tomitribe.inget.model.base;
 
 public class ModelTemplates {
 
-    public static String FAILURE =
+    private ModelTemplates() {
+        // no-op
+    }
+
+    public static final String FAILURE =
             "import io.swagger.v3.oas.annotations.media.Schema;\n" +
                     "import lombok.AllArgsConstructor;\n" +
                     "import lombok.Value;\n" +
@@ -40,7 +44,7 @@ public class ModelTemplates {
                     "    private final String code;\n" +
                     "}";
 
-    public static String DEFAULT_FILTER =
+    public static final String DEFAULT_FILTER =
             "import io.swagger.v3.oas.annotations.media.Schema;\n" +
                     "\n" +
                     "@Schema(description = \"A generic filter, part of the page result used for any search request. \" +\n" +
@@ -48,7 +52,7 @@ public class ModelTemplates {
                     "public class DefaultFilter {\n" +
                     "}";
 
-    public static String RESULT = "import io.swagger.v3.oas.annotations.media.Schema;\n" +
+    public static final String RESULT = "import io.swagger.v3.oas.annotations.media.Schema;\n" +
             "import lombok.Builder;\n" +
             "import lombok.EqualsAndHashCode;\n" +
             "import lombok.Value;\n" +
@@ -63,13 +67,15 @@ public class ModelTemplates {
             "@Schema(description = \"The list of %ITEMS_NAME available for a given search request with associated metadata.\")\n" +
             "public class %ENTITYResult {\n" +
             "\n" +
-            "    @Schema(description = \"The list of items for the given page. The list may be a partial list when pagination is used (default)\", required = true)\n" +
+            "    @Schema(description = \"The list of items for the given page. The list may be a partial list when " +
+            "pagination is used (default)\", required = true)\n" +
             "    private final Collection<%ENTITY> items;\n" +
             "\n" +
             "    @Schema(description = \"Contains the elements that can be used for filtering: labels, by default.\", required = true)\n" +
             "    private final %FILTER filters;\n" +
             "\n" +
-            "    @Schema(description = \"The total number of items for the search request. It may be higher than the number of items returned because of the pagination.\", required = true)\n" +
+            "    @Schema(description = \"The total number of items for the search request. It may be higher than the " +
+            "number of items returned because of the pagination.\", required = true)\n" +
             "    private final Long total;\n" +
             "\n" +
             "}";

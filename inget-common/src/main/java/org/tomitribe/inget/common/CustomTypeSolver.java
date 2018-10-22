@@ -35,9 +35,9 @@ public class CustomTypeSolver {
 
     public static void init() {
         COMBINED_TYPE_SOLVER.add(new ReflectionTypeSolver());
-        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.MODEL_SOURCES)));
-        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.RESOURCE_SOURCES)));
-        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.GENERATED_SOURCES)));
+        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.modelSources)));
+        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.resourceSources)));
+        COMBINED_TYPE_SOLVER.add(new JavaParserTypeSolver(new File(Configuration.generatedSources)));
     }
 
     public static TypeSolver get() {

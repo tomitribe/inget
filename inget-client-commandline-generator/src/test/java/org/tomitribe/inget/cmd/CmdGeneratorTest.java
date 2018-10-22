@@ -22,7 +22,6 @@ package org.tomitribe.inget.cmd;
 
 import org.junit.After;
 import org.junit.Test;
-import org.tomitribe.inget.cmd.CmdGenerator;
 import org.tomitribe.inget.common.Authentication;
 import org.tomitribe.inget.common.Configuration;
 import org.tomitribe.inget.common.CustomTypeSolver;
@@ -41,17 +40,17 @@ public class CmdGeneratorTest {
     public void testCmdNoAuth() throws Exception {
         final Resources movies = Resources.name("movies-no-auth");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.CLIENT_SOURCES = movies.input().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model.model";
-        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.model.rest";
-        Configuration.CLIENT_NAME = "MovieClient";
-        Configuration.RESOURCE_SUFFIX = "ResourceBean";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.CMD_LINE_NAME = "cmdline";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.resourceSources = movies.input().getAbsolutePath();
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.clientSources = movies.input().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model.model";
+        Configuration.resourcePackage = "io.superbiz.video.model.rest";
+        Configuration.clientName = "MovieClient";
+        Configuration.resourceSuffix = "ResourceBean";
+        Configuration.modelSuffix = "Model";
+        Configuration.cmdLineName = "cmdline";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
 
         CustomTypeSolver.init();
 
@@ -64,18 +63,18 @@ public class CmdGeneratorTest {
     public void testCmdBasic() throws Exception {
         final Resources movies = Resources.name("movies-basic-auth");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.CLIENT_SOURCES = movies.input().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.rest";
-        Configuration.CLIENT_NAME = "MovieClient";
-        Configuration.RESOURCE_SUFFIX = "ResourceBean";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.CMD_LINE_NAME = "cmdline";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
-        Configuration.AUTHENTICATION = Authentication.BASIC;
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.resourceSources = movies.input().getAbsolutePath();
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.clientSources = movies.input().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.resourcePackage = "io.superbiz.video.rest";
+        Configuration.clientName = "MovieClient";
+        Configuration.resourceSuffix = "ResourceBean";
+        Configuration.modelSuffix = "Model";
+        Configuration.cmdLineName = "cmdline";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
+        Configuration.authentication = Authentication.BASIC;
 
         CustomTypeSolver.init();
 
@@ -88,18 +87,18 @@ public class CmdGeneratorTest {
     public void testCmdSignature() throws Exception {
         final Resources movies = Resources.name("movies-signature-auth");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.CLIENT_SOURCES = movies.input().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model.model";
-        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.model.rest";
-        Configuration.CLIENT_NAME = "MovieClient";
-        Configuration.RESOURCE_SUFFIX = "ResourceBean";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.CMD_LINE_NAME = "cmdline";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
-        Configuration.AUTHENTICATION = Authentication.SIGNATURE;
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.resourceSources = movies.input().getAbsolutePath();
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.clientSources = movies.input().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model.model";
+        Configuration.resourcePackage = "io.superbiz.video.model.rest";
+        Configuration.clientName = "MovieClient";
+        Configuration.resourceSuffix = "ResourceBean";
+        Configuration.modelSuffix = "Model";
+        Configuration.cmdLineName = "cmdline";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
+        Configuration.authentication = Authentication.SIGNATURE;
 
         CustomTypeSolver.init();
 

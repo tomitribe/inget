@@ -40,6 +40,11 @@ import static org.tomitribe.inget.common.Utils.getModel;
 import static org.tomitribe.inget.common.Utils.getRootName;
 
 public class ModelGenerator {
+
+    private ModelGenerator() {
+        // no-op
+    }
+
     static final String CREATE_PREFIX = "Create";
     static final String UPDATE_PREFIX = "Update";
     static final String READ_PREFIX = "";

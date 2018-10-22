@@ -71,7 +71,7 @@ public class ResourcesGenerator {
             return relatedResources;
         }
 
-        final String rootResourceName = modelClassName + Configuration.RESOURCE_SUFFIX;
+        final String rootResourceName = modelClassName + Configuration.resourceSuffix;
         Optional<File> rootResource = relatedResources.stream()
                 .filter(f -> f.getName().equals(rootResourceName + ".java"))
                 .findFirst();
@@ -79,7 +79,7 @@ public class ResourcesGenerator {
             generateResource(rootResourceName, modelClassUnit);
         }
 
-        final String listResourceName = Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX;
+        final String listResourceName = Utils.toPlural(modelClassName) + Configuration.resourceSuffix;
         Optional<File> listResource = relatedResources.stream()
                 .filter(f -> f.getName().equals(listResourceName + ".java"))
                 .findFirst();
@@ -107,7 +107,7 @@ public class ResourcesGenerator {
 
     private static void generateResource(final String resourceName, final CompilationUnit modelClassUnit) throws IOException {
         String resourceClassPackage = modelClassUnit.getPackageDeclaration().get().getNameAsString();
-        resourceClassPackage = resourceClassPackage.replace(Configuration.MODEL_PACKAGE, Configuration.RESOURCE_PACKAGE);
+        resourceClassPackage = resourceClassPackage.replace(Configuration.modelPackage, Configuration.resourcePackage);
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(resourceClassPackage);
         newClassCompilationUnit.addClass(resourceName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(resourceName).get();

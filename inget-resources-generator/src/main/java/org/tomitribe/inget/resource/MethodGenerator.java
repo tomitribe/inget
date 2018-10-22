@@ -354,7 +354,7 @@ public class MethodGenerator {
         String modelPackage = rootClass.findCompilationUnit().get().getPackageDeclaration().get().getNameAsString();
 
         File filterFile = new File(
-                Configuration.MODEL_SOURCES + File.separator +
+                Configuration.modelSources + File.separator +
                         Utils.transformPackageToPath(modelPackage) + File.separator + rootClassName + "Filter.java");
 
         if (filterFile.exists()) {

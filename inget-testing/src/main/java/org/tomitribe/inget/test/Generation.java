@@ -34,13 +34,17 @@ import static org.junit.Assert.assertNotNull;
 
 public class Generation {
 
+    private Generation() {
+        // no-op
+    }
+
     /**
      * This can save you time rubber-stamping current behavior.  Add something like this
      * to the test temporarily to save the current actual results as the expected.
      *
      * `Generation.saveResults("custom-package", "expected", movies.actual(".*\\.java$"));`
      *
-     * Note if you use Intellij you'll need to referesh the files from disk afterwards or
+     * Note if you use Intellij you'll need to refresh the files from disk afterwards or
      * Intellij will not see the updated file contents.
      */
     public static void saveResults(final String name, final String location, final Map<String, File> results) throws IOException {
@@ -135,12 +139,12 @@ public class Generation {
                     "        final Resources resources = Resources.name(\"" + testName + "/testOnClass\");\n" +
                     "\n" +
                     "        Configuration.clean();\n" +
-                    "        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();\n" +
-                    "        Configuration.RESOURCE_SOURCES = resources.input().getAbsolutePath();\n" +
-                    "        Configuration.GENERATED_SOURCES = resources.actual().getAbsolutePath();\n" +
-                    "        Configuration.MODEL_PACKAGE = \"io.superbiz.video.model\";\n" +
-                    "        Configuration.MODEL_SUFFIX = \"Model\";\n" +
-                    "        Configuration.TEMP_SOURCE = resources.tempSource().getAbsolutePath();\n" +
+                    "        Configuration.modelSources = resources.input().getAbsolutePath();\n" +
+                    "        Configuration.resourceSources = resources.input().getAbsolutePath();\n" +
+                    "        Configuration.generatedSources = resources.actual().getAbsolutePath();\n" +
+                    "        Configuration.modelPackage = \"io.superbiz.video.model\";\n" +
+                    "        Configuration.modelSuffix = \"Model\";\n" +
+                    "        Configuration.tempSource = resources.tempSource().getAbsolutePath();\n" +
                     "\n" +
                     "        // do the magic\n" +
                     "        ModelGenerator.execute();\n" +
@@ -156,12 +160,12 @@ public class Generation {
                     "        final Resources resources = Resources.name(\"" + testName + "/testOnField\");\n" +
                     "\n" +
                     "        Configuration.clean();\n" +
-                    "        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();\n" +
-                    "        Configuration.RESOURCE_SOURCES = resources.input().getAbsolutePath();\n" +
-                    "        Configuration.GENERATED_SOURCES = resources.actual().getAbsolutePath();\n" +
-                    "        Configuration.MODEL_PACKAGE = \"io.superbiz.video.model\";\n" +
-                    "        Configuration.MODEL_SUFFIX = \"Model\";\n" +
-                    "        Configuration.TEMP_SOURCE = resources.tempSource().getAbsolutePath();\n" +
+                    "        Configuration.modelSources = resources.input().getAbsolutePath();\n" +
+                    "        Configuration.resourceSources = resources.input().getAbsolutePath();\n" +
+                    "        Configuration.generatedSources = resources.actual().getAbsolutePath();\n" +
+                    "        Configuration.modelPackage = \"io.superbiz.video.model\";\n" +
+                    "        Configuration.modelSuffix = \"Model\";\n" +
+                    "        Configuration.tempSource = resources.tempSource().getAbsolutePath();\n" +
                     "\n" +
                     "        // do the magic\n" +
                     "        ModelGenerator.execute();\n" +

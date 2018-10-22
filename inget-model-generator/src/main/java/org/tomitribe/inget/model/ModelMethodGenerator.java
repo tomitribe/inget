@@ -33,6 +33,10 @@ import java.util.Optional;
 
 public class ModelMethodGenerator {
 
+    private ModelMethodGenerator() {
+        // no-op
+    }
+
     static CompilationUnit createMethods(String rootClassName,
                                          CompilationUnit rootUnit,
                                          CompilationUnit createUnit,

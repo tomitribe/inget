@@ -36,8 +36,8 @@ public abstract class DefaultCommand implements Runnable {
 
     private void manageConfiguration() throws Exception {
         Properties conf = new Properties();
-        File folder = new File(System.getProperty("user.home") + File.separator + ".%CMD_LINE_NAME%");
-        File file = new File(folder, ".%CMD_LINE_NAME%config");
+        File folder = new File(System.getProperty("user.home") + File.separator + ".%cmdLineName%");
+        File file = new File(folder, ".%cmdLineName%config");
         if (!folder.exists()) {
             folder.mkdirs();
         }

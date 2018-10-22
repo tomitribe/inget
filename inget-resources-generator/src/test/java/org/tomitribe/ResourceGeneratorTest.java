@@ -40,14 +40,14 @@ public class ResourceGeneratorTest {
     public void testMovies() throws Exception {
         final Resources movies = Resources.name("movies");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = movies.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.RESOURCE_PACKAGE = "io.superbiz.video.rest";
-        Configuration.RESOURCE_SUFFIX = "ResourceBean";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.resourceSources = movies.input().getAbsolutePath();
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.resourcePackage = "io.superbiz.video.rest";
+        Configuration.resourceSuffix = "ResourceBean";
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
 
         CustomTypeSolver.init();
 

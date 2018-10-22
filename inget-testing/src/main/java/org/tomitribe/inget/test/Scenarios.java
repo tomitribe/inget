@@ -32,6 +32,10 @@ import static org.junit.Assert.fail;
 
 public class Scenarios {
 
+    private Scenarios() {
+        // no-op
+    }
+
     public static void assertFiles(final Map<String, File> expected, final Map<String, File> actual) throws IOException {
         for (final String name : expected.keySet()) {
             final File expectedFile = expected.get(name);

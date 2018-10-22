@@ -76,7 +76,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.tomitribe.inget.common.Utils.formatCamelCaseTo;
 
 public class CmdGenerator {
-    private static final String BASE_OUTPUT_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd.base";
+    private static final String BASE_OUTPUT_PACKAGE = Configuration.resourcePackage + ".cmd.base";
 
     public static void execute() throws IOException {
         final List<File> sourceClients = Utils.getClient();
@@ -92,8 +92,8 @@ public class CmdGenerator {
                 continue;
             }
             final ClassOrInterfaceDeclaration clientClass = Utils.getClazz(client);
-            final String replaceValue = Configuration.RESOURCE_SUFFIX == null ?
-                    "Client" : Configuration.RESOURCE_SUFFIX + "Client";
+            final String replaceValue = Configuration.resourceSuffix == null ?
+                    "Client" : Configuration.resourceSuffix + "Client";
             final String clientGroup =
                     clientClass.getNameAsString().replace(replaceValue, "");
 
@@ -120,16 +120,16 @@ public class CmdGenerator {
         readValueConfigurationValueIfNotProvidedMethod(commandClass);
         CompilationUnit modifiedClassUnit = commandClass.findCompilationUnit().get();
         addImports(modifiedClassUnit);
-        String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.CMD_LINE_NAME);
+        String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.cmdLineName);
         Utils.save("DefaultCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
     }
 
     private static void addImports(CompilationUnit modifiedClassUnit) {
         modifiedClassUnit.addImport(ImportManager.getImport("ClientConfiguration"));
-        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+        if (Configuration.authentication == Authentication.BASIC) {
             modifiedClassUnit.addImport(ImportManager.getImport("BasicConfiguration"));
         }
-        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+        if (Configuration.authentication == Authentication.SIGNATURE) {
             modifiedClassUnit.addImport(ImportManager.getImport("SignatureConfiguration"));
         }
     }
@@ -138,7 +138,7 @@ public class CmdGenerator {
         MethodDeclaration buildConfig = commandClass.getMethodsByName("buildConfiguration").stream().findFirst().get();
         BlockStmt body = buildConfig.getBody().get();
 
-        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+        if (Configuration.authentication == Authentication.BASIC) {
             body.asBlockStmt().addStatement(JavaParser.parseStatement("BasicConfiguration basicConfiguration = null;"));
 
             String basic = "if (username != null && password != null) {" +
@@ -149,7 +149,7 @@ public class CmdGenerator {
             body.asBlockStmt().addStatement(JavaParser.parseStatement(basic));
         }
 
-        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+        if (Configuration.authentication == Authentication.SIGNATURE) {
             body.asBlockStmt().addStatement(JavaParser.parseStatement("SignatureConfiguration signatureConfiguration = null;"));
 
             String signature =
@@ -166,7 +166,7 @@ public class CmdGenerator {
 
     private static void updateConfigWithNewValueMethod(ClassOrInterfaceDeclaration commandClass) {
         MethodDeclaration updateConfig = commandClass.getMethodsByName("updateConfigWithNewValue").stream().findFirst().get();
-        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+        if (Configuration.authentication == Authentication.BASIC) {
             String username =
                     "if (username != null) {" +
                             "   conf.put(\"basic.username\", username);" +
@@ -181,7 +181,7 @@ public class CmdGenerator {
             updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(password));
         }
 
-        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+        if (Configuration.authentication == Authentication.SIGNATURE) {
             String keyId =
                     "if (keyId != null) {" +
                             "    conf.put(\"signature.key-id\", keyId);" +
@@ -197,7 +197,7 @@ public class CmdGenerator {
 
     private static void readValueConfigurationValueIfNotProvidedMethod(ClassOrInterfaceDeclaration commandClass) {
         MethodDeclaration updateConfig = commandClass.getMethodsByName("readValueConfigurationValueIfNotProvided").stream().findFirst().get();
-        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+        if (Configuration.authentication == Authentication.BASIC) {
             String username =
                     " if (username == null && conf.containsKey(\"basic.username\")) {\n" +
                             "         username = conf.getProperty(\"basic.username\");\n" +
@@ -211,7 +211,7 @@ public class CmdGenerator {
             updateConfig.getBody().get().asBlockStmt().addStatement(JavaParser.parseStatement(password));
         }
 
-        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+        if (Configuration.authentication == Authentication.SIGNATURE) {
             String keyId =
                     "if (keyId == null && conf.containsKey(\"signature.key-id\")) {" +
                             "         keyId = conf.getProperty(\"signature.key-id\");" +
@@ -229,14 +229,14 @@ public class CmdGenerator {
     private static void addCommandOptions(ClassOrInterfaceDeclaration commandClass) {
         FieldDeclaration f = null;
 
-        if (Configuration.AUTHENTICATION == Authentication.BASIC) {
+        if (Configuration.authentication == Authentication.BASIC) {
             f = commandClass.addField("String", "username", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-u\", \"--username\"}, type = OptionType.GLOBAL)"));
             f = commandClass.addField("String", "password", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-p\", \"--password\"}, type = OptionType.GLOBAL)"));
         }
 
-        if (Configuration.AUTHENTICATION == Authentication.SIGNATURE) {
+        if (Configuration.authentication == Authentication.SIGNATURE) {
             f = commandClass.addField("String", "keyId", Modifier.PRIVATE);
             f.addAnnotation(JavaParser.parseAnnotation("@Option(name = {\"-k\", \"--key-id\"}, type = OptionType.GLOBAL)"));
             f = commandClass.addField("String", "keyLocation", Modifier.PRIVATE);
@@ -248,7 +248,7 @@ public class CmdGenerator {
 
     private static String generateCommandFromClientMethod(final MethodDeclaration clientMethod,
                                                           final String clientGroup) {
-        final CompilationUnit command = new CompilationUnit(Configuration.RESOURCE_PACKAGE + ".cmd");
+        final CompilationUnit command = new CompilationUnit(Configuration.resourcePackage + ".cmd");
 
         final String commandClassName = clientGroup + WordUtils.capitalize(clientMethod.getNameAsString()) + "Cmd";
         command.addClass(commandClassName);
@@ -455,7 +455,7 @@ public class CmdGenerator {
     }
 
     private static void addRunStatement(CompilationUnit command, final ClassOrInterfaceDeclaration commandClass, String clientGroup, MethodDeclaration clientMethod) {
-        command.addImport(Configuration.getClientPackage() + "." + Configuration.CLIENT_NAME);
+        command.addImport(Configuration.getClientPackage() + "." + Configuration.clientName);
 
         List<String> runParams = clientMethod.getParameters().stream().map(p -> {
             if (p.getTypeAsString().startsWith("List")) {
@@ -480,7 +480,7 @@ public class CmdGenerator {
         final MethodDeclaration run =
                 commandClass.getMethodsByName("run").stream().findFirst().orElseThrow(IllegalArgumentException::new);
 
-        String runCommand = "new " + Configuration.CLIENT_NAME + "(clientConfiguration)." + clientGroup.toLowerCase() + "()."
+        String runCommand = "new " + Configuration.clientName + "(clientConfiguration)." + clientGroup.toLowerCase() + "()."
                 + clientMethod.getNameAsString() + "(" + Join.join(",", runParams) + ")";
 
         if (!clientMethod.getType().isVoidType()) {
@@ -560,7 +560,7 @@ public class CmdGenerator {
 
         final BlockStmt block = new BlockStmt();
         cli.addImport(ImportManager.getImport("Cli"));
-        block.addStatement("final Cli.CliBuilder<Runnable> cliBuilder = Cli.builder(\"" + Configuration.CMD_LINE_NAME + "\");");
+        block.addStatement("final Cli.CliBuilder<Runnable> cliBuilder = Cli.builder(\"" + Configuration.cmdLineName + "\");");
         cli.addImport(ImportManager.getImport("Help"));
         block.addStatement("cliBuilder.withDefaultCommand(Help.class);");
         block.addStatement("cliBuilder.withCommand(Help.class);");
@@ -575,7 +575,7 @@ public class CmdGenerator {
             final List<String> commands = groups.get(group);
             for (final String command : commands) {
                 groupCommand.append(".withCommand(").append(command).append(".class").append(")");
-                cli.addImport(Configuration.RESOURCE_PACKAGE + ".cmd." + command);
+                cli.addImport(Configuration.resourcePackage + ".cmd." + command);
             }
             groupCommand.append(";");
             block.addStatement(groupCommand.toString());
@@ -607,7 +607,7 @@ public class CmdGenerator {
                         .orElseThrow(IllegalStateException::new);
 
         try {
-            Utils.save(className + ".java", Configuration.RESOURCE_PACKAGE + ".cmd", modified);
+            Utils.save(className + ".java", Configuration.resourcePackage + ".cmd", modified);
         } catch (final IOException e) {
             e.printStackTrace();
         }

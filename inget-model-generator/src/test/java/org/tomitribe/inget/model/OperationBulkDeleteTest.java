@@ -64,12 +64,12 @@ public class OperationBulkDeleteTest {
                         "}\n");
 
         Configuration.clean();
-        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = resources.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = resources.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = resources.tempSource().getAbsolutePath();
+        Configuration.modelSources = resources.input().getAbsolutePath();
+        Configuration.resourceSources = resources.input().getAbsolutePath();
+        Configuration.generatedSources = resources.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = resources.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();
@@ -120,12 +120,12 @@ public class OperationBulkDeleteTest {
                         "}\n");
 
         Configuration.clean();
-        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = resources.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = resources.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = resources.tempSource().getAbsolutePath();
+        Configuration.modelSources = resources.input().getAbsolutePath();
+        Configuration.resourceSources = resources.input().getAbsolutePath();
+        Configuration.generatedSources = resources.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = resources.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();

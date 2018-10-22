@@ -359,11 +359,11 @@ public class Utils {
         Optional<ImportDeclaration> classImport = classUnit.getImports().stream().filter(i -> i.getNameAsString().endsWith("." + extendedClassName)).findFirst();
         String extendedClassPath;
         if (classImport.isPresent()) {
-            extendedClassPath = Configuration.MODEL_SOURCES + "/" + classImport.get().getNameAsString().replaceAll("\\.", "/");
+            extendedClassPath = Configuration.modelSources + "/" + classImport.get().getNameAsString().replaceAll("\\.", "/");
             extendedClassPath += ".java";
 
         } else {
-            extendedClassPath = Configuration.MODEL_SOURCES + "/" + classUnit.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", "/");
+            extendedClassPath = Configuration.modelSources + "/" + classUnit.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", "/");
             extendedClassPath += "/" + extendedClassName + ".java";
         }
         return getClazz(extendedClassPath);
@@ -401,11 +401,11 @@ public class Utils {
     }
 
     public static String getRootName(ClassOrInterfaceDeclaration rootClass) {
-        return rootClass.getName().toString().replace(Configuration.MODEL_SUFFIX, "");
+        return rootClass.getName().toString().replace(Configuration.modelSuffix, "");
     }
 
     public static boolean isRootResource(final String rootClassName, final String resourceName) {
-        final String expectedSingularResource = rootClassName + Configuration.RESOURCE_SUFFIX;
+        final String expectedSingularResource = rootClassName + Configuration.resourceSuffix;
         return expectedSingularResource.equals(resourceName);
     }
 
@@ -436,17 +436,17 @@ public class Utils {
     }
 
     public static List<File> getResources(final String modelClassName) {
-        final File apiSourcesDir = new File(Configuration.RESOURCE_SOURCES);
-        final File sourceRootDir = new File(Configuration.GENERATED_SOURCES);
-        List<File> src = Files.collect(apiSourcesDir, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java")
+        final File apiSourcesDir = new File(Configuration.resourceSources);
+        final File sourceRootDir = new File(Configuration.generatedSources);
+        List<File> src = Files.collect(apiSourcesDir, "(.*)" + Configuration.resourceSuffix + "\\.java")
                 .stream()
-                .filter(f -> f.getName().equals(modelClassName + Configuration.RESOURCE_SUFFIX + ".java") ||
-                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
+                .filter(f -> f.getName().equals(modelClassName + Configuration.resourceSuffix + ".java") ||
+                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.resourceSuffix + ".java"))
                 .collect(Collectors.toList());
-        List<File> generatedSources = Files.collect(sourceRootDir, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java")
+        List<File> generatedSources = Files.collect(sourceRootDir, "(.*)" + Configuration.resourceSuffix + "\\.java")
                 .stream()
-                .filter(f -> f.getName().equals(modelClassName + Configuration.RESOURCE_SUFFIX + ".java") ||
-                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
+                .filter(f -> f.getName().equals(modelClassName + Configuration.resourceSuffix + ".java") ||
+                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.resourceSuffix + ".java"))
                 .collect(Collectors.toList());
 
         return Stream.concat(src.stream(), generatedSources.stream())
@@ -455,8 +455,8 @@ public class Utils {
     }
 
     public static Map<String, String> getResources() {
-        final File srcFolder = new File(Configuration.RESOURCE_SOURCES);
-        final File generatedFolder = new File(Configuration.GENERATED_SOURCES);
+        final File srcFolder = new File(Configuration.resourceSources);
+        final File generatedFolder = new File(Configuration.generatedSources);
         List<File> src = Files.collect(srcFolder, "(.*)\\.java");
         List<File> generatedSources = Files.collect(generatedFolder, "(.*)\\.java");
 
@@ -484,17 +484,17 @@ public class Utils {
     }
 
     public static List<File> getModel() {
-        if (Configuration.MODEL_PACKAGE != null) {
+        if (Configuration.modelPackage != null) {
             final File apiSourcesDir =
                     new File(Configuration.getModelPath());
-            return Files.collect(apiSourcesDir, "(.*)" + Configuration.MODEL_SUFFIX + "\\.java");
+            return Files.collect(apiSourcesDir, "(.*)" + Configuration.modelSuffix + "\\.java");
         } else {
             return Collections.emptyList();
         }
     }
 
     public static List<File> getClient() {
-        final File srcFolder = new File(Configuration.CLIENT_SOURCES);
+        final File srcFolder = new File(Configuration.clientSources);
         return Files.collect(srcFolder, "(.*)Client" + "\\.java");
     }
 
@@ -604,7 +604,7 @@ public class Utils {
     }
 
     public static void save(String fileName, String pkg, String content) throws IOException {
-        Path path = Paths.get(Configuration.GENERATED_SOURCES + File.separator + transformPackageToPath(pkg));
+        Path path = Paths.get(Configuration.generatedSources + File.separator + transformPackageToPath(pkg));
 
         content = Stream.of(content)
                 .map(RemoveDuplicateImports::apply)
