@@ -47,6 +47,10 @@ import static org.tomitribe.inget.common.Utils.getClazz;
  */
 public class ImportAnnotations {
 
+    private ImportAnnotations() {
+
+    }
+
     public static String apply(final String source) {
         final CompilationUnit unit = JavaParser.parse(source);
         final ClassOrInterfaceDeclaration clazz = getClazz(unit);

@@ -38,7 +38,7 @@ import java.net.URL;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Arquillian.class)
-public class ExceptionHandlingTest extends Command{
+public class ExceptionHandlingTest extends Command {
     @Deployment
     public static WebArchive webApp() {
         return ShrinkWrap.create(WebArchive.class)

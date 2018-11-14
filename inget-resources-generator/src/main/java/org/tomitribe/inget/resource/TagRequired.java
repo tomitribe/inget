@@ -30,6 +30,10 @@ import static org.tomitribe.inget.common.Utils.getClazz;
  */
 public class TagRequired {
 
+    private TagRequired(){
+
+    }
+
     private static final String DEFAULT = "@Tag(name = \"Account\", description = \"This endpoint manages a single account.\")";
 
     public static String apply(String source, CompilationUnit rootClassUnit) {

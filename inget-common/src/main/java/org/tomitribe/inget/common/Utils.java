@@ -635,6 +635,9 @@ public class Utils {
 
     public static String getResponseImplementation(MethodDeclaration m) {
         final NormalAnnotationExpr apiResponses = Utils.getAnnotation(m, "ApiResponses");
+        if (apiResponses == null) {
+            return null;
+        }
         final MemberValuePair value = pairs(apiResponses).get("value");
         final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
         Optional<NormalAnnotationExpr> responseOptional = annotations.stream()
@@ -643,7 +646,11 @@ public class Utils {
         if (responseOptional.isPresent()) {
             NormalAnnotationExpr response = responseOptional.get();
             Map<String, MemberValuePair> responsePairs = pairs(response);
-            Expression content = responsePairs.get("content").getValue();
+            MemberValuePair contentPair = responsePairs.get("content");
+            if(contentPair == null){
+                return null;
+            }
+            Expression content = contentPair.getValue();
             Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
             NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
             Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);

@@ -32,6 +32,10 @@ import static org.tomitribe.inget.common.Utils.getClazz;
  */
 public class SortApiOperationFields {
 
+    private SortApiOperationFields(){
+
+    }
+
     public static String apply(final String source) {
         final CompilationUnit unit = JavaParser.parse(source);
         final ClassOrInterfaceDeclaration clazz = getClazz(unit);

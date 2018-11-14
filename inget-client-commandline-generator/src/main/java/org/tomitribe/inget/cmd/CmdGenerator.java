@@ -76,7 +76,11 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.tomitribe.inget.common.Utils.formatCamelCaseTo;
 
 public class CmdGenerator {
+
     private static final String BASE_OUTPUT_PACKAGE = Configuration.resourcePackage + ".cmd.base";
+
+    private CmdGenerator(){
+    }
 
     public static void execute() throws IOException {
         final List<File> sourceClients = Utils.getClient();
@@ -120,7 +124,7 @@ public class CmdGenerator {
         readValueConfigurationValueIfNotProvidedMethod(commandClass);
         CompilationUnit modifiedClassUnit = commandClass.findCompilationUnit().get();
         addImports(modifiedClassUnit);
-        String baseCmd = modifiedClassUnit.toString().replaceAll("%CMD_LINE_NAME%", Configuration.cmdLineName);
+        String baseCmd = modifiedClassUnit.toString().replaceAll("%cmdLineName%", Configuration.cmdLineName);
         Utils.save("DefaultCommand.java", BASE_OUTPUT_PACKAGE, baseCmd);
     }
 
@@ -613,7 +617,9 @@ public class CmdGenerator {
         }
     }
 
-    private static String readInstanceFields(final CompilationUnit rootClassUnit, final List<FieldDeclaration> fields, final String prefix, final String classFieldName, final ModelType modelType) {
+    private static String readInstanceFields(final CompilationUnit rootClassUnit,
+                                             final List<FieldDeclaration> fields, final String prefix,
+                                             final String classFieldName, final ModelType modelType) {
         return fields
                 .stream()
                 .filter(f -> !f.isStatic())
@@ -621,7 +627,9 @@ public class CmdGenerator {
                 .collect(Collectors.joining());
     }
 
-    private static String readFieldOrUnflattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field, final String prefix, final String classFieldName, final ModelType modelType) {
+    private static String readFieldOrUnflattenClass(final CompilationUnit rootClassUnit,
+                                                    final FieldDeclaration field, final String prefix,
+                                                    final String classFieldName, final ModelType modelType) {
         if (Utils.isWrapperOrPrimitiveOrDate(field)) {
             return readField(field, prefix, classFieldName, modelType);
         } else {
@@ -629,7 +637,9 @@ public class CmdGenerator {
         }
     }
 
-    private static String unFlattenClass(final CompilationUnit rootClassUnit, final FieldDeclaration field, final String prefix, final String classFieldName, final ModelType modelType) {
+    private static String unFlattenClass(final CompilationUnit rootClassUnit,
+                                         final FieldDeclaration field, final String prefix,
+                                         final String classFieldName, final ModelType modelType) {
         ResolvedReferenceTypeDeclaration resolvedType = null;
 
 
@@ -691,11 +701,15 @@ public class CmdGenerator {
                 String statements = "final " + resolvedType.getClassName() + " " + resolvedType.getClassName().toLowerCase() + " = new " + resolvedType.getClassName() + "();\n";
 
                 if (variable.getTypeAsString().contains("List<")) {
-                    statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded, resolvedType.getClassName().toLowerCase(), resolvedType.getClassName().toLowerCase(), ModelType.SETTER);
-                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(java.util.Arrays.asList(" + resolvedType.getClassName().toLowerCase() + "));\n";
+                    statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded,
+                            resolvedType.getClassName().toLowerCase(), resolvedType.getClassName().toLowerCase(), ModelType.SETTER);
+                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) +
+                            "(java.util.Arrays.asList(" + resolvedType.getClassName().toLowerCase() + "));\n";
                 } else {
-                    statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded, variable.getNameAsString(), variable.getNameAsString(), ModelType.SETTER);
-                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) + "(" + variable.getNameAsString() + ");\n";
+                    statements += readInstanceFields(rootClassUnit, fieldsToBeExpanded,
+                            variable.getNameAsString(), variable.getNameAsString(), ModelType.SETTER);
+                    statements += classFieldName + ".set" + WordUtils.capitalize(variable.getNameAsString()) +
+                            "(" + variable.getNameAsString() + ");\n";
                 }
                 return statements;
             }

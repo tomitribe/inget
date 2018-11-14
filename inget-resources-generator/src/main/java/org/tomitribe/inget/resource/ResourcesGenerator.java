@@ -39,6 +39,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ResourcesGenerator {
+
+    private ResourcesGenerator() {
+
+    }
+
     public static void execute() throws IOException {
         final List<File> files = Utils.getModel();
 
@@ -157,11 +162,11 @@ public class ResourcesGenerator {
 
         CompilationUnit modifiedUnit = JavaParser.parse(modified);
         ClassOrInterfaceDeclaration modifiedClazz = Utils.getClazz(modifiedUnit);
-        if(modifiedClazz.getMethods().size() > 0){
+        if (modifiedClazz.getMethods().size() > 0) {
             IO.copy(IO.read(modified), resource);
         } else {
-            if(resource.exists() && IO.slurp(resource)
-                    .contains("@Generated(\"org.tomitribe.inget.resource.ResourcesGenerator\")")){
+            if (resource.exists() && IO.slurp(resource)
+                    .contains("@Generated(\"org.tomitribe.inget.resource.ResourcesGenerator\")")) {
                 resource.delete();
             }
         }

@@ -28,9 +28,11 @@ import java.util.function.Consumer;
 
 import static org.tomitribe.inget.common.Utils.getClazz;
 
-/**
- */
 public class Add200Responses {
+
+    private Add200Responses() {
+
+    }
 
     public static String apply(final String source) {
         final CompilationUnit unit = JavaParser.parse(source);

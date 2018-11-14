@@ -33,9 +33,11 @@ import java.util.function.Consumer;
 import static org.tomitribe.inget.common.Utils.getClazz;
 import static org.tomitribe.inget.common.Utils.pairs;
 
-/**
- */
 public class CheckContentInResponses {
+
+    private CheckContentInResponses() {
+
+    }
 
     public static String apply(final String source, final CompilationUnit modelClassUnit, CompilationUnit resourceClassUnit) {
         final CompilationUnit unit = JavaParser.parse(source);

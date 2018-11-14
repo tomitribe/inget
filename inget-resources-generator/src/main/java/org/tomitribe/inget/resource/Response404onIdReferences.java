@@ -25,9 +25,11 @@ import org.tomitribe.inget.common.Utils;
 
 import static org.tomitribe.inget.common.Utils.getClazz;
 
-/**
- */
 public class Response404onIdReferences {
+
+    private Response404onIdReferences() {
+
+    }
 
     public static String apply(final String source) {
         final CompilationUnit unit = JavaParser.parse(source);

@@ -30,6 +30,10 @@ public class AddMethodSeparators {
 
     private static final String separator = " ----------------------------------------------------------------------------------------";
 
+    private AddMethodSeparators() {
+
+    }
+
     public static String apply(String slurp) {
         final CompilationUnit unit = JavaParser.parse(slurp);
         final ClassOrInterfaceDeclaration clazz = getClazz(unit);

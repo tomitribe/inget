@@ -35,7 +35,7 @@ public class MoviesService {
 
     public List<Movie> catalog;
 
-    public int id=0;
+    public int id = 0;
 
     public List<Movie> getCatalog() {
         return catalog;
@@ -56,7 +56,7 @@ public class MoviesService {
     }
 
 
-    public List<Movie> getMovies(){
+    public List<Movie> getMovies() {
         return catalog;
     }
 
@@ -67,7 +67,7 @@ public class MoviesService {
 
     public Movie find(Long id) {
         for (Movie movie : catalog) {
-            if(movie.getId() == id){
+            if (movie.getId() == id) {
                 return movie;
             }
         }
@@ -75,23 +75,32 @@ public class MoviesService {
     }
 
 
-    public void updateMovie(Long id, Movie newMovieData){
+    public void updateMovie(Long id, Movie newMovieData) {
         Movie oldMovieData = find(id);
-        if (newMovieData.getTitle() != null){ oldMovieData.setTitle(newMovieData.getTitle());}
-        if (newMovieData.getDirector() != null){ oldMovieData.setDirector(newMovieData.getDirector());}
-        if (newMovieData.getYear() != -1){ oldMovieData.setYear(newMovieData.getYear());}
-        if (newMovieData.getGenre() != null){ oldMovieData.setGenre(newMovieData.getGenre());}
-        if (newMovieData.getRating() != -1){ oldMovieData.setRating(newMovieData.getRating());}
+        if (newMovieData.getTitle() != null) {
+            oldMovieData.setTitle(newMovieData.getTitle());
+        }
+        if (newMovieData.getDirector() != null) {
+            oldMovieData.setDirector(newMovieData.getDirector());
+        }
+        if (newMovieData.getYear() != -1) {
+            oldMovieData.setYear(newMovieData.getYear());
+        }
+        if (newMovieData.getGenre() != null) {
+            oldMovieData.setGenre(newMovieData.getGenre());
+        }
+        if (newMovieData.getRating() != -1) {
+            oldMovieData.setRating(newMovieData.getRating());
+        }
 
     }
 
 
-
-    public int count(){
+    public int count() {
         return catalog.size();
     }
 
-    public void clear(){
+    public void clear() {
         catalog.clear();
     }
 
@@ -99,16 +108,16 @@ public class MoviesService {
         final Faker faker = new Faker(Locale.ENGLISH);
         final Random random = new Random(System.nanoTime());
 
-        for (int i = 0 ; i < (5 + random.nextInt(20)) ; i++) {
+        for (int i = 0; i < (5 + random.nextInt(20)); i++) {
 
             addMovie(
-                new Movie(
-                        faker.book().title(),
-                        faker.book().author(),
-                        faker.book().genre(),
-                        random.nextInt(10),
-                        1960 + random.nextInt(50)
-                )
+                    new Movie(
+                            faker.book().title(),
+                            faker.book().author(),
+                            faker.book().genre(),
+                            random.nextInt(10),
+                            1960 + random.nextInt(50)
+                    )
             );
         }
 

@@ -33,8 +33,6 @@ import static org.tomitribe.inget.common.Utils.getClazz;
 import static org.tomitribe.inget.common.Utils.isMethodReadAll;
 import static org.tomitribe.inget.common.Utils.toPlural;
 
-/**
- */
 public class OperationRequired {
 
     private static final Map<String, String> methods = new HashMap<>();
@@ -42,6 +40,10 @@ public class OperationRequired {
 
     static {
         methods.put("readAll", "@Operation(summary = \"Read all accounts.\")");
+    }
+
+    private OperationRequired(){
+
     }
 
     public static String apply(String source, CompilationUnit rootClassUnit) {

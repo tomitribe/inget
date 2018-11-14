@@ -29,9 +29,11 @@ import java.util.function.Consumer;
 
 import static org.tomitribe.inget.common.Utils.getClazz;
 
-/**
- */
 public class Add201CreateResponses {
+
+    private Add201CreateResponses() {
+
+    }
 
     public static String apply(final String source, CompilationUnit rootClassUnit) {
         final CompilationUnit unit = JavaParser.parse(source);
