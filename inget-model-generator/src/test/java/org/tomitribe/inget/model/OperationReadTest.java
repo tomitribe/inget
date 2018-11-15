@@ -8,11 +8,13 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
  */
 package org.tomitribe.inget.model;
 
@@ -61,12 +63,12 @@ public class OperationReadTest {
                 "}\n");
 
         Configuration.clean();
-        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = resources.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = resources.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = resources.tempSource().getAbsolutePath();
+        Configuration.modelSources = resources.input().getAbsolutePath();
+        Configuration.resourceSources = resources.input().getAbsolutePath();
+        Configuration.generatedSources = resources.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = resources.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();
@@ -116,12 +118,12 @@ public class OperationReadTest {
                 "}\n");
 
         Configuration.clean();
-        Configuration.MODEL_SOURCES = resources.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = resources.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = resources.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = resources.tempSource().getAbsolutePath();
+        Configuration.modelSources = resources.input().getAbsolutePath();
+        Configuration.resourceSources = resources.input().getAbsolutePath();
+        Configuration.generatedSources = resources.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = resources.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();

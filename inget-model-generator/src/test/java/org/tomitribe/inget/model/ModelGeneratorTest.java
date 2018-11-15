@@ -8,11 +8,13 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
  */
 package org.tomitribe.inget.model;
 
@@ -28,14 +30,14 @@ public class ModelGeneratorTest {
     public void testExecute() throws Exception {
         final Resources movies = Resources.name("movies");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.model";
-        Configuration.RESOURCE_PACKAGE = null;
-        Configuration.CLIENT_NAME = null;
-        Configuration.RESOURCE_SUFFIX = null;
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.model";
+        Configuration.resourcePackage = null;
+        Configuration.clientName = null;
+        Configuration.resourceSuffix = null;
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();
@@ -48,15 +50,15 @@ public class ModelGeneratorTest {
     public void testCustomPackage() throws Exception {
         final Resources movies = Resources.name("custom-package");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = null;
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
-        Configuration.RESOURCE_PACKAGE = null;
-        Configuration.CLIENT_NAME = null;
-        Configuration.RESOURCE_SUFFIX = null;
-        Configuration.MODEL_SUFFIX = "Model";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.resourceSources = null;
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.dao";
+        Configuration.resourcePackage = null;
+        Configuration.clientName = null;
+        Configuration.resourceSuffix = null;
+        Configuration.modelSuffix = "Model";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();
@@ -69,15 +71,15 @@ public class ModelGeneratorTest {
     public void testCustomSuffix() throws Exception {
         final Resources movies = Resources.name("custom-suffix");
 
-        Configuration.MODEL_SOURCES = movies.input().getAbsolutePath();
-        Configuration.RESOURCE_SOURCES = null;
-        Configuration.GENERATED_SOURCES = movies.actual().getAbsolutePath();
-        Configuration.MODEL_PACKAGE = "io.superbiz.video.dao";
-        Configuration.RESOURCE_PACKAGE = null;
-        Configuration.CLIENT_NAME = null;
-        Configuration.RESOURCE_SUFFIX = null;
-        Configuration.MODEL_SUFFIX = "Dao";
-        Configuration.TEMP_SOURCE = movies.tempSource().getAbsolutePath();
+        Configuration.modelSources = movies.input().getAbsolutePath();
+        Configuration.resourceSources = null;
+        Configuration.generatedSources = movies.actual().getAbsolutePath();
+        Configuration.modelPackage = "io.superbiz.video.dao";
+        Configuration.resourcePackage = null;
+        Configuration.clientName = null;
+        Configuration.resourceSuffix = null;
+        Configuration.modelSuffix = "Dao";
+        Configuration.tempSource = movies.tempSource().getAbsolutePath();
 
         // do the magic
         ModelGenerator.execute();

@@ -1,11 +1,20 @@
 /*
- * Tomitribe Confidential
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Copyright Tomitribe Corporation. 2018
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * The source code for this program is not published or otherwise divested
- * of its trade secrets, irrespective of what has been deposited with the
- * U.S. Copyright Office.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
  */
 package org.tomitribe.inget;
 
@@ -87,29 +96,29 @@ public class MainGenerator extends AbstractMojo {
         Set<Artifact> artifacts = project.getArtifacts();
         final String generatedSources = project.getBuild().getDirectory() + File.separator + "generated-sources";
         project.addCompileSourceRoot(generatedSources);
-        Configuration.MODEL_SOURCES = project.getBuild().getSourceDirectory();
-        Configuration.RESOURCE_SOURCES = project.getBuild().getSourceDirectory();
-        Configuration.GENERATED_SOURCES = generatedSources;
-        Configuration.MODEL_PACKAGE = modelPackage;
-        Configuration.RESOURCE_PACKAGE = resourcePackage;
-        Configuration.CLIENT_NAME = clientName;
-        Configuration.RESOURCE_SUFFIX = resourceSuffix;
-        Configuration.MODEL_SUFFIX = modelSuffix;
-        Configuration.TEMP_SOURCE = project.getBuild().getDirectory() + File.separator + "temp-source";
+        Configuration.modelSources = project.getBuild().getSourceDirectory();
+        Configuration.resourceSources = project.getBuild().getSourceDirectory();
+        Configuration.generatedSources = generatedSources;
+        Configuration.modelPackage = modelPackage;
+        Configuration.resourcePackage = resourcePackage;
+        Configuration.clientName = clientName;
+        Configuration.resourceSuffix = resourceSuffix;
+        Configuration.modelSuffix = modelSuffix;
+        Configuration.tempSource = project.getBuild().getDirectory() + File.separator + "temp-source";
 
         if (cmdLineName != null) {
-            Configuration.CMD_LINE_NAME = cmdLineName;
+            Configuration.cmdLineName = cmdLineName;
         } else {
-            Configuration.CMD_LINE_NAME = project.getArtifactId();
+            Configuration.cmdLineName = project.getArtifactId();
         }
 
         if (authentication != null) {
             if (authentication.equalsIgnoreCase(Authentication.BASIC.name())) {
-                Configuration.AUTHENTICATION = Authentication.BASIC;
+                Configuration.authentication = Authentication.BASIC;
             }
 
             if (authentication.equalsIgnoreCase(Authentication.SIGNATURE.name())) {
-                Configuration.AUTHENTICATION = Authentication.SIGNATURE;
+                Configuration.authentication = Authentication.SIGNATURE;
             }
         }
 
@@ -126,13 +135,13 @@ public class MainGenerator extends AbstractMojo {
                 getLog().info("Started Client Code Generation.");
                 ClientGenerator.execute();
                 getLog().info("Finished Client Code Generation.");
-                Configuration.CLIENT_SOURCES = Configuration.GENERATED_SOURCES;
+                Configuration.clientSources = Configuration.generatedSources;
             }
 
             if (generateCli) {
                 boolean clientExistsInCurrentProject = new File(Configuration.getClientPath()).exists();
                 if (clientExistsInCurrentProject) {
-                    Configuration.CLIENT_SOURCES = Configuration.getClientPath();
+                    Configuration.clientSources = Configuration.getClientPath();
                 } else {
                     List<Artifact> clientDependencies = artifacts.stream()
                             .filter(a -> hasClient(a.getFile()))
@@ -144,10 +153,10 @@ public class MainGenerator extends AbstractMojo {
                     }
 
                     clientDependencies.forEach(m -> extractJavaFiles(m.getFile()));
-                    Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
-                    Configuration.CLIENT_SOURCES = Configuration.TEMP_SOURCE;
+                    Configuration.resourceSources = Configuration.tempSource;
+                    Configuration.clientSources = Configuration.tempSource;
                 }
-                Configuration.CMD_PACKAGE = Configuration.RESOURCE_PACKAGE + ".cmd";
+                Configuration.cmdPackage = Configuration.resourcePackage + ".cmd";
                 getLog().info("Started Command Code Generation.");
                 CmdGenerator.execute();
                 getLog().info("Finished Command Code Generation.");
@@ -162,7 +171,7 @@ public class MainGenerator extends AbstractMojo {
             requireModelPackage();
 
             if (resourcePackage == null) {
-                Configuration.RESOURCE_PACKAGE = "org.tomitribe.resources";
+                Configuration.resourcePackage = "org.tomitribe.resources";
             }
 
             File resourceFolder = new File(Configuration.getResourcePath());
@@ -174,15 +183,15 @@ public class MainGenerator extends AbstractMojo {
             getLog().info("Started Resource Code Generation.");
             ResourcesGenerator.execute();
             getLog().info("Finished Resource Code Generation.");
-            Configuration.RESOURCE_SOURCES = Configuration.GENERATED_SOURCES;
+            Configuration.resourceSources = Configuration.generatedSources;
         } else {
             if (resourcePackage != null) {
                 List<String> compileSourceRoots = project.getCompileSourceRoots();
                 if (compileSourceRoots != null) {
                     for (String source : compileSourceRoots) {
-                        File folder = new File(source, Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE));
+                        File folder = new File(source, Utils.transformPackageToPath(Configuration.resourcePackage));
                         if (folder.exists()) {
-                            Configuration.RESOURCE_SOURCES = source;
+                            Configuration.resourceSources = source;
                             return;
                         }
                     }
@@ -197,11 +206,11 @@ public class MainGenerator extends AbstractMojo {
                                     "this project or add a jar with the .java files for the resources.");
                 } else {
                     resourceDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
-                    Configuration.RESOURCE_SOURCES = Configuration.TEMP_SOURCE;
+                    Configuration.resourceSources = Configuration.tempSource;
                 }
             }
         }
-        Configuration.CLIENT_SOURCES = Configuration.RESOURCE_SOURCES;
+        Configuration.clientSources = Configuration.resourceSources;
     }
 
     private void generateModel(Set<Artifact> artifacts) throws IOException, MojoExecutionException {
@@ -221,9 +230,9 @@ public class MainGenerator extends AbstractMojo {
                 List<String> compileSourceRoots = project.getCompileSourceRoots();
                 if (compileSourceRoots != null) {
                     for (String source : compileSourceRoots) {
-                        File folder = new File(source, Utils.transformPackageToPath(Configuration.MODEL_PACKAGE));
+                        File folder = new File(source, Utils.transformPackageToPath(Configuration.modelPackage));
                         if (folder.exists()) {
-                            Configuration.MODEL_SOURCES = source;
+                            Configuration.modelSources = source;
                             return;
                         }
                     }
@@ -239,7 +248,7 @@ public class MainGenerator extends AbstractMojo {
                 }
 
                 modelDependencies.stream().forEach(m -> extractJavaFiles(m.getFile()));
-                Configuration.MODEL_SOURCES = Configuration.TEMP_SOURCE;
+                Configuration.modelSources = Configuration.tempSource;
             }
         }
     }
@@ -250,7 +259,7 @@ public class MainGenerator extends AbstractMojo {
             Enumeration<? extends JarEntry> enumeration = jar.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = enumeration.nextElement();
-                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.MODEL_PACKAGE) + File.separator)) {
+                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.modelPackage) + File.separator)) {
                     return true;
                 }
             }
@@ -267,7 +276,7 @@ public class MainGenerator extends AbstractMojo {
             Enumeration<? extends JarEntry> enumeration = jar.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = enumeration.nextElement();
-                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE) + File.separator)) {
+                if (zipEntry.getName().equals(Utils.transformPackageToPath(Configuration.resourcePackage) + File.separator)) {
                     return true;
                 }
             }
@@ -284,7 +293,7 @@ public class MainGenerator extends AbstractMojo {
             Enumeration<? extends JarEntry> enumeration = jar.entries();
             while (enumeration.hasMoreElements()) {
                 ZipEntry zipEntry = enumeration.nextElement();
-                String pkg = Utils.transformPackageToPath(Configuration.RESOURCE_PACKAGE) + File.separator + "client";
+                String pkg = Utils.transformPackageToPath(Configuration.resourcePackage) + File.separator + "client";
                 if (zipEntry.getName().equals(pkg) || zipEntry.getName().equals(pkg + File.separator)) {
                     return true;
                 }
@@ -304,7 +313,7 @@ public class MainGenerator extends AbstractMojo {
                 ZipEntry zipEntry = enumeration.nextElement();
                 if (zipEntry.getName().endsWith(".java")) {
                     InputStream is = jar.getInputStream(zipEntry);
-                    File generatedSources = new File(Configuration.TEMP_SOURCE);
+                    File generatedSources = new File(Configuration.tempSource);
                     java.io.File output = new java.io.File(generatedSources, java.io.File.separator + zipEntry.getName());
                     if (!output.getParentFile().exists()) {
                         output.getParentFile().mkdirs();

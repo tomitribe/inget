@@ -13,10 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *
  */
 package org.tomitribe.inget.test;
-
-import org.tomitribe.util.JarLocation;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -24,26 +24,24 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.tomitribe.util.JarLocation;
 
-
-/**
- * @version $Rev$ $Date$
- */
 public class Urls {
-    private static final Map<String, MessageDigest> DIGESTS = new HashMap<String, MessageDigest>();
+
     private static final boolean IS_WINDOWS = System.getProperty("os.name", "unknown").toLowerCase(Locale.ENGLISH).startsWith("win");
+
+    private Urls() {
+        // no-op
+    }
 
     public static File path(final String... parts) {
         File dir = null;

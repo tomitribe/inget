@@ -1,12 +1,19 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   Tomitribe Confidential
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Copyright Tomitribe Corporation. 2018
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  The source code for this program is not published or otherwise divested
- *  of its trade secrets, irrespective of what has been deposited with the
- *  U.S. Copyright Office.
  *
  */
 
@@ -38,6 +45,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ModelClassGenerator {
+
+    private ModelClassGenerator() {
+        // no-op
+    }
 
     static CompilationUnit createClass(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
                                        String rootClassName, String operation, String classPrefix) throws IOException {
@@ -76,7 +87,10 @@ public class ModelClassGenerator {
         return newClassCompilationUnit;
     }
 
-    private static void handleExtendedClasses(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass, String operation, ClassOrInterfaceDeclaration newClass, String prefix) throws IOException {
+    private static void handleExtendedClasses(CompilationUnit rootClassUnit, ClassOrInterfaceDeclaration rootClass,
+                                              String operation, ClassOrInterfaceDeclaration newClass, String prefix)
+            throws IOException {
+
         NodeList<ClassOrInterfaceType> extendedTypes = rootClass.getExtendedTypes();
         while (extendedTypes.size() > 0) {
             for (ClassOrInterfaceType et : extendedTypes) {
@@ -92,7 +106,9 @@ public class ModelClassGenerator {
         }
     }
 
-    private static void handleField(String operation, CompilationUnit unit, ClassOrInterfaceDeclaration newClass, FieldDeclaration f, String prefix) {
+    private static void handleField(String operation, CompilationUnit unit, ClassOrInterfaceDeclaration newClass,
+                                    FieldDeclaration f, String prefix) {
+
         FieldDeclaration newField = f.clone();
         if (!newField.getAnnotationByName("Model").isPresent() ||
                 !Utils.hasOperations(newField) || Utils.isOperationPresent(newField, operation)) {
@@ -109,17 +125,17 @@ public class ModelClassGenerator {
 
     private static void handleExpandableField(FieldDeclaration field, String prefix, CompilationUnit unit) {
         VariableDeclarator variable = field.getVariables().stream().findFirst().get();
-        boolean isExpandable = variable.getTypeAsString().contains(Configuration.MODEL_SUFFIX);
+        boolean isExpandable = variable.getTypeAsString().contains(Configuration.modelSuffix);
         if (isExpandable) {
             String end = variable.getTypeAsString();
             String entityBefore = variable.getTypeAsString();
             String entityAfter;
             if (variable.getTypeAsString().contains("<")) {
                 entityBefore = end.substring(end.indexOf("<") + 1, end.indexOf(">"));
-                entityAfter = prefix + entityBefore.replace(Configuration.MODEL_SUFFIX, "");
+                entityAfter = prefix + entityBefore.replace(Configuration.modelSuffix, "");
                 end = end.replace(entityBefore, entityAfter);
             } else {
-                end = prefix + end.replace(Configuration.MODEL_SUFFIX, "");
+                end = prefix + end.replace(Configuration.modelSuffix, "");
                 entityAfter = end;
             }
             variable.setType(end);
@@ -166,7 +182,7 @@ public class ModelClassGenerator {
 
         Utils.addLicense(rootClassUnit, newClassCompilationUnit);
         if (importDefault) {
-            newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
+            newClassCompilationUnit.addImport(Configuration.modelPackage + ".base.filter.DefaultFilter");
         }
         return newClassCompilationUnit;
     }
@@ -195,7 +211,7 @@ public class ModelClassGenerator {
         filterClassCompilationUnit.addClass(filterClassName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration filterClass = filterClassCompilationUnit.getClassByName(filterClassName).get();
         filterClass.addExtendedType("DefaultFilter");
-        filterClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.filter.DefaultFilter");
+        filterClassCompilationUnit.addImport(Configuration.modelPackage + ".base.filter.DefaultFilter");
         filterClass.addMarkerAnnotation("Builder");
         filterClassCompilationUnit.addImport(ImportManager.getImport("Builder"));
         filterClass.addMarkerAnnotation("ToString");
@@ -267,7 +283,7 @@ public class ModelClassGenerator {
         fieldSchema.addPair("description", "\"The " + paramName + " that failed in the bulk operation.\"");
         FieldDeclaration fieldDeclaration = newClass.addField(new TypeParameter("List<Failure>"), paramName, Modifier.PRIVATE);
         fieldDeclaration.addAnnotation(fieldSchema);
-        newClassCompilationUnit.addImport(Configuration.MODEL_PACKAGE + ".base.bulk.Failure");
+        newClassCompilationUnit.addImport(Configuration.modelPackage + ".base.bulk.Failure");
         newClassCompilationUnit.addImport(ImportManager.getImport("List"));
 
         return newClassCompilationUnit;
@@ -325,7 +341,7 @@ public class ModelClassGenerator {
     }
 
     public static void createBaseClasses() throws IOException {
-        String outputBasePackage = Configuration.MODEL_PACKAGE + ".base";
+        String outputBasePackage = Configuration.modelPackage + ".base";
         createFailureClass(outputBasePackage);
         createDefaultFilterClass(outputBasePackage);
     }

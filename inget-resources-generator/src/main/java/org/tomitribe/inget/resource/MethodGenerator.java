@@ -1,12 +1,19 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   Tomitribe Confidential
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Copyright Tomitribe Corporation. 2018
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  The source code for this program is not published or otherwise divested
- *  of its trade secrets, irrespective of what has been deposited with the
- *  U.S. Copyright Office.
  *
  */
 package org.tomitribe.inget.resource;
@@ -41,15 +48,18 @@ public class MethodGenerator {
 
     private static final String CREATE = "Create";
     private static final String UPDATE = "Update";
-    private static String ID_PARAM = "id";
+    private static String idParam = "id";
 
+    private MethodGenerator() {
+
+    }
 
     public static String apply(CompilationUnit resourceUnit, CompilationUnit rootClassUnit) {
         ClassOrInterfaceDeclaration resourceClass = Utils.getClazz(resourceUnit);
         ClassOrInterfaceDeclaration rootClass = Utils.getClazz(rootClassUnit);
         final String rootClassName = Utils.getRootName(rootClass);
         final String rootClassPackage = rootClassUnit.getPackageDeclaration().get().getName().toString();
-        ID_PARAM = Utils.getIdName(rootClass);
+        idParam = Utils.getIdName(rootClass);
 
         removeGeneratedMethods(resourceClass);
 //        removeCrudAndBulkMethods(resourceClass);
@@ -57,7 +67,9 @@ public class MethodGenerator {
         return resourceUnit.toString();
     }
 
-    private static void generateMethods(CompilationUnit resourceUnit, ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass, String rootClassName, String rootClassPackage) {
+    private static void generateMethods(CompilationUnit resourceUnit,
+                                        ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass,
+                                        String rootClassName, String rootClassPackage) {
         List<String> classOperations = Utils.getClassOperations(rootClass);
         if (isRootResource(rootClassName, resourceClass.getName().toString())) {
             createRootResourceMethods(resourceUnit, resourceClass, rootClass, rootClassName, rootClassPackage, classOperations);
@@ -67,7 +79,9 @@ public class MethodGenerator {
         }
     }
 
-    private static void createListResourceMethods(CompilationUnit resourceUnit, ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass, String rootClassName, String rootClassPackage, List<String> classOperations) {
+    private static void createListResourceMethods(CompilationUnit resourceUnit,
+                                                  ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass, String rootClassName,
+                                                  String rootClassPackage, List<String> classOperations) {
         if (classOperations == null || classOperations.contains(Operation.BULK_CREATE)) {
             bulkCreate(rootClassName, rootClassPackage, resourceClass, resourceUnit);
         }
@@ -85,7 +99,9 @@ public class MethodGenerator {
         }
     }
 
-    private static void createRootResourceMethods(CompilationUnit resourceUnit, ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass, String rootClassName, String rootClassPackage, List<String> classOperations) {
+    private static void createRootResourceMethods(CompilationUnit resourceUnit,
+                                                  ClassOrInterfaceDeclaration resourceClass, ClassOrInterfaceDeclaration rootClass,
+                                                  String rootClassName, String rootClassPackage, List<String> classOperations) {
         if (classOperations == null || classOperations.contains(Operation.CREATE)) {
             create(rootClassName, rootClassPackage, resourceClass, resourceUnit);
         }
@@ -117,9 +133,9 @@ public class MethodGenerator {
         resourceClass.getMethods().forEach(method -> {
             boolean remove =
                     Utils.isMethodCreate(method) ||
-                            Utils.isMethodUpdate(method, ID_PARAM) ||
-                            Utils.isMethodDelete(method, ID_PARAM) ||
-                            Utils.isMethodRead(method, ID_PARAM) ||
+                            Utils.isMethodUpdate(method, idParam) ||
+                            Utils.isMethodDelete(method, idParam) ||
+                            Utils.isMethodRead(method, idParam) ||
                             Utils.isMethodBulkCreate(method) ||
                             Utils.isMethodBulkUpdate(method) ||
                             Utils.isMethodBulkDelete(method);
@@ -144,7 +160,7 @@ public class MethodGenerator {
             unit.addImport(getImport("Path"));
             NormalAnnotationExpr pathAnnotation = new NormalAnnotationExpr();
             pathAnnotation.setName("Path");
-            pathAnnotation.addPair("value", "\"{" + ID_PARAM + "}\"");
+            pathAnnotation.addPair("value", "\"{" + idParam + "}\"");
             method.addAnnotation(pathAnnotation);
         }
 
@@ -233,7 +249,7 @@ public class MethodGenerator {
 
     private static void update(String rootClassName, ClassOrInterfaceDeclaration rootClass, String rootClassPackage, ClassOrInterfaceDeclaration clazz, CompilationUnit unit) {
         boolean isMethodPresent = clazz.getMethods().stream()
-                .filter(m -> Utils.isMethodUpdate(m, ID_PARAM))
+                .filter(m -> Utils.isMethodUpdate(m, idParam))
                 .findFirst()
                 .isPresent();
         if (isMethodPresent) {
@@ -241,17 +257,17 @@ public class MethodGenerator {
         }
 
         final String paramType = UPDATE + rootClassName;
-        final String idDescription = "The " + rootClassName + " " + ID_PARAM;
+        final String idDescription = "The " + rootClassName + " " + idParam;
         final String idExample = Utils.getExample(getId(rootClass));
-        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Update " + rootClassName + " by " + ID_PARAM + ".\")");
+        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Update " + rootClassName + " by " + idParam + ".\")");
         final MethodDeclaration baseMethod = createBaseMethod(UPDATE.toLowerCase(), "PUT", true, clazz, unit, operation);
-        createParameter("String", ID_PARAM, true, null, idDescription, idExample, baseMethod, unit);
+        createParameter("String", idParam, true, null, idDescription, idExample, baseMethod, unit);
         final String requestBodyDescription = "The updated data for the existing " + rootClassName;
         createRequestBody(paramType, rootClassName.toLowerCase(), rootClassPackage, requestBodyDescription, null, baseMethod, unit);
     }
 
     private static FieldDeclaration getId(ClassOrInterfaceDeclaration rootClass) {
-        Optional<FieldDeclaration> id = rootClass.getFieldByName(ID_PARAM);
+        Optional<FieldDeclaration> id = rootClass.getFieldByName(idParam);
         if (!id.isPresent()) {
             throw new GeneratorException("Class " + rootClass.getNameAsString() + ": Id was not found. Add to a field id = true in @Model.");
         }
@@ -260,35 +276,35 @@ public class MethodGenerator {
 
     private static void read(String rootClassName, ClassOrInterfaceDeclaration rootClass, ClassOrInterfaceDeclaration clazz, CompilationUnit unit) {
         boolean isMethodPresent = clazz.getMethods().stream()
-                .filter(m -> Utils.isMethodRead(m, ID_PARAM))
+                .filter(m -> Utils.isMethodRead(m, idParam))
                 .findFirst()
                 .isPresent();
         if (isMethodPresent) {
             return;
         }
 
-        final String description = "The " + rootClassName + " " + ID_PARAM;
+        final String description = "The " + rootClassName + " " + idParam;
         final String example = Utils.getExample(getId(rootClass));
-        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Read " + rootClassName + " by " + ID_PARAM + ".\")");
+        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Read " + rootClassName + " by " + idParam + ".\")");
         final MethodDeclaration baseMethod = createBaseMethod("read", "GET", true, clazz, unit, operation);
-        createParameter("String", ID_PARAM, true, null, description, example, baseMethod, unit);
+        createParameter("String", idParam, true, null, description, example, baseMethod, unit);
 
     }
 
     private static void delete(String rootClassName, ClassOrInterfaceDeclaration rootClass, ClassOrInterfaceDeclaration clazz, CompilationUnit unit) {
         boolean isMethodPresent = clazz.getMethods().stream()
-                .filter(m -> Utils.isMethodDelete(m, ID_PARAM))
+                .filter(m -> Utils.isMethodDelete(m, idParam))
                 .findFirst()
                 .isPresent();
         if (isMethodPresent) {
             return;
         }
 
-        final String idDescription = "The " + rootClassName + " " + ID_PARAM;
+        final String idDescription = "The " + rootClassName + " " + idParam;
         final String example = Utils.getExample(getId(rootClass));
-        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Delete by " + ID_PARAM + ".\")");
+        AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Delete by " + idParam + ".\")");
         final MethodDeclaration baseMethod = createBaseMethod("delete", "DELETE", true, clazz, unit, operation);
-        createParameter("String", ID_PARAM, true, null, idDescription, example, baseMethod, unit);
+        createParameter("String", idParam, true, null, idDescription, example, baseMethod, unit);
     }
 
     private static void bulkDelete(String rootClassName, ClassOrInterfaceDeclaration rootClass, ClassOrInterfaceDeclaration clazz, CompilationUnit unit) {
@@ -296,9 +312,9 @@ public class MethodGenerator {
             return;
         }
 
-        final String paramName = Utils.toPlural(ID_PARAM);
+        final String paramName = Utils.toPlural(idParam);
         final String idsDescription = "Set of " + rootClassName + " " + paramName + " to delete";
-        final String idExample = Utils.getExample(rootClass.getFieldByName(ID_PARAM).get());
+        final String idExample = Utils.getExample(rootClass.getFieldByName(idParam).get());
         AnnotationExpr operation = JavaParser.parseAnnotation("@Operation(summary = \"Bulk delete " + Utils.toPlural(rootClassName).toLowerCase() + ".\")");
         final MethodDeclaration baseMethod = createBaseMethod("bulkDelete", "DELETE", false, clazz, unit, operation);
         createParameter("List<String>", paramName, false, Arrays.asList("java.util.List"), idsDescription, idExample, baseMethod, unit);
@@ -347,7 +363,7 @@ public class MethodGenerator {
         String modelPackage = rootClass.findCompilationUnit().get().getPackageDeclaration().get().getNameAsString();
 
         File filterFile = new File(
-                Configuration.MODEL_SOURCES + File.separator +
+                Configuration.modelSources + File.separator +
                         Utils.transformPackageToPath(modelPackage) + File.separator + rootClassName + "Filter.java");
 
         if (filterFile.exists()) {

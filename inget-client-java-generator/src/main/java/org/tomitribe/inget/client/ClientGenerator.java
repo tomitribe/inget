@@ -1,12 +1,19 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   Tomitribe Confidential
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Copyright Tomitribe Corporation. 2018
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  The source code for this program is not published or otherwise divested
- *  of its trade secrets, irrespective of what has been deposited with the
- *  U.S. Copyright Office.
  *
  */
 
@@ -51,8 +58,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientGenerator {
+
+    private ClientGenerator() {
+        // no-op
+    }
+
     public static void execute() throws IOException {
-        createClientExceptions(Configuration.RESOURCE_PACKAGE + ".client.base");
+        createClientExceptions(Configuration.resourcePackage + ".client.base");
         CompilationUnit genericClientUnit = createResourceClient();
         ClassOrInterfaceDeclaration genericClientClass = Utils.getClazz(genericClientUnit);
         genericClientUnit.addImport(ImportManager.getImport("RestClientBuilder"));
@@ -66,7 +78,7 @@ public class ClientGenerator {
         cBuilder.append("builder = RestClientBuilder.newBuilder()" +
                 ".baseUrl(new java.net.URL(config.getUrl()))\n" +
                 ".register(JohnzonProvider.class)");
-        cBuilder.append(".register(" + Configuration.CLIENT_NAME + "ExceptionMapper.class);");
+        cBuilder.append(".register(" + Configuration.clientName + "ExceptionMapper.class);");
         cBuilder.append(" } catch (java.net.MalformedURLException e) {");
         cBuilder.append("throw new javax.ws.rs.WebApplicationException(\"URL is not valid \" + e.getMessage());");
         cBuilder.append("}");
@@ -82,7 +94,7 @@ public class ClientGenerator {
             Map.Entry<String, String> resource = it.next();
             generateClient(resource.getKey(), resource.getValue(), genericClientClass);
         }
-        save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.CLIENT_NAME, genericClientUnit);
+        save(genericClientUnit.getPackageDeclaration().get().getNameAsString(), Configuration.clientName, genericClientUnit);
     }
 
     private static void addCxfLogInterceptor(ClassOrInterfaceDeclaration clazz) {
@@ -95,14 +107,14 @@ public class ClientGenerator {
     private static CompilationUnit createResourceClient() throws IOException {
         final String outputBasePackage = Configuration.getClientPackage();
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(outputBasePackage);
-        newClassCompilationUnit.addClass(Configuration.CLIENT_NAME, Modifier.PUBLIC);
-        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(Configuration.CLIENT_NAME).get();
+        newClassCompilationUnit.addClass(Configuration.clientName, Modifier.PUBLIC);
+        final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(Configuration.clientName).get();
 
         ConstructorDeclaration constructor = newClass.addConstructor(Modifier.PUBLIC);
         constructor.addParameter("ClientConfiguration", "config");
         newClassCompilationUnit.addImport(ImportManager.getImport("ClientConfiguration"));
         newClassCompilationUnit.addImport(
-                Configuration.RESOURCE_PACKAGE + ".client.base." + Configuration.CLIENT_NAME + "ExceptionMapper");
+                Configuration.resourcePackage + ".client.base." + Configuration.clientName + "ExceptionMapper");
         Utils.addGeneratedAnnotation(newClassCompilationUnit, newClass, null, ClientGenerator.class);
 
         return newClassCompilationUnit;
@@ -110,12 +122,12 @@ public class ClientGenerator {
 
     private static void createClientExceptions(final String outputBasePackage) throws IOException {
         final CompilationUnit clientException = new CompilationUnit(outputBasePackage);
-        clientException.addClass(Configuration.CLIENT_NAME + "Exception", Modifier.PUBLIC);
+        clientException.addClass(Configuration.clientName + "Exception", Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration clientExceptionClass =
-                clientException.getClassByName(Configuration.CLIENT_NAME + "Exception").get();
+                clientException.getClassByName(Configuration.clientName + "Exception").get();
         clientExceptionClass.addExtendedType(RuntimeException.class);
         Utils.addGeneratedAnnotation(clientException, Utils.getClazz(clientException), null, ClientGenerator.class);
-        save(outputBasePackage, Configuration.CLIENT_NAME + "Exception", clientException);
+        save(outputBasePackage, Configuration.clientName + "Exception", clientException);
 
         final CompilationUnit entityNotFoundException = new CompilationUnit(outputBasePackage);
         entityNotFoundException.addClass("EntityNotFoundException", Modifier.PUBLIC);
@@ -126,9 +138,9 @@ public class ClientGenerator {
         save(outputBasePackage, "EntityNotFoundException", entityNotFoundException);
 
         final CompilationUnit exceptionMapper = new CompilationUnit(outputBasePackage);
-        exceptionMapper.addClass(Configuration.CLIENT_NAME + "ExceptionMapper", Modifier.PUBLIC);
+        exceptionMapper.addClass(Configuration.clientName + "ExceptionMapper", Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration exceptionMapperClass =
-                exceptionMapper.getClassByName(Configuration.CLIENT_NAME + "ExceptionMapper").get();
+                exceptionMapper.getClassByName(Configuration.clientName + "ExceptionMapper").get();
         exceptionMapperClass.addImplementedType("ResponseExceptionMapper");
         exceptionMapperClass.getImplementedTypes()
                 .get(0)
@@ -159,13 +171,13 @@ public class ClientGenerator {
         toThrowable.setBody(toThrowableBody);
 
         Utils.addGeneratedAnnotation(exceptionMapper, Utils.getClazz(exceptionMapper), null, ClientGenerator.class);
-        save(outputBasePackage, Configuration.CLIENT_NAME + "ExceptionMapper", exceptionMapper);
+        save(outputBasePackage, Configuration.clientName + "ExceptionMapper", exceptionMapper);
     }
 
     private static void generateClient(String fileName, String resourceContent, ClassOrInterfaceDeclaration genericResourceClientClass) throws IOException {
         final CompilationUnit resourceClientUnit = JavaParser.parse(resourceContent);
         final ClassOrInterfaceDeclaration resourceClientClass = Utils.getClazz(resourceClientUnit);
-        final String clientClassPackage = Configuration.RESOURCE_PACKAGE + ".client.interfaces";
+        final String clientClassPackage = Configuration.resourcePackage + ".client.interfaces";
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(clientClassPackage);
         final String clientName = fileName.replace(".java", "Client");
         newClassCompilationUnit.addClass(clientName, Modifier.PUBLIC);
@@ -239,13 +251,16 @@ public class ClientGenerator {
         constructor.getBody().asBlockStmt().addStatement(logClientRequestFilter);
     }
 
-    private static void createResourceClientReference(String clientName, String pkg, ClassOrInterfaceDeclaration genericClientClass, ClassOrInterfaceDeclaration resourceClientClass) {
-        VariableDeclarator var = new VariableDeclarator(new TypeParameter(resourceClientClass.getNameAsString()), WordUtils.uncapitalize(resourceClientClass.getNameAsString()));
+    private static void createResourceClientReference(String clientName, String pkg, ClassOrInterfaceDeclaration genericClientClass,
+                                                      ClassOrInterfaceDeclaration resourceClientClass) {
+
+        VariableDeclarator var = new VariableDeclarator(new TypeParameter(resourceClientClass.getNameAsString()),
+                WordUtils.uncapitalize(resourceClientClass.getNameAsString()));
         FieldDeclaration reference = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), var);
         genericClientClass.getMembers().add(0, reference);
         genericClientClass.findCompilationUnit().get().addImport(pkg + "." + clientName);
-        final String replaceValue = Configuration.RESOURCE_SUFFIX == null ?
-                "Client" : Configuration.RESOURCE_SUFFIX + "Client";
+        final String replaceValue = Configuration.resourceSuffix == null ?
+                "Client" : Configuration.resourceSuffix + "Client";
         String name = clientName.replace(replaceValue, "");
         MethodDeclaration referenceMethod = new MethodDeclaration();
         referenceMethod.setModifiers(EnumSet.of(Modifier.PUBLIC));

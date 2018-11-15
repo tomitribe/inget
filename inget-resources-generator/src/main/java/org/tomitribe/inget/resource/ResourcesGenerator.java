@@ -1,12 +1,19 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   Tomitribe Confidential
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Copyright Tomitribe Corporation. 2018
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  The source code for this program is not published or otherwise divested
- *  of its trade secrets, irrespective of what has been deposited with the
- *  U.S. Copyright Office.
  *
  */
 
@@ -32,6 +39,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ResourcesGenerator {
+
+    private ResourcesGenerator() {
+
+    }
+
     public static void execute() throws IOException {
         final List<File> files = Utils.getModel();
 
@@ -64,7 +76,7 @@ public class ResourcesGenerator {
             return relatedResources;
         }
 
-        final String rootResourceName = modelClassName + Configuration.RESOURCE_SUFFIX;
+        final String rootResourceName = modelClassName + Configuration.resourceSuffix;
         Optional<File> rootResource = relatedResources.stream()
                 .filter(f -> f.getName().equals(rootResourceName + ".java"))
                 .findFirst();
@@ -72,7 +84,7 @@ public class ResourcesGenerator {
             generateResource(rootResourceName, modelClassUnit);
         }
 
-        final String listResourceName = Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX;
+        final String listResourceName = Utils.toPlural(modelClassName) + Configuration.resourceSuffix;
         Optional<File> listResource = relatedResources.stream()
                 .filter(f -> f.getName().equals(listResourceName + ".java"))
                 .findFirst();
@@ -100,7 +112,7 @@ public class ResourcesGenerator {
 
     private static void generateResource(final String resourceName, final CompilationUnit modelClassUnit) throws IOException {
         String resourceClassPackage = modelClassUnit.getPackageDeclaration().get().getNameAsString();
-        resourceClassPackage = resourceClassPackage.replace(Configuration.MODEL_PACKAGE, Configuration.RESOURCE_PACKAGE);
+        resourceClassPackage = resourceClassPackage.replace(Configuration.modelPackage, Configuration.resourcePackage);
         final CompilationUnit newClassCompilationUnit = new CompilationUnit(resourceClassPackage);
         newClassCompilationUnit.addClass(resourceName, Modifier.PUBLIC);
         final ClassOrInterfaceDeclaration newClass = newClassCompilationUnit.getClassByName(resourceName).get();
@@ -150,11 +162,11 @@ public class ResourcesGenerator {
 
         CompilationUnit modifiedUnit = JavaParser.parse(modified);
         ClassOrInterfaceDeclaration modifiedClazz = Utils.getClazz(modifiedUnit);
-        if(modifiedClazz.getMethods().size() > 0){
+        if (modifiedClazz.getMethods().size() > 0) {
             IO.copy(IO.read(modified), resource);
         } else {
-            if(resource.exists() && IO.slurp(resource)
-                    .contains("@Generated(\"org.tomitribe.inget.resource.ResourcesGenerator\")")){
+            if (resource.exists() && IO.slurp(resource)
+                    .contains("@Generated(\"org.tomitribe.inget.resource.ResourcesGenerator\")")) {
                 resource.delete();
             }
         }

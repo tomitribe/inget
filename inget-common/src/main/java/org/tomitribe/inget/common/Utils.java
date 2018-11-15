@@ -1,12 +1,19 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   Tomitribe Confidential
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Copyright Tomitribe Corporation. 2018
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *  The source code for this program is not published or otherwise divested
- *  of its trade secrets, irrespective of what has been deposited with the
- *  U.S. Copyright Office.
  *
  */
 package org.tomitribe.inget.common;
@@ -168,16 +175,16 @@ public class Utils {
             headerString = ", headers = {@Header(name = \"" + header.getName() + "\", description = \"" + header.getDescription() + "\")}";
         }
 
-        final String RESPONSE = "@ApiResponse(responseCode = \"" + code + "\", description = \"" + message + "\"" + headerString + ")";
+        final String response = "@ApiResponse(responseCode = \"" + code + "\", description = \"" + message + "\"" + headerString + ")";
 
         if (apiResponses == null) {
-            method.addAnnotation(JavaParser.parseAnnotation("@ApiResponses( value = {" + RESPONSE + "})"));
+            method.addAnnotation(JavaParser.parseAnnotation("@ApiResponses( value = {" + response + "})"));
             return;
         }
 
         final MemberValuePair value = pairs(apiResponses).get("value");
         if (value == null) {
-            apiResponses.addPair("value", "{" + RESPONSE + "}");
+            apiResponses.addPair("value", "{" + response + "}");
             return;
         }
 
@@ -186,7 +193,7 @@ public class Utils {
         final boolean has409 = annotations.stream().anyMatch(has("responseCode", "\"" + code + "\""));
 
         if (!has409) {
-            annotations.add((NormalAnnotationExpr) JavaParser.parseAnnotation(RESPONSE));
+            annotations.add((NormalAnnotationExpr) JavaParser.parseAnnotation(response));
             final ArrayInitializerExpr value1 = asArray(annotations);
             value.setValue(value1);
         }
@@ -352,11 +359,11 @@ public class Utils {
         Optional<ImportDeclaration> classImport = classUnit.getImports().stream().filter(i -> i.getNameAsString().endsWith("." + extendedClassName)).findFirst();
         String extendedClassPath;
         if (classImport.isPresent()) {
-            extendedClassPath = Configuration.MODEL_SOURCES + "/" + classImport.get().getNameAsString().replaceAll("\\.", "/");
+            extendedClassPath = Configuration.modelSources + "/" + classImport.get().getNameAsString().replaceAll("\\.", "/");
             extendedClassPath += ".java";
 
         } else {
-            extendedClassPath = Configuration.MODEL_SOURCES + "/" + classUnit.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", "/");
+            extendedClassPath = Configuration.modelSources + "/" + classUnit.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", "/");
             extendedClassPath += "/" + extendedClassName + ".java";
         }
         return getClazz(extendedClassPath);
@@ -394,11 +401,11 @@ public class Utils {
     }
 
     public static String getRootName(ClassOrInterfaceDeclaration rootClass) {
-        return rootClass.getName().toString().replace(Configuration.MODEL_SUFFIX, "");
+        return rootClass.getName().toString().replace(Configuration.modelSuffix, "");
     }
 
     public static boolean isRootResource(final String rootClassName, final String resourceName) {
-        final String expectedSingularResource = rootClassName + Configuration.RESOURCE_SUFFIX;
+        final String expectedSingularResource = rootClassName + Configuration.resourceSuffix;
         return expectedSingularResource.equals(resourceName);
     }
 
@@ -429,17 +436,17 @@ public class Utils {
     }
 
     public static List<File> getResources(final String modelClassName) {
-        final File apiSourcesDir = new File(Configuration.RESOURCE_SOURCES);
-        final File sourceRootDir = new File(Configuration.GENERATED_SOURCES);
-        List<File> src = Files.collect(apiSourcesDir, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java")
+        final File apiSourcesDir = new File(Configuration.resourceSources);
+        final File sourceRootDir = new File(Configuration.generatedSources);
+        List<File> src = Files.collect(apiSourcesDir, "(.*)" + Configuration.resourceSuffix + "\\.java")
                 .stream()
-                .filter(f -> f.getName().equals(modelClassName + Configuration.RESOURCE_SUFFIX + ".java") ||
-                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
+                .filter(f -> f.getName().equals(modelClassName + Configuration.resourceSuffix + ".java") ||
+                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.resourceSuffix + ".java"))
                 .collect(Collectors.toList());
-        List<File> generatedSources = Files.collect(sourceRootDir, "(.*)" + Configuration.RESOURCE_SUFFIX + "\\.java")
+        List<File> generatedSources = Files.collect(sourceRootDir, "(.*)" + Configuration.resourceSuffix + "\\.java")
                 .stream()
-                .filter(f -> f.getName().equals(modelClassName + Configuration.RESOURCE_SUFFIX + ".java") ||
-                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.RESOURCE_SUFFIX + ".java"))
+                .filter(f -> f.getName().equals(modelClassName + Configuration.resourceSuffix + ".java") ||
+                        f.getName().equals(Utils.toPlural(modelClassName) + Configuration.resourceSuffix + ".java"))
                 .collect(Collectors.toList());
 
         return Stream.concat(src.stream(), generatedSources.stream())
@@ -448,8 +455,8 @@ public class Utils {
     }
 
     public static Map<String, String> getResources() {
-        final File srcFolder = new File(Configuration.RESOURCE_SOURCES);
-        final File generatedFolder = new File(Configuration.GENERATED_SOURCES);
+        final File srcFolder = new File(Configuration.resourceSources);
+        final File generatedFolder = new File(Configuration.generatedSources);
         List<File> src = Files.collect(srcFolder, "(.*)\\.java");
         List<File> generatedSources = Files.collect(generatedFolder, "(.*)\\.java");
 
@@ -477,17 +484,17 @@ public class Utils {
     }
 
     public static List<File> getModel() {
-        if (Configuration.MODEL_PACKAGE != null) {
+        if (Configuration.modelPackage != null) {
             final File apiSourcesDir =
                     new File(Configuration.getModelPath());
-            return Files.collect(apiSourcesDir, "(.*)" + Configuration.MODEL_SUFFIX + "\\.java");
+            return Files.collect(apiSourcesDir, "(.*)" + Configuration.modelSuffix + "\\.java");
         } else {
             return Collections.emptyList();
         }
     }
 
     public static List<File> getClient() {
-        final File srcFolder = new File(Configuration.CLIENT_SOURCES);
+        final File srcFolder = new File(Configuration.clientSources);
         return Files.collect(srcFolder, "(.*)Client" + "\\.java");
     }
 
@@ -597,7 +604,7 @@ public class Utils {
     }
 
     public static void save(String fileName, String pkg, String content) throws IOException {
-        Path path = Paths.get(Configuration.GENERATED_SOURCES + File.separator + transformPackageToPath(pkg));
+        Path path = Paths.get(Configuration.generatedSources + File.separator + transformPackageToPath(pkg));
 
         content = Stream.of(content)
                 .map(RemoveDuplicateImports::apply)
@@ -628,21 +635,27 @@ public class Utils {
 
     public static String getResponseImplementation(MethodDeclaration m) {
         final NormalAnnotationExpr apiResponses = Utils.getAnnotation(m, "ApiResponses");
-        try {
-            final MemberValuePair value = pairs(apiResponses).get("value");
-            final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
-            Optional<NormalAnnotationExpr> responseOptional = annotations.stream().filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\"")).findFirst();
-            if (responseOptional.isPresent()) {
-                NormalAnnotationExpr response = responseOptional.get();
-                Map<String, MemberValuePair> responsePairs = pairs(response);
-                Expression content = responsePairs.get("content").getValue();
-                Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
-                NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
-                Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
-                Expression implementation = schemaPairs.get("implementation").getValue();
-                return implementation.asClassExpr().getTypeAsString();
+        if (apiResponses == null) {
+            return null;
+        }
+        final MemberValuePair value = pairs(apiResponses).get("value");
+        final NodeList<NormalAnnotationExpr> annotations = Utils.arrayValue(value.getValue());
+        Optional<NormalAnnotationExpr> responseOptional = annotations.stream()
+                .filter(a -> Utils.has(a, "responseCode", "\"200\"") || Utils.has(a, "responseCode", "\"201\""))
+                .findFirst();
+        if (responseOptional.isPresent()) {
+            NormalAnnotationExpr response = responseOptional.get();
+            Map<String, MemberValuePair> responsePairs = pairs(response);
+            MemberValuePair contentPair = responsePairs.get("content");
+            if(contentPair == null){
+                return null;
             }
-        } catch (Exception e) {
+            Expression content = contentPair.getValue();
+            Map<String, MemberValuePair> contentPairs = Utils.pairs(content.asNormalAnnotationExpr());
+            NormalAnnotationExpr schema = contentPairs.get("schema").getValue().asNormalAnnotationExpr();
+            Map<String, MemberValuePair> schemaPairs = Utils.pairs(schema);
+            Expression implementation = schemaPairs.get("implementation").getValue();
+            return implementation.asClassExpr().getTypeAsString();
         }
         return null;
     }

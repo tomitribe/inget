@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.util.Properties;
 import javax.annotation.Generated;
 import org.tomitribe.inget.client.ClientConfiguration;

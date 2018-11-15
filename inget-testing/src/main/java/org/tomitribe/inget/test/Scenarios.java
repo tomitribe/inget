@@ -8,11 +8,13 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
  */
 package org.tomitribe.inget.test;
 
@@ -29,6 +31,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public class Scenarios {
+
+    private Scenarios() {
+        // no-op
+    }
 
     public static void assertFiles(final Map<String, File> expected, final Map<String, File> actual) throws IOException {
         for (final String name : expected.keySet()) {
