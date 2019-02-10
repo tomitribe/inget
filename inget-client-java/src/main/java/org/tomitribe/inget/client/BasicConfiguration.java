@@ -31,7 +31,9 @@ public class BasicConfiguration {
 
     private String password;
 
-    private String header;
+    @Builder.Default
+    private String header = "Authorization";
 
-    private String prefix;
+    @Builder.Default
+    private String prefix = "Basic";
 }

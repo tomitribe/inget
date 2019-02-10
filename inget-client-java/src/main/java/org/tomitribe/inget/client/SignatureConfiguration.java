@@ -39,9 +39,11 @@ public class SignatureConfiguration {
 
     private String algorithm;
 
-    private String header;
+    @Builder.Default
+    private String header = "Authorization";
 
-    private String prefix;
+    @Builder.Default
+    private String prefix = "Signature";
 
     private List<String> signedHeaders;
 }
