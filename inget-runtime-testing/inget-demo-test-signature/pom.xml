@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.tomitribe.inget</groupId>
         <artifactId>inget-runtime-testing</artifactId>
-        <version>1.2</version>
+        <version>1.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>inget-demo-test-signature</artifactId>
