@@ -29,7 +29,7 @@
 
   <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget</artifactId>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.3</version>
 
   <name>Tomitribe :: Inget</name>
   <packaging>pom</packaging>
@@ -43,7 +43,7 @@
     <connection>scm:git:git@github.com:tomitribe/inget.git</connection>
     <url>scm:git:git@github.com:tomitribe/inget.git</url>
     <developerConnection>scm:git:git@github.com:tomitribe/inget.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>inget-1.3</tag>
   </scm>
 
   <modules>
