@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 /**
- * @goal generate-sources
+ * goal generate-sources
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class MainGenerator extends AbstractMojo {
