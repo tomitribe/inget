@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.tomitribe.inget</groupId>
         <artifactId>inget-demo-test-signature</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
 
     <artifactId>model-signature</artifactId>
@@ -47,7 +47,7 @@
             <plugin>
                 <groupId>org.tomitribe.inget</groupId>
                 <artifactId>inget-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.2</version>
                 <configuration>
                     <generateModel>true</generateModel>
                     <modelPackage>org.tomitribe.inget.movie.model</modelPackage>
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>org.tomitribe.inget</groupId>
             <artifactId>inget-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 </project>

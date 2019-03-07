@@ -21,7 +21,7 @@
   <parent>
     <artifactId>inget</artifactId>
     <groupId>org.tomitribe.inget</groupId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-common</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

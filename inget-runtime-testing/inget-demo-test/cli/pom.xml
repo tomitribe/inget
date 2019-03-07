@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.tomitribe.inget</groupId>
         <artifactId>inget-demo-test</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
 
     <artifactId>cli</artifactId>
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>org.tomitribe.inget</groupId>
             <artifactId>client</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.2</version>
         </dependency>
 
         <!-- TEST ONLY-->

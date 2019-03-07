@@ -23,7 +23,7 @@
   <parent>
     <artifactId>inget</artifactId>
     <groupId>org.tomitribe.inget</groupId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
   </parent>
 
   <groupId>org.tomitribe.inget</groupId>
@@ -78,27 +78,27 @@
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-common</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-model-generator</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-client-java-generator</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-client-commandline-generator</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>org.tomitribe.inget</groupId>
       <artifactId>inget-resources-generator</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>

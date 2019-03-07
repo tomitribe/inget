@@ -17,7 +17,7 @@ Maven depedency
 <dependency>
   <groupId>org.tomitribe.inget</groupId>
   <artifactId>inget-api</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.2</version>
 </dependency>
 ```
 
@@ -226,7 +226,7 @@ Also add the jax-rs resources as a dependency in your pom file with the classifi
 <dependency>
     <groupId>yourpackage</groupId>
     <artifactId>resources</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2</version>
     <classifier>resources</classifier>
     <scope>provided</scope>
 </dependency>
@@ -377,7 +377,7 @@ To add documentation to your project add the configuration below
       <dependency>
         <groupId>${yourpackage}</groupId>
         <artifactId>resources</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.2</version>
       </dependency>
       <dependency>
         <groupId>com.tomitribe.swagger2markup</groupId>

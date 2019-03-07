@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.tomitribe.inget</groupId>
         <artifactId>inget-demo-test</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2</version>
     </parent>
 
     <artifactId>client</artifactId>
