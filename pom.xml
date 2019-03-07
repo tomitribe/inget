@@ -55,7 +55,6 @@
     <module>inget-client-commandline-generator</module>
     <module>inget-model-generator</module>
     <module>inget-resources-generator</module>
-    <module>inget-runtime-testing</module>
     <module>inget-client-java</module>
     <module>inget-client-commandline</module>
     <module>inget-documentation</module>
