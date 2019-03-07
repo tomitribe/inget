@@ -43,7 +43,7 @@
     <connection>scm:git:git@github.com:tomitribe/inget.git</connection>
     <url>scm:git:git@github.com:tomitribe/inget.git</url>
     <developerConnection>scm:git:git@github.com:tomitribe/inget.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>inget-1.2</tag>
   </scm>
 
   <modules>
