@@ -324,7 +324,7 @@ public class Urls {
      * Delete a file and all contents if specified file is a directory
      *
      * @param file File
-     * @Throws IllegalStateException on failure at any point
+     * @throws IllegalStateException on failure at any point
      */
     public static void remove(final File file) {
 
